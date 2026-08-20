@@ -6,7 +6,6 @@ window.loadSheetJS = function() {
     return new Promise((resolve, reject) => {
         if (window.XLSX) return resolve();
         const script = document.createElement('script');
-        // Ganti CDN ke jsdelivr yang jauh lebih tangguh dari blokir browser
         script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
         script.onload = () => resolve();
         script.onerror = () => reject(new Error("Gagal memuat library Excel. Periksa koneksi internet Anda."));
@@ -23,32 +22,32 @@ window.toggleFormKelas = function() {
 
 window.loadDataKelas = async function() {
     const container = document.getElementById('tempat-data-kelas');
-    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--biru-dasar);">Memuat data... <i class="fa-solid fa-spinner fa-spin"></i></li>';
+    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--neon-green);">Memuat data... <i class="fa-solid fa-spinner fa-spin"></i></li>';
 
     try {
         const { data, error } = await supabase.from('kelas').select('*').order('tingkat', { ascending: true }).order('nama_kelas', { ascending: true });
         if (error) throw error;
         if (data.length === 0) {
-            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: #8fa0b3;">Belum ada data kelas.</li>';
+            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--text-abu);">Belum ada data kelas.</li>';
             return;
         }
 
         let htmlContent = '';
         data.forEach(item => {
             htmlContent += `
-                <li onclick="bukaDetailKelas('${item.id}', '${item.nama_kelas}')" style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#f4f7f6'" onmouseout="this.style.background='transparent'">
+                <li onclick="bukaDetailKelas('${item.id}', '${item.nama_kelas}')" style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-chalkboard" style="color: var(--biru-muda); font-size: 16px;"></i>
+                        <i class="fa-solid fa-chalkboard" style="color: var(--neon-green); font-size: 16px;"></i>
                         <span><b>${item.nama_kelas}</b> (Tingkat ${item.tingkat})</span>
                     </div>
-                    <i class="fa-solid fa-chevron-right" style="color: #ced4da; font-size: 12px;"></i>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-abu); font-size: 12px;"></i>
                 </li>
             `;
         });
         container.innerHTML = htmlContent;
     } catch (error) {
         console.error("Error ambil data:", error);
-        container.innerHTML = `<li style="display:block; text-align:center; color: red; padding: 10px;">Gagal: ${error.message}</li>`;
+        container.innerHTML = `<li style="display:block; text-align:center; color: var(--neon-red); padding: 10px;">Gagal: ${error.message}</li>`;
     }
 };
 
@@ -132,14 +131,14 @@ window.toggleFormMassal = function() {
 
 window.loadDataSiswa = async function() {
     const container = document.getElementById('tempat-data-siswa');
-    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--biru-dasar);">Memuat data siswa... <i class="fa-solid fa-spinner fa-spin"></i></li>';
+    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--neon-green);">Memuat data siswa... <i class="fa-solid fa-spinner fa-spin"></i></li>';
 
     try {
         const { data, error } = await supabase.from('anggota_kelas').select(`id, nomor_absen, jabatan_kelas, siswa (*)`).eq('id_kelas', currentKelasId);
         if (error) throw error;
 
         if (data.length === 0) {
-            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: #8fa0b3;">Belum ada siswa di kelas ini.</li>';
+            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--text-abu);">Belum ada siswa di kelas ini.</li>';
             currentDataSiswa = [];
             return;
         }
@@ -150,18 +149,18 @@ window.loadDataSiswa = async function() {
         let htmlContent = '';
         data.forEach(item => {
             const dSiswa = item.siswa;
-            const ikonGender = dSiswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:#007bff;"></i>' : '<i class="fa-solid fa-venus" style="color:#e83e8c;"></i>';
+            const ikonGender = dSiswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
             const badgeJabatan = (item.jabatan_kelas && item.jabatan_kelas !== 'Anggota') 
-                ? `<span style="background:var(--biru-muda); color:var(--biru-tua); font-size:9px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">${item.jabatan_kelas}</span>` : '';
-            const ikonFoto = dSiswa.foto_siswa ? '<i class="fa-solid fa-image" style="color:#28a745; font-size:10px; margin-left:5px;" title="Foto Tersedia"></i>' : '';
+                ? `<span style="background:rgba(5,213,138,0.1); color:var(--neon-green); font-size:9px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">${item.jabatan_kelas}</span>` : '';
+            const ikonFoto = dSiswa.foto_siswa ? '<i class="fa-solid fa-image" style="color:var(--neon-green); font-size:10px; margin-left:5px;" title="Foto Tersedia"></i>' : '';
 
             htmlContent += `
                 <li>
                     <div style="display: flex; align-items: center; gap: 10px; width:70%;">
-                        <span style="font-weight:600; color:var(--biru-tua); width:20px;">${item.nomor_absen || '-'}</span>
+                        <span style="font-weight:600; color:var(--neon-green); width:20px;">${item.nomor_absen || '-'}</span>
                         <div>
-                            <div style="font-size:13px; font-weight:500;">${dSiswa.nama_siswa} ${ikonGender} ${badgeJabatan} ${ikonFoto}</div>
-                            <div style="font-size:10px; color:#8fa0b3;">NISN: ${dSiswa.nisn_siswa || '-'}</div>
+                            <div style="font-size:13px; font-weight:500; color:var(--text-putih);">${dSiswa.nama_siswa} ${ikonGender} ${badgeJabatan} ${ikonFoto}</div>
+                            <div style="font-size:10px; color:var(--text-abu);">NISN: ${dSiswa.nisn_siswa || '-'}</div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
@@ -173,7 +172,7 @@ window.loadDataSiswa = async function() {
         });
         container.innerHTML = htmlContent;
     } catch (error) {
-        container.innerHTML = `<li style="display:block; text-align:center; color: red; padding: 10px;">Gagal: ${error.message}</li>`;
+        container.innerHTML = `<li style="display:block; text-align:center; color: var(--neon-red); padding: 10px;">Gagal: ${error.message}</li>`;
     }
 };
 
@@ -317,7 +316,7 @@ window.downloadBlangkoExcel = async function() {
     }
 
     try {
-        await window.loadSheetJS(); // Pastikan library termuat
+        await window.loadSheetJS();
         
         const headers = [["No Absen", "NISN", "Kode Siswa", "Nama Lengkap", "L/P", "Tempat Lahir", "Tanggal Lahir (YYYY-MM-DD)", "Alamat", "WA Siswa", "Email Siswa", "WA Ortu", "Instagram", "Jabatan"]];
         
@@ -327,13 +326,12 @@ window.downloadBlangkoExcel = async function() {
         ];
 
         const dataSheet = [...headers, ...exampleData];
-        const ws = window.XLSX.utils.aoa_to_sheet(dataSheet); // Gunakan referensi window eksak
+        const ws = window.XLSX.utils.aoa_to_sheet(dataSheet);
         
         ws['!cols'] = [{wch: 8}, {wch: 15}, {wch: 10}, {wch: 25}, {wch: 5}, {wch: 15}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
 
         const wb = window.XLSX.utils.book_new();
         
-        // Ambil nama kelas untuk penamaan file
         let namaKelas = "Baru";
         const elKelas = document.getElementById('judul-detail-kelas');
         if(elKelas) {
@@ -342,7 +340,6 @@ window.downloadBlangkoExcel = async function() {
         
         window.XLSX.utils.book_append_sheet(wb, ws, "DataSiswa");
         
-        // METODE BLOB ANCHOR (Tahan Banting di semua browser)
         const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([wbout], { type: 'application/octet-stream' });
         const url = URL.createObjectURL(blob);

@@ -38,6 +38,40 @@ window.loadKelasUntukPresensi = async function() {
     }
 };
 
+// ================= FUNGSI HITUNG REKAP (SUMMARY) =================
+function hitungRekapKelas() {
+    let h = 0, s = 0, i = 0, a = 0;
+    dataSiswaAbsenKelas.forEach(item => {
+        if(item.kehadiran === 'Hadir') h++;
+        else if(item.kehadiran === 'Sakit') s++;
+        else if(item.kehadiran === 'Izin') i++;
+        else if(item.kehadiran === 'Alpa') a++;
+    });
+    const elH = document.getElementById('sum-m-h');
+    const elS = document.getElementById('sum-m-s');
+    const elI = document.getElementById('sum-m-i');
+    const elA = document.getElementById('sum-m-a');
+    
+    if(elH) elH.innerText = h;
+    if(elS) elS.innerText = s;
+    if(elI) elI.innerText = i;
+    if(elA) elA.innerText = a;
+}
+
+function hitungRekapSholat() {
+    let sh = 0, ts = 0;
+    dataSiswaAbsenSholat.forEach(item => {
+        if(item.kehadiran === 'SH' || item.kehadiran === 'HD') sh++; 
+        else if(item.kehadiran === 'TS' || item.kehadiran === 'S' || item.kehadiran === 'I' || item.kehadiran === 'A') ts++;
+    });
+    
+    const elSh = document.getElementById('sum-s-sh');
+    const elTs = document.getElementById('sum-s-ts');
+    
+    if(elSh) elSh.innerText = sh;
+    if(elTs) elTs.innerText = ts;
+}
+
 // ================= TAB 1: LOGIKA PRESENSI KELAS =================
 window.bukaFormAbsenKelas = async function() {
     const idKelas = document.getElementById('pilih-kelas-absen-kelas').value;
@@ -47,7 +81,7 @@ window.bukaFormAbsenKelas = async function() {
     }
 
     editModeKelas = null;
-    document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Transmit Data Presensi';
+    document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Data Presensi';
     document.getElementById('input-tgl-absen-kelas').valueAsDate = new Date(); 
 
     const container = document.getElementById('tempat-list-absen-kelas');
@@ -83,25 +117,32 @@ window.bukaFormAbsenKelas = async function() {
 
             htmlContent += `
                 <div class="absen-card">
-                    <span class="absen-no">${item.nomor_absen || '-'}</span>
-                    <span class="absen-nama" title="${item.siswa.nama_siswa}">${item.siswa.nama_siswa} ${ikonGender}</span>
-                    
-                    <div class="opsi-group" id="kg-hadir-${index}">
-                        <div class="btn-opsi active btn-hadir" onclick="pilihKehadiranKelas(${index}, 'Hadir')">H</div>
-                        <div class="btn-opsi btn-sakit" onclick="pilihKehadiranKelas(${index}, 'Sakit')">S</div>
-                        <div class="btn-opsi btn-izin" onclick="pilihKehadiranKelas(${index}, 'Izin')">I</div>
-                        <div class="btn-opsi btn-alpa" onclick="pilihKehadiranKelas(${index}, 'Alpa')">A</div>
+                    <div class="absen-info">
+                        <div class="absen-no">${item.nomor_absen || '-'}</div>
+                        <div class="absen-nama" title="${item.siswa.nama_siswa}">${item.siswa.nama_siswa} ${ikonGender}</div>
                     </div>
                     
-                    <div class="opsi-group" id="kg-quran-${index}" style="margin-left: 5px;">
-                        <div class="btn-opsi btn-bawa" onclick="pilihQuranKelas(${index}, 'Bawa')">B</div>
-                        <div class="btn-opsi btn-tbawa" onclick="pilihQuranKelas(${index}, 'Tidak Bawa')">T</div>
-                        <div class="btn-opsi active btn-strip" onclick="pilihQuranKelas(${index}, 'Kosong')">-</div>
+                    <div class="opsi-row">
+                        <div>
+                            <div class="opsi-group" id="kg-hadir-${index}">
+                                <div class="btn-opsi active btn-hadir" onclick="pilihKehadiranKelas(${index}, 'Hadir')">H</div>
+                                <div class="btn-opsi btn-sakit" onclick="pilihKehadiranKelas(${index}, 'Sakit')">S</div>
+                                <div class="btn-opsi btn-izin" onclick="pilihKehadiranKelas(${index}, 'Izin')">I</div>
+                                <div class="btn-opsi btn-alpa" onclick="pilihKehadiranKelas(${index}, 'Alpa')">A</div>
+                            </div>
+                            
+                            <div class="opsi-group" id="kg-quran-${index}">
+                                <div class="btn-opsi btn-bawa" onclick="pilihQuranKelas(${index}, 'Bawa')">B</div>
+                                <div class="btn-opsi btn-tbawa" onclick="pilihQuranKelas(${index}, 'Tidak Bawa')">T</div>
+                                <div class="btn-opsi active btn-strip" onclick="pilihQuranKelas(${index}, 'Kosong')">-</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = htmlContent;
+        hitungRekapKelas(); 
         loadRiwayatKelas(idKelas);
     } catch (error) {
         container.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Gagal: ${error.message}</div>`;
@@ -134,6 +175,8 @@ window.pilihKehadiranKelas = function(indexSiswa, status) {
             btn.style.opacity = '1';
         });
     }
+    
+    hitungRekapKelas(); 
 };
 
 window.pilihQuranKelas = function(indexSiswa, status) {
@@ -216,21 +259,18 @@ window.loadRiwayatKelas = async function(idKelas) {
         let html = '';
         sortedKeys.forEach(k => {
             const g = grouped[k];
-            // PERUBAHAN UI RIWAYAT 2 BARIS (MENGAJAR)
             html += `
             <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                <!-- Baris 1: Judul & Tanggal -->
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:var(--biru-tua); font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--biru-dasar); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan})</b>
+                    <b style="color:var(--teal-dark); font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--emerald); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan})</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
-                <!-- Baris 2: Indikator & Aksi -->
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div style="font-size:10px; background:rgba(0,123,255,0.05); padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:8px; border:1px solid rgba(0,123,255,0.1);">
+                    <div style="font-size:10px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:8px; border:1px solid #e2e8f0;">
                         <span style="color:#10b981;">H:${g.Hadir}</span>
                         <span style="color:#f59e0b;">S:${g.Sakit}</span>
-                        <span style="color:#0ea5e9;">I:${g.Izin}</span>
+                        <span style="color:#3b82f6;">I:${g.Izin}</span>
                         <span style="color:#ef4444;">A:${g.Alpa}</span>
                     </div>
                     <div style="display:flex; gap:6px;">
@@ -267,7 +307,7 @@ window.editRiwayatKelas = async function(tanggal, pertemuan) {
         });
         
         editModeKelas = { tanggal, pertemuan_ke: pertemuan };
-        document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Perbarui Presensi Kelas';
+        document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Perbarui Data Presensi';
         document.getElementById('area-absen-kelas').scrollIntoView({ behavior: 'smooth' });
     } catch(e) { alert('Gagal memuat data edit: ' + e.message); }
 };
@@ -292,7 +332,7 @@ window.bukaFormAbsenSholat = async function() {
     }
 
     editModeSholat = null;
-    document.getElementById('btn-simpan-absen-sholat').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Transmit Presensi Sholat';
+    document.getElementById('btn-simpan-absen-sholat').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Presensi Sholat';
     document.getElementById('input-tgl-absen-sholat').valueAsDate = new Date(); 
     document.getElementById('filter-gender-sholat').value = 'Semua'; 
 
@@ -310,33 +350,41 @@ window.bukaFormAbsenSholat = async function() {
         }
 
         data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
-        dataSiswaAbsenSholat = data.map(item => ({ id_siswa: item.id_siswa, kehadiran: 'SH', keterangan: '' }));
+        
+        // Init data tanpa properti keterangan
+        dataSiswaAbsenSholat = data.map(item => ({ id_siswa: item.id_siswa, kehadiran: 'SH' }));
 
         let htmlContent = '';
         data.forEach((item, index) => {
             const jk = item.siswa.jenis_kelamin;
             const ikonGender = jk === 'L' ? '<i class="fa-solid fa-mars" style="color:#007bff; font-size:10px;"></i>' : (jk === 'P' ? '<i class="fa-solid fa-venus" style="color:#e83e8c; font-size:10px;"></i>' : '');
 
+            // KOTAK KET DIHAPUS SEPENUHNYA DARI HTML RENDER INI
             htmlContent += `
                 <div class="absen-card absen-card-sholat" data-jk="${jk}">
-                    <span class="absen-no">${item.nomor_absen || '-'}</span>
-                    <span class="absen-nama" title="${item.siswa.nama_siswa}">${item.siswa.nama_siswa} ${ikonGender}</span>
-                    
-                    <div class="opsi-group" id="kg-sholat-${index}">
-                        <div class="btn-opsi active btn-sh" onclick="pilihKehadiranSholat(${index}, 'SH')">SH</div>
-                        <div class="btn-opsi btn-ts" onclick="pilihKehadiranSholat(${index}, 'TS')">TS</div>
-                        <div class="btn-opsi btn-izin" onclick="pilihKehadiranSholat(${index}, 'I')">I</div>
-                        <div class="btn-opsi btn-sakit" onclick="pilihKehadiranSholat(${index}, 'S')">S</div>
-                        <div class="btn-opsi btn-alpa" onclick="pilihKehadiranSholat(${index}, 'A')">A</div>
-                        <div class="btn-opsi btn-hd" onclick="pilihKehadiranSholat(${index}, 'HD')">HD</div>
-                        <div class="btn-opsi btn-strip" onclick="pilihKehadiranSholat(${index}, '-')">-</div>
+                    <div class="absen-info">
+                        <div class="absen-no">${item.nomor_absen || '-'}</div>
+                        <div class="absen-nama" title="${item.siswa.nama_siswa}">${item.siswa.nama_siswa} ${ikonGender}</div>
                     </div>
                     
-                    <input type="text" id="ket-sholat-${index}" class="input-ket-sholat" placeholder="Ket..." onkeyup="inputKetSholat(${index}, this.value)">
+                    <div class="opsi-row">
+                        <div>
+                            <div class="opsi-group" id="kg-sholat-${index}">
+                                <div class="btn-opsi active btn-sh" onclick="pilihKehadiranSholat(${index}, 'SH')">SH</div>
+                                <div class="btn-opsi btn-ts" onclick="pilihKehadiranSholat(${index}, 'TS')">TS</div>
+                                <div class="btn-opsi btn-izin" onclick="pilihKehadiranSholat(${index}, 'I')">I</div>
+                                <div class="btn-opsi btn-sakit" onclick="pilihKehadiranSholat(${index}, 'S')">S</div>
+                                <div class="btn-opsi btn-alpa" onclick="pilihKehadiranSholat(${index}, 'A')">A</div>
+                                <div class="btn-opsi btn-hd" onclick="pilihKehadiranSholat(${index}, 'HD')">HD</div>
+                                <div class="btn-opsi btn-strip" onclick="pilihKehadiranSholat(${index}, '-')">-</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         });
         container.innerHTML = htmlContent;
+        hitungRekapSholat(); 
         loadRiwayatSholat(idKelas);
     } catch (error) {
         container.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Gagal: ${error.message}</div>`;
@@ -367,10 +415,8 @@ window.pilihKehadiranSholat = function(indexSiswa, status) {
     btnsHadir.forEach(btn => { 
         if (btn.innerText === status && btn.classList.contains(classMap[status])) btn.classList.add('active'); 
     });
-};
-
-window.inputKetSholat = function(indexSiswa, value) {
-    dataSiswaAbsenSholat[indexSiswa].keterangan = value;
+    
+    hitungRekapSholat(); 
 };
 
 window.simpanPresensiSholat = async function() {
@@ -394,7 +440,7 @@ window.simpanPresensiSholat = async function() {
 
         const payloadInsert = dataSiswaAbsenSholat.map(item => ({
             id_kelas: idKelas, id_siswa: item.id_siswa, tanggal: tgl,
-            nama_sholat: nmSholat, kehadiran: item.kehadiran, keterangan: item.keterangan || null 
+            nama_sholat: nmSholat, kehadiran: item.kehadiran, keterangan: null // Pastikan dikirim null ke database
         }));
 
         const { error } = await supabase.from('absensholat').insert(payloadInsert);
@@ -430,9 +476,9 @@ window.loadRiwayatSholat = async function(idKelas) {
         const grouped = {};
         data.forEach(item => {
             const key = `${item.tanggal}|${item.nama_sholat}`;
-            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, sholat: item.nama_sholat, SH:0, TS:0, I:0, S:0, A:0, HD:0, strip:0 };
-            if(item.kehadiran === '-') grouped[key].strip++;
-            else if(grouped[key][item.kehadiran] !== undefined) grouped[key][item.kehadiran]++;
+            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, sholat: item.nama_sholat, SH:0, TS:0 };
+            if(item.kehadiran === 'SH' || item.kehadiran === 'HD') grouped[key].SH++;
+            else if(item.kehadiran === 'TS' || item.kehadiran === 'A' || item.kehadiran === 'S' || item.kehadiran === 'I') grouped[key].TS++;
         });
 
         const sortedKeys = Object.keys(grouped).sort((a,b) => new Date(grouped[b].tanggal) - new Date(grouped[a].tanggal));
@@ -440,25 +486,17 @@ window.loadRiwayatSholat = async function(idKelas) {
         let html = '';
         sortedKeys.forEach(k => {
             const g = grouped[k];
-            // PERUBAHAN UI RIWAYAT 2 BARIS (SHOLAT)
             html += `
             <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                <!-- Baris 1: Judul & Tanggal -->
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:#0ea5e9; font-size:12px;"><i class="fa-solid fa-mosque" style="margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
+                    <b style="color:var(--teal-dark); font-size:12px;"><i class="fa-solid fa-mosque" style="color:var(--emerald); margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
-                <!-- Baris 2: Indikator & Aksi -->
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div style="font-size:9px; background:rgba(14,165,233,0.05); padding:5px 8px; border-radius:6px; font-weight:800; display:flex; gap:6px; border:1px solid rgba(14,165,233,0.1); overflow-x:auto; white-space:nowrap; scrollbar-width:none; flex:1;">
-                        <span style="color:#10b981;">SH:${g.SH}</span>
-                        <span style="color:#ef4444;">TS:${g.TS}</span>
-                        <span style="color:#0ea5e9;">I:${g.I}</span>
-                        <span style="color:#f59e0b;">S:${g.S}</span>
-                        <span style="color:#ef4444;">A:${g.A}</span>
-                        <span style="color:#d946ef;">HD:${g.HD}</span>
-                        <span style="color:#64748b;">-:${g.strip}</span>
+                    <div style="font-size:10px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:10px; border:1px solid #e2e8f0;">
+                        <span style="color:#10b981;">Sholat: ${g.SH}</span>
+                        <span style="color:#ef4444;">Tidak: ${g.TS}</span>
                     </div>
                     <div style="display:flex; gap:6px; margin-left: 5px;">
                         <button onclick="editRiwayatSholat('${g.tanggal}', '${g.sholat}')" class="btn-action btn-edit" style="width: 28px; height: 28px; padding:0; justify-content:center;" title="Edit"><i class="fa-solid fa-edit"></i></button>
@@ -487,9 +525,6 @@ window.editRiwayatSholat = async function(tanggal, sholat) {
             const index = dataSiswaAbsenSholat.findIndex(s => s.id_siswa === dbItem.id_siswa);
             if(index !== -1) {
                 pilihKehadiranSholat(index, dbItem.kehadiran);
-                const ketInput = document.getElementById(`ket-sholat-${index}`);
-                if(ketInput) ketInput.value = dbItem.keterangan || '';
-                dataSiswaAbsenSholat[index].keterangan = dbItem.keterangan || '';
             }
         });
         

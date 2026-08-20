@@ -1,175 +1,216 @@
 <!-- pages/presensi.html -->
 <style>
-    .presensi-container { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .section-title { font-size: 18px; font-weight: 700; color: var(--biru-tua); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-    
-    /* KARTU MELAYANG (GLASSMORPHISM) */
-    .card-data { 
-        background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 20px; 
-        box-shadow: 0 10px 30px rgba(31, 38, 135, 0.05); transition: transform 0.3s ease; 
+    /* =========================================================
+       PREMIUM DARK NEON THEME - PRESENSI
+       ========================================================= */
+    :root {
+        --bg-main: #0b121e;
+        --bg-card: #151d2a;
+        --border-color: #232f40;
+        --text-putih: #ffffff;
+        --text-abu: #8494a8;
+        --neon-green: #05d58a;
+        --neon-blue: #3b82f6;
+        --neon-yellow: #f59e0b;
+        --neon-red: #ef4444;
+        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
     }
-    .card-data:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08); }
+
+    .presensi-container { animation: fadeIn 0.4s ease-out; }
+    
+    /* Hilangkan background putih dari wadah utama */
+    .card-data { 
+        background: transparent; border: none; padding: 0; 
+        margin-bottom: 20px; box-shadow: none; 
+    }
     
     .form-group { margin-bottom: 15px; width: 100%; }
-    .form-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group label { display: block; font-size: 10px; color: var(--text-abu); margin-bottom: 6px; font-weight: 600; text-transform: capitalize; }
     .form-control { 
-        width: 100%; padding: 12px; border: 1px solid rgba(0, 123, 255, 0.2); border-radius: 10px; 
-        font-size: 13px; color: var(--biru-tua); outline: none; transition: all 0.3s ease; 
-        background: rgba(255,255,255,0.9); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); font-weight: 500;
+        width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 12px; 
+        font-size: 13px; color: var(--text-putih); outline: none; transition: all 0.3s ease; 
+        background: var(--bg-card); font-weight: 500;
     }
-    .form-control:focus { border-color: var(--biru-neon); box-shadow: 0 0 0 4px rgba(0, 210, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.02); background: #fff; }
+    .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 4px rgba(5, 213, 138, 0.1); }
     
-    /* TOMBOL GRADASI & GLOW */
-    .btn-primary {
-        background: linear-gradient(135deg, var(--biru-dasar), var(--biru-neon)); border: none; border-radius: 10px;
-        color: white; font-weight: 600; font-size: 13px; box-shadow: 0 6px 20px rgba(0, 210, 255, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    /* TAB CONTAINER (Dark Mode) */
+    .tab-container { 
+        display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
+        margin-bottom: 25px; border: 1px solid var(--border-color);
+        overflow-x: auto; scrollbar-width: none; margin-top: 5px; 
     }
-    .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0, 210, 255, 0.2); }
-
-    /* DESAIN TAB MELAYANG */
-    .tab-container { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
     .tab-btn { 
-        background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9); padding: 10px 20px; 
-        font-size: 12px; font-weight: 600; color: #64748b; cursor: pointer; white-space: nowrap; 
-        transition: all 0.3s; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        flex: 1; background: transparent; border: none; padding: 12px 20px; 
+        font-size: 12px; font-weight: 600; color: var(--text-abu); cursor: pointer; white-space: nowrap; 
+        transition: all 0.3s; border-radius: 8px; text-align: center;
     }
-    .tab-btn.active { background: linear-gradient(135deg, var(--biru-tua), var(--biru-dasar)); color: white; border: none; box-shadow: 0 6px 15px rgba(0, 86, 179, 0.3); }
+    .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
 
     /* =========================================================
-       SISTEM TABEL ABSENSI HORIZONTAL MURNI
+       KOTAK RINGKASAN EKSKLUSIF (4 KOTAK TERPISAH)
        ========================================================= */
+    .summary-box { display: flex; gap: 8px; margin: 15px 0; justify-content: space-between; }
+    .summary-item { 
+        flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); 
+        border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center;
+    }
+    .sum-top { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 800; }
+    .sum-text { font-size: 9px; font-weight: 600; color: var(--text-abu); text-transform: capitalize; margin-top: 4px;}
+    .sum-val { font-size: 18px; margin-right: 2px; }
+
+    /* =========================================================
+       SISTEM TABEL ABSENSI (DARK NEON CARDS)
+       ========================================================= */
+    .table-scroll { width: 100%; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+    .table-inner { min-width: 330px; }
+
     .header-tabel-presensi {
-        display: flex; align-items: center; padding: 10px 5px; margin-bottom: 5px;
-        font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; 
-        border-bottom: 2px solid var(--biru-muda); letter-spacing: 0.5px;
+        display: flex; align-items: center; padding: 10px 8px; margin-bottom: 5px;
+        font-size: 10px; font-weight: 500; color: var(--text-abu); background: transparent;
+        border-bottom: 1px solid var(--border-color); text-transform: capitalize;
     }
 
-    /* 1 Baris Penuh (Dilarang Turun) */
+    /* KARTU SISWA (Gaya FinTech Gelap) */
     .absen-card {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        flex-wrap: nowrap !important;
-        gap: 5px !important;
-        padding: 8px 5px !important;
-        background: rgba(255, 255, 255, 0.8) !important; 
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 10px !important; 
-        margin-bottom: 8px !important; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;
-        overflow: hidden;
+        display: flex !important; flex-direction: row !important; align-items: center !important; 
+        justify-content: flex-start !important; flex-wrap: nowrap !important; padding: 10px 12px !important;
+        background: var(--bg-card) !important; border: 1px solid var(--border-color) !important; 
+        border-radius: 12px !important; margin-bottom: 10px !important; width: 100% !important;
     }
 
-    /* No & Nama (Di-press ke Kiri) */
+    /* AREA KIRI: NO & NAMA SISWA */
+    .absen-info { display: flex !important; flex-direction: row !important; align-items: center !important; flex: 1 !important; min-width: 0 !important; }
     .absen-no { 
-        min-width: 22px !important; height: 22px !important; flex-shrink: 0;
+        width: 22px !important; height: 22px !important; flex-shrink: 0 !important; margin-right: 10px !important;
         display: flex !important; justify-content: center !important; align-items: center !important; 
-        border-radius: 6px !important; background: var(--biru-muda) !important; 
-        color: var(--biru-tua) !important; font-weight: 700 !important; font-size: 10px !important;
+        border-radius: 50% !important; background: rgba(5, 213, 138, 0.1) !important; color: var(--neon-green) !important; 
+        font-weight: 700 !important; font-size: 9px !important; padding: 0 !important; border: 1px solid rgba(5, 213, 138, 0.2) !important;
     }
     .absen-nama { 
-        font-size: 11px !important; font-weight: 600 !important; color: var(--abu-teks) !important;
-        white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; 
-        flex-grow: 1 !important; margin: 0 5px !important;
+        flex: 1 !important; min-width: 0 !important; font-size: 12px !important; font-weight: 600 !important; color: var(--text-putih) !important; margin: 0 !important; padding-right: 6px !important;
+        display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; white-space: normal !important; line-height: 1.3 !important;
     }
 
-    /* Grup Tombol (Di-press ke Kanan) */
-    .opsi-group { 
-        display: flex !important; flex-direction: row !important; align-items: center !important; 
-        gap: 2px !important; flex-shrink: 0;
+    /* AREA KANAN: WADAH TOMBOL DIKUNCI MATI LEBARNYA */
+    .opsi-row { flex-shrink: 0 !important; display: flex !important; }
+    .opsi-row > div { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0 !important; }
+    .opsi-row span { display: none !important; }
+    .opsi-group { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 4px !important; flex-shrink: 0 !important; }
+
+    /* -- Kunci Kolom Kehadiran Mengajar (Fixed: 4btn x 22px + 3gap x 4px = 100px) -- */
+    .hdr-kehadiran-kelas, #tempat-list-absen-kelas .opsi-row > div > div:nth-child(1), #tempat-list-absen-kelas .absen-card > .opsi-group:nth-of-type(1) {
+        width: 100px !important; display: flex !important; justify-content: center !important; flex-shrink: 0 !important; text-align: center !important;
+    }
+    /* -- Kunci Kolom Qur'an Mengajar (Fixed: 3btn x 22px + 2gap x 4px = 74px) -- */
+    .hdr-quran-kelas, #tempat-list-absen-kelas .opsi-row > div > div:nth-child(2), #tempat-list-absen-kelas .absen-card > .opsi-group:nth-of-type(2) {
+        width: 74px !important; display: flex !important; justify-content: center !important; margin-left: 8px !important; flex-shrink: 0 !important; text-align: center !important;
+    }
+    /* -- Kunci Kolom Kehadiran Sholat (Fixed: 7btn x 22px + 6gap x 4px = 178px) -- */
+    .hdr-kehadiran-sholat, #tempat-list-absen-sholat .opsi-row > div, #tempat-list-absen-sholat .absen-card > div:last-child { 
+        width: 178px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 4px !important; flex-wrap: nowrap !important; flex-shrink: 0 !important; text-align: center !important;
     }
 
-    /* Tombol Interaktif Bulat */
+    /* DESAIN TOMBOL KOTAK NEON (22px, Radius 6px) */
     .btn-opsi {
         width: 22px !important; height: 22px !important; font-size: 9px !important;
-        border-radius: 50% !important; font-weight: 800 !important; border: 1px solid rgba(0,0,0,0.05) !important;
-        box-shadow: 0 2px 3px rgba(0,0,0,0.05) !important; color: #94a3b8 !important; background: #f8fafc !important;
+        border-radius: 6px !important; font-weight: 700 !important; border: 1px solid var(--border-color) !important;
+        color: var(--text-abu) !important; background: var(--bg-main) !important;
         display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important;
-        cursor: pointer; transition: all 0.2s;
+        cursor: pointer; transition: all 0.2s; box-shadow: none !important; flex-shrink: 0 !important;
     }
-    .btn-opsi.active { box-shadow: 0 0 8px currentColor !important; transform: scale(1.1) !important; border: none !important; }
 
-    /* Pewarnaan Indikator (Glow) */
-    .btn-hadir.active { background: #10b981 !important; color: white !important; }
-    .btn-sakit.active { background: #f59e0b !important; color: white !important; }
-    .btn-izin.active { background: #0ea5e9 !important; color: white !important; }
-    .btn-alpa.active { background: #ef4444 !important; color: white !important; }
+    /* Pewarnaan Indikator Aktif (Neon Glow) */
+    .btn-hadir.active, .btn-sh.active { background: var(--neon-green) !important; color: var(--bg-main) !important; border-color: var(--neon-green) !important; box-shadow: 0 0 10px rgba(5,213,138,0.4) !important;}
+    .btn-sakit.active { background: var(--neon-yellow) !important; color: var(--bg-main) !important; border-color: var(--neon-yellow) !important; box-shadow: 0 0 10px rgba(245,158,11,0.4) !important;}
+    .btn-izin.active { background: var(--neon-blue) !important; color: #fff !important; border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(59,130,246,0.4) !important;}
+    .btn-alpa.active, .btn-ts.active { background: var(--neon-red) !important; color: #fff !important; border-color: var(--neon-red) !important; box-shadow: 0 0 10px rgba(239,68,68,0.4) !important;}
+    .btn-bawa.active { background: var(--neon-green) !important; color: var(--bg-main) !important; border-color: var(--neon-green) !important;}
+    .btn-tbawa.active { background: var(--neon-red) !important; color: #fff !important; border-color: var(--neon-red) !important;}
+    .btn-strip.active { background: #334155 !important; color: #fff !important; border-color: #475569 !important;}
+    .btn-hd.active { background: #d946ef !important; color: #fff !important; border-color: #d946ef !important;}
 
-    .btn-bawa.active { background: #3b82f6 !important; color: white !important; }
-    .btn-tbawa.active { background: #f97316 !important; color: white !important; }
-    .btn-strip.active { background: #64748b !important; color: white !important; }
-    
-    .btn-sh.active { background: #10b981 !important; color: white !important; }
-    .btn-ts.active { background: #ef4444 !important; color: white !important; }
-    .btn-hd.active { background: #d946ef !important; color: white !important; }
-
-    /* Tab Sholat Khusus (Input Teks Kecil Sebaris) */
-    .input-ket-sholat {
-        width: 55px !important; padding: 2px 4px !important; font-size: 9px !important; 
-        margin-left: 3px !important; height: 22px !important; border-radius: 4px !important;
-        border: 1px solid #ced4da !important; outline: none; flex-shrink: 0;
+    /* TOMBOL SIMPAN PREMIUM */
+    .btn-primary {
+        background: var(--gradient-primary); border: none; border-radius: 16px;
+        color: white; font-weight: 700; font-size: 14px; box-shadow: 0 8px 20px rgba(5, 213, 138, 0.2);
+        transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 10px 20px;
     }
+    .btn-primary:active { transform: scale(0.98); }
+    .icon-circle { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+
+    /* RIWAYAT LIST (Dark Mode) */
+    #area-riwayat-kelas, #area-riwayat-sholat { background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border-color); }
+    .list-data { list-style: none; padding: 0; }
+    .list-data li { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-putih); background: transparent; border-radius:0; box-shadow:none;}
+    .list-data li:last-child { border-bottom: none; }
+    .btn-action { background: var(--bg-main); border: 1px solid var(--border-color); cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 8px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-edit { color: var(--neon-blue); }
+    .btn-delete { color: var(--neon-red); }
 
     /* DESAIN LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
-    
-    .list-data { list-style: none; padding: 0; }
-    .list-data li { padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: var(--abu-teks); display: flex; justify-content: space-between; align-items: center; }
-    .btn-action { background: none; border: none; cursor: pointer; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-action:hover { transform: scale(1.05); }
-    .btn-edit { background: #eff6ff; color: #3b82f6; }
-    .btn-delete { background: #fef2f2; color: #ef4444; }
 </style>
 
 <div class="presensi-container">
     
     <div class="tab-container">
-        <button class="tab-btn active" id="btn-tab-kelas" onclick="gantiTabPresensi('kelas')"><i class="fa-solid fa-chalkboard-user"></i> Presensi Mengajar</button>
-        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPresensi('sholat')"><i class="fa-solid fa-mosque"></i> Presensi Sholat</button>
+        <button class="tab-btn active" id="btn-tab-kelas" onclick="gantiTabPresensi('kelas')">Presensi Mengajar</button>
+        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPresensi('sholat')">Presensi Sholat</button>
     </div>
 
     <!-- ================= TAB 1: PRESENSI KELAS ================= -->
     <div id="tab-presensi-kelas" style="display: block;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-absen-kelas" class="form-control" onchange="bukaFormAbsenKelas()"></select>
             </div>
             
-            <div id="area-absen-kelas" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-absen-kelas" style="display: none; padding-top: 5px;">
                 <div class="desktop-row">
                     <div class="form-group">
                         <label>Tanggal</label>
                         <input type="date" id="input-tgl-absen-kelas" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>Pertemuan Ke (Otomatis)</label>
-                        <input type="number" id="input-pertemuan-ke" class="form-control" placeholder="Cth: 1" required>
+                        <label>Pertemuan Ke</label>
+                        <input type="number" id="input-pertemuan-ke" class="form-control" placeholder="04" required>
                     </div>
                 </div>
 
-                <!-- HEADER TABEL STATIS -->
-                <div class="header-tabel-presensi" style="margin-top: 20px;">
-                    <div style="width: 24px; text-align:center;">No</div>
-                    <div style="flex: 1; padding-left:5px;">Nama Siswa</div>
-                    <div style="width: 92px; text-align: center;">Kehadiran</div>
-                    <div style="width: 72px; text-align: center; margin-left: 2px;">Qur'an</div>
+                <!-- KOTAK RINGKASAN MENGAJAR EKSKLUSIF -->
+                <div class="summary-box" id="summary-mengajar">
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-green);"><i class="fa-solid fa-circle-check"></i> <span class="sum-val" id="sum-m-h">-</span></div><div class="sum-text">Hadir</div></div>
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-yellow);"><i class="fa-regular fa-circle-xmark"></i> <span class="sum-val" id="sum-m-s">-</span></div><div class="sum-text">Sakit</div></div>
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-blue);"><i class="fa-solid fa-circle-info"></i> <span class="sum-val" id="sum-m-i">-</span></div><div class="sum-text">Izin</div></div>
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-red);"><i class="fa-regular fa-circle-xmark"></i> <span class="sum-val" id="sum-m-a">-</span></div><div class="sum-text">Alpa</div></div>
                 </div>
 
-                <div id="tempat-list-absen-kelas"></div>
+                <!-- TABEL BISA DI GESER (SCROLL) -->
+                <div class="table-scroll">
+                    <div class="table-inner">
+                        <!-- HEADER TABEL STATIS -->
+                        <div class="header-tabel-presensi">
+                            <div style="width: 22px; text-align:center; flex-shrink: 0;">No</div>
+                            <div style="flex: 1; padding-left:10px; min-width: 0;">Nama Siswa</div>
+                            <div class="hdr-kehadiran-kelas">Kehadiran</div>
+                            <div class="hdr-quran-kelas">Qur'an</div>
+                        </div>
 
-                <button onclick="simpanPresensiKelas()" id="btn-simpan-absen-kelas" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 14px;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Transmit Data Presensi
+                        <div id="tempat-list-absen-kelas"></div>
+                    </div>
+                </div>
+
+                <button onclick="simpanPresensiKelas()" id="btn-simpan-absen-kelas" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Presensi</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
 
-        <div class="card-data" id="area-riwayat-kelas" style="display: none;">
-            <div style="font-size: 14px; font-weight: 700; color: var(--biru-tua); border-bottom: 1px solid var(--biru-muda); padding-bottom: 10px; margin-bottom: 15px;">Riwayat Presensi Mengajar</div>
+        <div id="area-riwayat-kelas" style="display: none;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-putih); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">Riwayat Presensi Mengajar</div>
             <ul class="list-data" id="tempat-riwayat-kelas"></ul>
         </div>
     </div>
@@ -178,11 +219,10 @@
     <div id="tab-presensi-sholat" style="display: none;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-absen-sholat" class="form-control" onchange="bukaFormAbsenSholat()"></select>
             </div>
             
-            <div id="area-absen-sholat" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-absen-sholat" style="display: none; padding-top: 5px;">
                 <div class="desktop-row">
                     <div class="form-group" style="flex: 1.5;">
                         <label>Tanggal</label>
@@ -207,23 +247,35 @@
                     </div>
                 </div>
 
-                <!-- HEADER TABEL STATIS SHOLAT -->
-                <div class="header-tabel-presensi" style="margin-top: 20px;">
-                    <div style="width: 24px; text-align:center;">No</div>
-                    <div style="flex: 1; padding-left:5px;">Nama Siswa</div>
-                    <div style="width: 225px; text-align: center;">Kehadiran & Keterangan</div>
+                <!-- KOTAK RINGKASAN SHOLAT -->
+                <div class="summary-box" id="summary-sholat">
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-green);"><i class="fa-solid fa-mosque"></i> <span class="sum-val" id="sum-s-sh">-</span></div><div class="sum-text">Sholat</div></div>
+                    <div class="summary-item"><div class="sum-top" style="color:var(--neon-red);"><i class="fa-regular fa-circle-xmark"></i> <span class="sum-val" id="sum-s-ts">-</span></div><div class="sum-text">Tidak Sholat</div></div>
                 </div>
 
-                <div id="tempat-list-absen-sholat"></div>
+                <!-- TABEL BISA DI GESER (SCROLL) -->
+                <div class="table-scroll">
+                    <div class="table-inner">
+                        <!-- HEADER TABEL STATIS SHOLAT -->
+                        <div class="header-tabel-presensi">
+                            <div style="width: 22px; text-align:center; flex-shrink: 0;">No</div>
+                            <div style="flex: 1; padding-left:10px; min-width: 0;">Nama Siswa</div>
+                            <div class="hdr-kehadiran-sholat">Kehadiran</div>
+                        </div>
 
-                <button onclick="simpanPresensiSholat()" id="btn-simpan-absen-sholat" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 14px; background: linear-gradient(135deg, #0ea5e9, #38bdf8); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Transmit Presensi Sholat
+                        <div id="tempat-list-absen-sholat"></div>
+                    </div>
+                </div>
+
+                <button onclick="simpanPresensiSholat()" id="btn-simpan-absen-sholat" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Presensi Sholat</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
 
-        <div class="card-data" id="area-riwayat-sholat" style="display: none;">
-            <div style="font-size: 14px; font-weight: 700; color: #0ea5e9; border-bottom: 1px solid var(--biru-muda); padding-bottom: 10px; margin-bottom: 15px;">Riwayat Presensi Sholat</div>
+        <div id="area-riwayat-sholat" style="display: none;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-putih); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">Riwayat Presensi Sholat</div>
             <ul class="list-data" id="tempat-riwayat-sholat"></ul>
         </div>
     </div>

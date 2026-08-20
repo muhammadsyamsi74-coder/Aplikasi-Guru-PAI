@@ -62,7 +62,7 @@ window.batalkanEdit = function(tipe) {
         document.getElementById('jm-judul').value = '';
         document.getElementById('jm-deskripsi').value = '';
         document.getElementById('jm-refleksi').value = '';
-        document.getElementById('btn-simpan-mengajar').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Jurnal';
+        document.getElementById('btn-simpan-mengajar').innerHTML = '<span style="flex:1; text-align:left;">Simpan Jurnal Mengajar</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-mengajar').style.display = 'none';
         
         setAutoPertemuanMengajar();
@@ -72,7 +72,7 @@ window.batalkanEdit = function(tipe) {
         document.getElementById('js-tanggal').value = today;
         document.getElementById('js-deskripsi').value = '';
         document.getElementById('js-refleksi').value = '';
-        document.getElementById('btn-simpan-sikap').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Jurnal Sikap';
+        document.getElementById('btn-simpan-sikap').innerHTML = '<span style="flex:1; text-align:left;">Simpan Jurnal Sikap</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-sikap').style.display = 'none';
         document.getElementById('wrap-check-all-sikap').style.display = 'flex';
         document.querySelectorAll('.check-siswa-sikap').forEach(cb => { cb.checked = false; cb.disabled = false; });
@@ -83,7 +83,7 @@ window.batalkanEdit = function(tipe) {
         document.getElementById('jw-deskripsi').value = '';
         document.getElementById('jw-tindak').value = '';
         document.getElementById('jw-refleksi').value = '';
-        document.getElementById('btn-simpan-wali').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Jurnal Wali';
+        document.getElementById('btn-simpan-wali').innerHTML = '<span style="flex:1; text-align:left;">Simpan Jurnal Wali</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-wali').style.display = 'none';
         document.getElementById('wrap-check-all-wali').style.display = 'flex';
         document.querySelectorAll('.check-siswa-wali').forEach(cb => { cb.checked = false; cb.disabled = false; });
@@ -118,7 +118,7 @@ window.loadSiswaJurnal = async function(tipe) {
     if (!idKelas) { area.style.display = 'none'; return; }
 
     area.style.display = 'block';
-    container.innerHTML = '<div style="text-align:center; padding:10px; color:#007bff;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
+    container.innerHTML = '<div style="text-align:center; padding:10px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
     document.getElementById(`check-all-${tipe}`).checked = false;
 
     try {
@@ -129,7 +129,7 @@ window.loadSiswaJurnal = async function(tipe) {
 
         let htmlContent = '';
         data.forEach((item, index) => {
-            const ikonGender = item.siswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:#007bff;"></i>' : (item.siswa.jenis_kelamin === 'P' ? '<i class="fa-solid fa-venus" style="color:#e83e8c;"></i>' : '');
+            const ikonGender = item.siswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : (item.siswa.jenis_kelamin === 'P' ? '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>' : '');
             htmlContent += `
                 <label class="student-checkbox-item" for="cb-${tipe}-${index}">
                     <input type="checkbox" id="cb-${tipe}-${index}" class="check-siswa-${tipe}" value="${item.id_siswa}">
@@ -139,7 +139,7 @@ window.loadSiswaJurnal = async function(tipe) {
         });
         container.innerHTML = htmlContent;
     } catch (error) {
-        container.innerHTML = `<div style="color:red; text-align:center; padding:10px;">Gagal: ${error.message}</div>`;
+        container.innerHTML = `<div style="color:var(--neon-red); text-align:center; padding:10px;">Gagal: ${error.message}</div>`;
     }
 };
 
@@ -162,7 +162,7 @@ window.simpanJurnalMengajar = async function() {
     const teksAsli = btn.innerHTML;
     
     try {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
         const payload = {
@@ -203,17 +203,17 @@ window.loadRiwayatMengajar = async function() {
 
         const { data, error } = await query;
         if (error) throw error;
-        if (data.length === 0) { container.innerHTML = '<li style="color:#8fa0b3; font-size:12px;">Belum ada riwayat.</li>'; return; }
+        if (data.length === 0) { container.innerHTML = '<li style="color:var(--text-abu); font-size:12px;">Belum ada riwayat.</li>'; return; }
 
         let html = '';
         data.forEach(d => {
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:6px; padding:12px 0; border-bottom:1px solid #f4f7f6;">
+            <li style="flex-direction:column; align-items:flex-start; gap:6px;">
                 <div style="display:flex; justify-content:space-between; width:100%;">
-                    <b style="color:var(--biru-tua); font-size:13px;">${d.kelas.nama_kelas} - Pertemuan ${d.pertemuan_ke || '-'}</b>
-                    <span style="font-size:11px; color:#8fa0b3;">${d.tanggal}</span>
+                    <b style="color:var(--text-putih); font-size:13px;">${d.kelas.nama_kelas} - Pertemuan ${d.pertemuan_ke || '-'}</b>
+                    <span style="font-size:11px; color:var(--text-abu);">${d.tanggal}</span>
                 </div>
-                <div style="font-size:11px; color:#495057;"><b>Jam:</b> ${d.jam_ke || '-'} | <b>Materi:</b> ${d.judul_materi || '-'}</div>
+                <div style="font-size:11px; color:var(--text-abu);"><b>Jam:</b> ${d.jam_ke || '-'} | <b>Materi:</b> ${d.judul_materi || '-'}</div>
                 <div style="display:flex; gap:8px; margin-top:5px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditMengajar('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalmengajar', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
@@ -221,7 +221,7 @@ window.loadRiwayatMengajar = async function() {
             </li>`;
         });
         container.innerHTML = html;
-    } catch(e) { container.innerHTML = `<li style="color:red; font-size:11px;">Gagal memuat.</li>`; }
+    } catch(e) { container.innerHTML = `<li style="color:var(--neon-red); font-size:11px;">Gagal memuat.</li>`; }
 };
 
 window.panggilEditMengajar = async function(id) {
@@ -238,7 +238,7 @@ window.panggilEditMengajar = async function(id) {
         document.getElementById('jm-refleksi').value = data.refleksi || '';
         
         editModeMengajar = id;
-        document.getElementById('btn-simpan-mengajar').innerHTML = '<i class="fa-solid fa-save"></i> Update Jurnal Mengajar';
+        document.getElementById('btn-simpan-mengajar').innerHTML = '<span style="flex:1; text-align:left;">Update Jurnal Mengajar</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-mengajar').style.display = 'block';
         document.getElementById('tab-jurnal-mengajar').scrollIntoView({behavior: 'smooth'});
     } catch(e) { alert("Gagal memuat data edit: " + e.message); }
@@ -258,7 +258,7 @@ window.simpanJurnalSikap = async function() {
     const teksAsli = btn.innerHTML;
     
     try {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
         const jenis = document.getElementById('js-jenis').value;
@@ -308,18 +308,18 @@ window.loadRiwayatSikap = async function() {
 
         const { data, error } = await query;
         if (error) throw error;
-        if (data.length === 0) { container.innerHTML = '<li style="color:#8fa0b3; font-size:12px;">Belum ada riwayat.</li>'; return; }
+        if (data.length === 0) { container.innerHTML = '<li style="color:var(--text-abu); font-size:12px;">Belum ada riwayat.</li>'; return; }
 
         let html = '';
         data.forEach(d => {
-            const clr = d.jenis_sikap === 'Positif' ? '#28a745' : '#dc3545';
+            const clr = d.jenis_sikap === 'Positif' ? 'var(--neon-green)' : 'var(--neon-red)';
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:6px; padding:12px 0; border-bottom:1px solid #f4f7f6;">
+            <li style="flex-direction:column; align-items:flex-start; gap:6px;">
                 <div style="display:flex; justify-content:space-between; width:100%;">
-                    <b style="color:var(--biru-tua); font-size:13px;">${d.siswa.nama_siswa}</b>
-                    <span style="font-size:11px; color:#8fa0b3;">${d.tanggal}</span>
+                    <b style="color:var(--text-putih); font-size:13px;">${d.siswa.nama_siswa}</b>
+                    <span style="font-size:11px; color:var(--text-abu);">${d.tanggal}</span>
                 </div>
-                <div style="font-size:11px; color:#495057;">${d.kelas.nama_kelas} | <b style="color:${clr}">${d.jenis_sikap}</b> - ${d.kategori_sikap}</div>
+                <div style="font-size:11px; color:var(--text-abu);">${d.kelas.nama_kelas} | <b style="color:${clr}">${d.jenis_sikap}</b> - ${d.kategori_sikap}</div>
                 <div style="display:flex; gap:8px; margin-top:5px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditSikap('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalsikap', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
@@ -327,7 +327,7 @@ window.loadRiwayatSikap = async function() {
             </li>`;
         });
         container.innerHTML = html;
-    } catch(e) { container.innerHTML = `<li style="color:red; font-size:11px;">Gagal memuat.</li>`; }
+    } catch(e) { container.innerHTML = `<li style="color:var(--neon-red); font-size:11px;">Gagal memuat.</li>`; }
 };
 
 window.panggilEditSikap = async function(id) {
@@ -352,7 +352,7 @@ window.panggilEditSikap = async function(id) {
         document.getElementById('js-refleksi').value = data.refleksi_sikap || '';
         
         editModeSikap = id;
-        document.getElementById('btn-simpan-sikap').innerHTML = '<i class="fa-solid fa-save"></i> Update Jurnal Sikap';
+        document.getElementById('btn-simpan-sikap').innerHTML = '<span style="flex:1; text-align:left;">Update Jurnal Sikap</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-sikap').style.display = 'block';
         document.getElementById('tab-jurnal-sikap').scrollIntoView({behavior: 'smooth'});
     } catch(e) { alert("Gagal memuat data edit: " + e.message); }
@@ -372,7 +372,7 @@ window.simpanJurnalWali = async function() {
     const teksAsli = btn.innerHTML;
     
     try {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
         const deskripsi = document.getElementById('jw-deskripsi').value;
@@ -417,17 +417,17 @@ window.loadRiwayatWali = async function() {
 
         const { data, error } = await query;
         if (error) throw error;
-        if (data.length === 0) { container.innerHTML = '<li style="color:#8fa0b3; font-size:12px;">Belum ada riwayat.</li>'; return; }
+        if (data.length === 0) { container.innerHTML = '<li style="color:var(--text-abu); font-size:12px;">Belum ada riwayat.</li>'; return; }
 
         let html = '';
         data.forEach(d => {
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:6px; padding:12px 0; border-bottom:1px solid #f4f7f6;">
+            <li style="flex-direction:column; align-items:flex-start; gap:6px;">
                 <div style="display:flex; justify-content:space-between; width:100%;">
-                    <b style="color:var(--biru-tua); font-size:13px;">${d.siswa.nama_siswa}</b>
-                    <span style="font-size:11px; color:#8fa0b3;">${d.tanggal}</span>
+                    <b style="color:var(--text-putih); font-size:13px;">${d.siswa.nama_siswa}</b>
+                    <span style="font-size:11px; color:var(--text-abu);">${d.tanggal}</span>
                 </div>
-                <div style="font-size:11px; color:#495057;">${d.kelas.nama_kelas}</div>
+                <div style="font-size:11px; color:var(--text-abu);">${d.kelas.nama_kelas}</div>
                 <div style="display:flex; gap:8px; margin-top:5px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditWali('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalwali', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
@@ -435,7 +435,7 @@ window.loadRiwayatWali = async function() {
             </li>`;
         });
         container.innerHTML = html;
-    } catch(e) { container.innerHTML = `<li style="color:red; font-size:11px;">Gagal memuat.</li>`; }
+    } catch(e) { container.innerHTML = `<li style="color:var(--neon-red); font-size:11px;">Gagal memuat.</li>`; }
 };
 
 window.panggilEditWali = async function(id) {
@@ -459,7 +459,7 @@ window.panggilEditWali = async function(id) {
         document.getElementById('jw-refleksi').value = data.refleksi || '';
         
         editModeWali = id;
-        document.getElementById('btn-simpan-wali').innerHTML = '<i class="fa-solid fa-save"></i> Update Jurnal Wali';
+        document.getElementById('btn-simpan-wali').innerHTML = '<span style="flex:1; text-align:left;">Update Jurnal Wali</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         document.getElementById('btn-cancel-wali').style.display = 'block';
         document.getElementById('tab-jurnal-wali').scrollIntoView({behavior: 'smooth'});
     } catch(e) { alert("Gagal memuat data edit: " + e.message); }

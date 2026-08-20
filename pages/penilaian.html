@@ -1,71 +1,99 @@
 <!-- pages/penilaian.html -->
 <style>
-    .penilaian-container { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .section-title { font-size: 18px; font-weight: 700; color: var(--biru-tua); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-    
-    /* KARTU MELAYANG (GLASSMORPHISM) */
-    .card-data { 
-        background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 20px; 
-        box-shadow: 0 10px 30px rgba(31, 38, 135, 0.05); transition: transform 0.3s ease; 
+    /* =========================================================
+       PREMIUM DARK NEON THEME - PENILAIAN
+       ========================================================= */
+    :root {
+        --bg-main: #0b121e;
+        --bg-card: #151d2a;
+        --border-color: #232f40;
+        --text-putih: #ffffff;
+        --text-abu: #8494a8;
+        --neon-green: #05d58a;
+        --neon-blue: #3b82f6;
+        --neon-yellow: #f59e0b;
+        --neon-red: #ef4444;
+        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
     }
-    .card-data:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08); }
+
+    .penilaian-container { animation: fadeIn 0.4s ease-out; }
+    
+    /* Hilangkan background putih dari wadah utama */
+    .card-data { 
+        background: transparent; border: none; padding: 0; 
+        margin-bottom: 20px; box-shadow: none; 
+    }
     
     .form-group { margin-bottom: 15px; width: 100%; }
-    .form-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group label { display: block; font-size: 10px; color: var(--text-abu); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .form-control { 
-        width: 100%; padding: 12px; border: 1px solid rgba(0, 123, 255, 0.2); border-radius: 10px; 
-        font-size: 13px; color: var(--biru-tua); outline: none; transition: all 0.3s ease; 
-        background: rgba(255,255,255,0.9); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); font-weight: 500;
+        width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 12px; 
+        font-size: 13px; color: var(--text-putih); outline: none; transition: all 0.3s ease; 
+        background: var(--bg-card); font-weight: 500;
     }
-    .form-control:focus { border-color: var(--biru-neon); box-shadow: 0 0 0 4px rgba(0, 210, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.02); background: #fff; }
+    .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 4px rgba(5, 213, 138, 0.1); }
     
-    /* DESAIN TAB MELAYANG */
-    .tab-container { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
+    /* TAB CONTAINER (Dark Mode) */
+    .tab-container { 
+        display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
+        margin-bottom: 25px; border: 1px solid var(--border-color);
+        overflow-x: auto; scrollbar-width: none; margin-top: 5px; 
+    }
     .tab-container::-webkit-scrollbar { display: none; }
     .tab-btn { 
-        background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9); padding: 10px 20px; 
-        font-size: 12px; font-weight: 600; color: #64748b; cursor: pointer; white-space: nowrap; 
-        transition: all 0.3s; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        flex: 1; background: transparent; border: none; padding: 12px 20px; 
+        font-size: 12px; font-weight: 600; color: var(--text-abu); cursor: pointer; white-space: nowrap; 
+        transition: all 0.3s; border-radius: 8px; text-align: center;
     }
-    .tab-btn.active { background: linear-gradient(135deg, var(--biru-tua), var(--biru-dasar)); color: white; border: none; box-shadow: 0 6px 15px rgba(0, 86, 179, 0.3); }
-    
-    /* DESAIN STUDENT CARD & ACCORDION (High-Tech) */
-    .absen-card { display: flex; flex-direction: column; padding: 15px 0; border-bottom: 1px solid #e2e8f0; }
+    .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
+
+    /* DESAIN STUDENT CARD & ACCORDION (Dark Mode) */
+    .absen-card { display: flex; flex-direction: column; padding: 12px 10px; border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 12px; margin-bottom: 10px; }
     .absen-info-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .absen-identity { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .absen-no { font-weight: 700; color: var(--biru-muda); background: var(--biru-tua); padding: 4px 10px; border-radius: 6px; font-size: 11px; }
-    .absen-nama { font-size: 13px; font-weight: 600; color: var(--abu-teks); }
-    .btn-toggle-input { background: #eff6ff; color: var(--biru-dasar); border: none; padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .btn-toggle-input:hover { background: var(--biru-dasar); color: white; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
+    .absen-identity { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    
+    /* Nomor & Nama */
+    .absen-no { 
+        width: 24px; height: 24px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; 
+        border-radius: 50%; background: rgba(5, 213, 138, 0.1); color: var(--neon-green); font-weight: 700; font-size: 10px; padding: 0; border: 1px solid rgba(5, 213, 138, 0.2);
+    }
+    .absen-nama { 
+        font-size: 12px; font-weight: 600; color: var(--text-putih); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 5px;
+    }
+    
+    /* Tombol Isi/Edit */
+    .btn-toggle-input { background: var(--bg-main); color: var(--text-abu); border: 1px solid var(--border-color); padding: 6px 12px; font-size: 10px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+    .btn-toggle-input:hover { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border-color: var(--neon-green); }
 
-    /* STATUS BADGE */
-    .badge-status { font-size: 9px; padding: 3px 8px; border-radius: 12px; font-weight: 800; letter-spacing: 0.5px; margin-left: 5px; }
-    .bg-belum { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; }
-    .bg-sebagian { background: #fef9c3; color: #d97706; border: 1px solid #fde047; }
-    .bg-sudah { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    /* STATUS BADGE (Neon Outline) */
+    .badge-status { font-size: 8px; padding: 3px 6px; border-radius: 6px; font-weight: 800; letter-spacing: 0.5px; flex-shrink: 0; text-transform: uppercase;}
+    .bg-belum { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .bg-sebagian { background: rgba(245, 158, 11, 0.1); color: var(--neon-yellow); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .bg-sudah { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.2); }
 
-    /* LAYOUT TUGAS T/TS */
-    .wrap-tugas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .btn-tuntas { width: 40px; height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-    .btn-tuntas.active.t { background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; box-shadow: 0 4px 10px rgba(40,167,69,0.3); }
-    .btn-tuntas.active.ts { background: linear-gradient(135deg, #dc3545, #f87171); color: white; border: none; box-shadow: 0 4px 10px rgba(220,53,69,0.3); }
+    /* LAYOUT TUGAS T/TS (KOTAK KECIL) */
+    .wrap-tugas { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; width: 100%; margin-top: 10px;}
+    .btn-tuntas { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-abu); font-weight: 700; font-size: 11px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display:flex; justify-content:center; align-items:center; padding:0; }
+    .btn-tuntas.active.t { background: var(--neon-green); color: var(--bg-main); border-color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.4); }
+    .btn-tuntas.active.ts { background: var(--neon-red); color: #fff; border-color: var(--neon-red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
 
     /* LAYOUT KOMPONEN BANYAK (GRID) */
-    .grid-input-nilai { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
-    .hafalan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.01); }
+    .grid-input-nilai { display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; margin-bottom: 8px; }
+    .hafalan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg-main); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
     .hafalan-item { display: flex; flex-direction: column; gap: 4px; }
-    .hafalan-label { font-size: 10px; font-weight: 700; color: var(--biru-tua); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hafalan-label { font-size: 9px; font-weight: 600; color: var(--text-abu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sel-kecil { padding: 8px; font-size: 11px; height: auto; border-radius: 8px; }
 
-    /* TOMBOL GRADASI & GLOW */
+    /* TOMBOL SIMPAN PREMIUM */
     .btn-primary {
-        background: linear-gradient(135deg, var(--biru-dasar), var(--biru-neon)); border: none; border-radius: 10px;
-        color: white; font-weight: 600; font-size: 13px; box-shadow: 0 6px 20px rgba(0, 210, 255, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;
+        background: var(--gradient-primary); border: none; border-radius: 16px;
+        color: white; font-weight: 700; font-size: 14px; box-shadow: 0 8px 20px rgba(5, 213, 138, 0.2);
+        transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 10px 20px;
     }
-    .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0, 210, 255, 0.2); }
+    .btn-primary:active { transform: scale(0.98); }
+    .icon-circle { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
 
+    /* DESAIN LAYOUT DESKTOP 1 BARIS */
     @media (min-width: 768px) {
         .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
         .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
@@ -75,27 +103,25 @@
 </style>
 
 <div class="penilaian-container">
-    <h2 class="section-title"><i class="fa-solid fa-clipboard-check"></i> Modul Penilaian</h2>
     
     <div class="tab-container">
-        <button class="tab-btn active" id="btn-tab-tugas" onclick="gantiTabPenilaian('tugas')">Nilai Tugas</button>
+        <button class="tab-btn active" id="btn-tab-tugas" onclick="gantiTabPenilaian('tugas')">Tugas</button>
         <button class="tab-btn" id="btn-tab-baca" onclick="gantiTabPenilaian('baca')">Baca Qur'an</button>
-        <button class="tab-btn" id="btn-tab-tulis" onclick="gantiTabPenilaian('tulis')">Menulis Qur'an</button>
-        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPenilaian('sholat')">Hafalan Sholat</button>
-        <button class="tab-btn" id="btn-tab-surah" onclick="gantiTabPenilaian('surah')">Surah Pendek</button>
+        <button class="tab-btn" id="btn-tab-tulis" onclick="gantiTabPenilaian('tulis')">Tulis Qur'an</button>
+        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPenilaian('sholat')">Sholat</button>
+        <button class="tab-btn" id="btn-tab-surah" onclick="gantiTabPenilaian('surah')">Surah</button>
     </div>
 
     <!-- ================= TAB 1: PENILAIAN TUGAS ================= -->
     <div id="tab-penilaian-tugas" style="display: block;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-tugas" class="form-control" onchange="bukaFormPenilaian('tugas')"></select>
             </div>
-            <div id="area-tugas" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-tugas" style="display: none; padding-top: 5px;">
                 
-                <div class="form-group" style="background: rgba(0,123,255,0.05); padding: 15px; border-radius: 12px; border: 1px dashed rgba(0,123,255,0.3);">
-                    <label>Pilih Tugas (Tersimpan) atau Buat Baru</label>
+                <div class="form-group" style="background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px dashed var(--border-color);">
+                    <label style="color:var(--text-putih);">Pilih Tugas (Tersimpan) atau Buat Baru</label>
                     <div class="desktop-row" style="margin-bottom: 0;">
                         <div class="form-group" style="flex: 2;">
                             <select id="input-nama-tugas-dropdown" class="form-control" onchange="loadNilaiTugas()">
@@ -104,7 +130,7 @@
                             <input type="text" id="input-nama-tugas-baru" class="form-control" placeholder="Ketik nama tugas baru di sini..." style="display:none; margin-top:8px;">
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <button type="button" onclick="toggleTugasBaru()" class="btn-primary" style="width: 100%; background: linear-gradient(135deg, #6c757d, #adb5bd); box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2); font-size:11px; padding:12px;">
+                            <button type="button" onclick="toggleTugasBaru()" class="btn-toggle-input" style="width: 100%; font-size:11px; padding:12px; border-radius:12px;">
                                 <i class="fa-solid fa-plus"></i> Buat Tugas Baru
                             </button>
                         </div>
@@ -113,8 +139,9 @@
 
                 <div id="tempat-list-tugas" style="margin-top: 15px;"></div>
                 
-                <button onclick="simpanPenilaian('tugas')" id="btn-simpan-tugas" class="btn-primary" style="width: 100%; margin-top: 20px;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Nilai Tugas
+                <button onclick="simpanPenilaian('tugas')" id="btn-simpan-tugas" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Nilai Tugas</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
@@ -124,13 +151,13 @@
     <div id="tab-penilaian-baca" style="display: none;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-baca" class="form-control" onchange="bukaFormPenilaian('baca')"></select>
             </div>
-            <div id="area-baca" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-baca" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-baca"></div>
-                <button onclick="simpanPenilaian('baca')" id="btn-simpan-baca" class="btn-primary" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #0ea5e9, #38bdf8); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Nilai Baca Qur'an
+                <button onclick="simpanPenilaian('baca')" id="btn-simpan-baca" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Nilai Baca Qur'an</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
@@ -140,13 +167,13 @@
     <div id="tab-penilaian-tulis" style="display: none;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-tulis" class="form-control" onchange="bukaFormPenilaian('tulis')"></select>
             </div>
-            <div id="area-tulis" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-tulis" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-tulis"></div>
-                <button onclick="simpanPenilaian('tulis')" id="btn-simpan-tulis" class="btn-primary" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #10b981, #34d399); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Nilai Menulis Qur'an
+                <button onclick="simpanPenilaian('tulis')" id="btn-simpan-tulis" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Nilai Menulis Qur'an</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
@@ -156,13 +183,13 @@
     <div id="tab-penilaian-sholat" style="display: none;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-sholat" class="form-control" onchange="bukaFormPenilaian('sholat')"></select>
             </div>
-            <div id="area-sholat" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-sholat" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-sholat"></div>
-                <button onclick="simpanPenilaian('sholat')" id="btn-simpan-sholat" class="btn-primary" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #8b5cf6, #a78bfa); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Hafalan Sholat
+                <button onclick="simpanPenilaian('sholat')" id="btn-simpan-sholat" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Hafalan Sholat</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
@@ -172,13 +199,13 @@
     <div id="tab-penilaian-surah" style="display: none;">
         <div class="card-data">
             <div class="form-group">
-                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-surah" class="form-control" onchange="bukaFormPenilaian('surah')"></select>
             </div>
-            <div id="area-surah" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(0,123,255,0.3); padding-top: 15px;">
+            <div id="area-surah" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-surah"></div>
-                <button onclick="simpanPenilaian('surah')" id="btn-simpan-surah" class="btn-primary" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #f59e0b, #fbbf24); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Hafalan Surah
+                <button onclick="simpanPenilaian('surah')" id="btn-simpan-surah" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                    <span style="flex:1; text-align:left;">Simpan Hafalan Surah</span>
+                    <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
             </div>
         </div>
