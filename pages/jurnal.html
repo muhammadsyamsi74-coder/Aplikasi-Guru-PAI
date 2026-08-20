@@ -1,0 +1,274 @@
+<!-- pages/jurnal.html -->
+<style>
+    .jurnal-container { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .section-title { font-size: 18px; font-weight: 700; color: var(--biru-tua); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    
+    /* KARTU MELAYANG (GLASSMORPHISM) */
+    .card-data { 
+        background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 20px; 
+        box-shadow: 0 10px 30px rgba(31, 38, 135, 0.05); transition: transform 0.3s ease; 
+    }
+    .card-data:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08); }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed rgba(0,123,255,0.3); }
+    .card-header h3 { font-size: 14px; font-weight: 700; color: var(--biru-tua); margin: 0; }
+
+    .form-group { margin-bottom: 15px; width: 100%; }
+    .form-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-control { 
+        width: 100%; padding: 12px; border: 1px solid rgba(0, 123, 255, 0.2); border-radius: 10px; 
+        font-size: 13px; color: var(--biru-tua); outline: none; transition: all 0.3s ease; 
+        background: rgba(255,255,255,0.9); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); font-weight: 500;
+    }
+    .form-control:focus { border-color: var(--biru-neon); box-shadow: 0 0 0 4px rgba(0, 210, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.02); background: #fff; }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    
+    /* TOMBOL GRADASI & GLOW */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--biru-dasar), var(--biru-neon)); border: none; border-radius: 10px;
+        color: white; font-weight: 600; font-size: 13px; box-shadow: 0 6px 20px rgba(0, 210, 255, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;
+    }
+    .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0, 210, 255, 0.2); }
+
+    .btn-cancel { 
+        background: rgba(220, 53, 69, 0.05); color: #dc3545; border: 1px dashed #dc3545; 
+        display: none; text-align: center; margin-top: 10px; padding: 12px; border-radius: 10px; 
+        font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+    }
+    .btn-cancel:hover { background: #dc3545; color: white; }
+
+    /* DESAIN TAB MELAYANG */
+    .tab-container { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
+    .tab-btn { 
+        background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9); padding: 10px 20px; 
+        font-size: 12px; font-weight: 600; color: #64748b; cursor: pointer; white-space: nowrap; 
+        transition: all 0.3s; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .tab-btn.active { background: linear-gradient(135deg, var(--biru-tua), var(--biru-dasar)); color: white; border: none; box-shadow: 0 6px 15px rgba(0, 86, 179, 0.3); }
+
+    /* DESAIN LAYOUT DESKTOP 1 BARIS */
+    .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
+    .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
+
+    /* KELENGKAPAN LIST & ACTION BTN */
+    .list-data { list-style: none; padding: 0; }
+    .list-data li { padding: 15px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: var(--abu-teks); display: flex; justify-content: space-between; align-items: center; }
+    .btn-action { background: none; border: none; cursor: pointer; padding: 8px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-action:hover { transform: scale(1.05); }
+    .btn-edit { background: #eff6ff; color: #3b82f6; box-shadow: 0 2px 5px rgba(59,130,246,0.1); }
+    .btn-delete { background: #fef2f2; color: #ef4444; box-shadow: 0 2px 5px rgba(239,68,68,0.1); }
+
+    /* CHECKBOX & KOTAK SISWA (HIGH-TECH) */
+    .check-all-wrapper { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(0,123,255,0.05); border-radius: 10px; font-weight: 700; font-size: 12px; color: var(--biru-tua); margin-bottom: 10px; border: 1px solid rgba(0,123,255,0.1); }
+    .student-list-box { max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.8); border-radius: 10px; padding: 10px; background: rgba(255,255,255,0.5); box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
+    .student-checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-bottom: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: background 0.2s; border-radius: 6px; }
+    .student-checkbox-item:hover { background: rgba(0,123,255,0.05); }
+    .student-checkbox-item:last-child { border-bottom: none; }
+    .student-checkbox-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--biru-dasar); }
+    .student-checkbox-item span { font-size: 12px; color: var(--biru-tua); font-weight: 600; }
+</style>
+
+<div class="jurnal-container">
+    <h2 class="section-title"><i class="fa-solid fa-book"></i> Catatan Jurnal</h2>
+    
+    <div class="tab-container">
+        <button class="tab-btn active" id="btn-tab-mengajar" onclick="gantiTabJurnal('mengajar')">Jurnal Mengajar</button>
+        <button class="tab-btn" id="btn-tab-sikap" onclick="gantiTabJurnal('sikap')">Jurnal Sikap</button>
+        <button class="tab-btn" id="btn-tab-wali" onclick="gantiTabJurnal('wali')">Jurnal Guru Wali</button>
+    </div>
+
+    <!-- ================= TAB 1: JURNAL MENGAJAR ================= -->
+    <div id="tab-jurnal-mengajar" style="display: block;">
+        <div class="card-data">
+            <div class="form-group">
+                <label>Pilih Kelas</label>
+                <select id="pilih-kelas-mengajar" class="form-control" onchange="setAutoPertemuanMengajar()"></select>
+            </div>
+            
+            <div class="desktop-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Tanggal</label>
+                    <input type="date" id="jm-tanggal" class="form-control" required>
+                </div>
+                <div class="form-group" style="flex: 0.5;">
+                    <label>Pertemuan Ke</label>
+                    <input type="number" id="jm-pertemuan" class="form-control" placeholder="Cth: 1">
+                </div>
+                <div class="form-group" style="flex: 0.5;">
+                    <label>Jam Ke</label>
+                    <input type="text" id="jm-jam" class="form-control" placeholder="Cth: 1-2">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Judul Materi</label>
+                <input type="text" id="jm-judul" class="form-control" placeholder="Cth: Rukun Iman">
+            </div>
+            <div class="form-group">
+                <label>Deskripsi Materi / Kegiatan</label>
+                <textarea id="jm-deskripsi" class="form-control" placeholder="Siswa melakukan diskusi tentang..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Refleksi Guru</label>
+                <textarea id="jm-refleksi" class="form-control" placeholder="Metode yang digunakan efektif..."></textarea>
+            </div>
+
+            <button onclick="simpanJurnalMengajar()" id="btn-simpan-mengajar" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Jurnal
+            </button>
+            <div id="btn-cancel-mengajar" class="btn-cancel" onclick="batalkanEdit('mengajar')">Batal Edit</div>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3>Riwayat Jurnal Mengajar</h3>
+            </div>
+            <div class="form-group">
+                <select id="filter-riwayat-mengajar" class="form-control" onchange="loadRiwayatMengajar()">
+                    <option value="">Semua Kelas</option>
+                </select>
+            </div>
+            <ul class="list-data" id="list-riwayat-mengajar"></ul>
+        </div>
+    </div>
+
+    <!-- ================= TAB 2: JURNAL SIKAP ================= -->
+    <div id="tab-jurnal-sikap" style="display: none;">
+        <div class="card-data">
+            <div class="form-group">
+                <label>Pilih Kelas</label>
+                <select id="pilih-kelas-sikap" class="form-control" onchange="loadSiswaJurnal('sikap')"></select>
+            </div>
+            
+            <div id="area-sikap" style="display: none;">
+                <div class="form-group">
+                    <label>Pilih Siswa (Ceklis yang bersangkutan)</label>
+                    <div class="check-all-wrapper" id="wrap-check-all-sikap">
+                        <input type="checkbox" id="check-all-sikap" onclick="togglePilihSemua('sikap')"> 
+                        <label for="check-all-sikap" style="margin:0; cursor:pointer;">Pilih Semua Siswa di Kelas Ini</label>
+                    </div>
+                    <div class="student-list-box" id="list-siswa-sikap"></div>
+                </div>
+
+                <div class="desktop-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Tanggal</label>
+                        <input type="date" id="js-tanggal" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Jenis Sikap</label>
+                        <select id="js-jenis" class="form-control">
+                            <option value="Positif">Positif</option>
+                            <option value="Negatif">Negatif</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1.5;">
+                        <label>Kategori</label>
+                        <select id="js-kategori" class="form-control">
+                            <option value="Kedisiplinan">Kedisiplinan</option>
+                            <option value="Etika/Sosial">Etika/Sosial</option>
+                            <option value="Spiritual">Spiritual</option>
+                            <option value="Kepemimpinan">Kepemimpinan</option>
+                            <option value="Jujur">Jujur</option>
+                            <option value="Adil">Adil</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Kejadian</label>
+                    <textarea id="js-deskripsi" class="form-control" placeholder="Membantu membersihkan papan tulis..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tindak Lanjut / Refleksi</label>
+                    <textarea id="js-refleksi" class="form-control" placeholder="Diberikan apresiasi..."></textarea>
+                </div>
+
+                <button onclick="simpanJurnalSikap()" id="btn-simpan-sikap" class="btn-primary" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #17a2b8, #0dcaf0); box-shadow: 0 6px 20px rgba(23, 162, 184, 0.3);">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Jurnal Sikap
+                </button>
+                <div id="btn-cancel-sikap" class="btn-cancel" onclick="batalkanEdit('sikap')">Batal Edit</div>
+            </div>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3 style="color:#0c5460;">Riwayat Jurnal Sikap</h3>
+            </div>
+            <div class="desktop-row">
+                <div class="form-group">
+                    <select id="filter-riwayat-sikap" class="form-control" onchange="loadRiwayatSikap()">
+                        <option value="">Semua Kelas</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <input type="text" id="search-nama-sikap" class="form-control" placeholder="Cari nama siswa..." onkeyup="loadRiwayatSikap()">
+                </div>
+            </div>
+            <ul class="list-data" id="list-riwayat-sikap"></ul>
+        </div>
+    </div>
+
+    <!-- ================= TAB 3: JURNAL WALI ================= -->
+    <div id="tab-jurnal-wali" style="display: none;">
+        <div class="card-data">
+            <div class="form-group">
+                <label>Pilih Kelas</label>
+                <select id="pilih-kelas-wali" class="form-control" onchange="loadSiswaJurnal('wali')"></select>
+            </div>
+            
+            <div id="area-wali" style="display: none;">
+                <div class="form-group">
+                    <label>Pilih Siswa (Ceklis yang bersangkutan)</label>
+                    <div class="check-all-wrapper" id="wrap-check-all-wali">
+                        <input type="checkbox" id="check-all-wali" onclick="togglePilihSemua('wali')" style="width:16px; height:16px; cursor:pointer;"> 
+                        <label for="check-all-wali" style="margin:0; cursor:pointer; font-size:12px;">Pilih Semua Siswa di Kelas Ini</label>
+                    </div>
+                    <div class="student-list-box" id="list-siswa-wali"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" id="jw-tanggal" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Pembinaan / Masalah</label>
+                    <textarea id="jw-deskripsi" class="form-control" placeholder="Terlambat 3 hari berturut-turut..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tindak Lanjut</label>
+                    <textarea id="jw-tindak" class="form-control" placeholder="Pemanggilan orang tua..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Refleksi</label>
+                    <textarea id="jw-refleksi" class="form-control" placeholder="Siswa berjanji untuk..."></textarea>
+                </div>
+
+                <button onclick="simpanJurnalWali()" id="btn-simpan-wali" class="btn-primary" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #6f42c1, #a985ff); box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Jurnal Wali
+                </button>
+                <div id="btn-cancel-wali" class="btn-cancel" onclick="batalkanEdit('wali')">Batal Edit</div>
+            </div>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3 style="color:#6f42c1;">Riwayat Jurnal Wali</h3>
+            </div>
+            <div class="desktop-row">
+                <div class="form-group">
+                    <select id="filter-riwayat-wali" class="form-control" onchange="loadRiwayatWali()">
+                        <option value="">Semua Kelas</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <input type="text" id="search-nama-wali" class="form-control" placeholder="Cari nama siswa..." onkeyup="loadRiwayatWali()">
+                </div>
+            </div>
+            <ul class="list-data" id="list-riwayat-wali"></ul>
+        </div>
+    </div>
+
+</div>
