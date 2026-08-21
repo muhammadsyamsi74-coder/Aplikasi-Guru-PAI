@@ -13,8 +13,10 @@
         --neon-blue: #3b82f6;
         --neon-yellow: #f59e0b;
         --neon-red: #ef4444;
+        --neon-purple: #8b5cf6;
         --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
         --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
     }
 
     .master-container { animation: fadeIn 0.4s ease-out; }
@@ -49,6 +51,7 @@
     .btn-primary:active { transform: scale(0.97); }
 
     .btn-blue { background: var(--gradient-blue); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2); }
+    .btn-purple { background: var(--gradient-purple); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.2); }
 
     /* DESAIN LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
@@ -63,6 +66,17 @@
     .btn-action:hover { transform: scale(1.05); }
     .btn-edit { color: var(--neon-blue); }
     .btn-delete { color: var(--neon-red); }
+
+    /* BADGE STATUS KELAS */
+    .badge-status-kelas {
+        font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 12px; text-transform: uppercase;
+    }
+    .badge-status-aktif {
+        background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3);
+    }
+    .badge-status-nonaktif {
+        background: rgba(239, 68, 68, 0.15); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.3);
+    }
 </style>
 
 <div class="master-container">
@@ -72,14 +86,22 @@
         <h2 class="section-title"><i class="fa-solid fa-database"></i> Data Master Kelas</h2>
         
         <div class="card-data">
-            <button onclick="toggleFormKelas()" class="btn-primary" style="width: 100%;">
-                <i class="fa-solid fa-chalkboard"></i> Form Tambah Kelas Baru
-            </button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button onclick="toggleFormKelas()" class="btn-primary" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-chalkboard"></i> Form Tambah Kelas
+                </button>
+                <button onclick="bukaPanelWali()" class="btn-primary btn-purple" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-user-shield"></i> Siswa Guru Wali
+                </button>
+                <button onclick="downloadSemuaSiswaExcel()" id="btn-download-semua-siswa" class="btn-primary btn-blue" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-file-excel"></i> Download Excel
+                </button>
+            </div>
         </div>
 
         <div class="card-data" id="wrapper-form-kelas" style="display: none; border: 1px solid var(--neon-green);">
             <div class="card-header">
-                <h3>Isi Data Kelas Baru</h3>
+                <h3 id="judul-form-kelas">Isi Data Kelas Baru</h3>
                 <button onclick="toggleFormKelas()" style="background:none; border:none; color:var(--neon-red); cursor:pointer;"><i class="fa-solid fa-times"></i> Tutup</button>
             </div>
             <form id="form-tambah-kelas" onsubmit="simpanDataKelas(event)">
@@ -98,7 +120,14 @@
                         <label>Tahun Ajaran</label>
                         <input type="text" id="input-tahun-ajaran" class="form-control" value="2025/2026" required>
                     </div>
-                    <div class="form-group" style="flex: 0.5;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Status Kelas</label>
+                        <select id="input-status-kelas" class="form-control" required>
+                            <option value="true">Aktif</option>
+                            <option value="false">Tidak Aktif</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 0.6;">
                         <button type="submit" id="btn-simpan-kelas" class="btn-primary" style="width: 100%;">
                             <i class="fa-solid fa-save"></i> Simpan
                         </button>
@@ -116,7 +145,7 @@
         </div>
     </div>
 
-    <!-- ================= PANEL 2: SISWA ================= -->
+    <!-- ================= PANEL 2: SISWA MENGAJAR ================= -->
     <div id="panel-siswa" style="display: none;">
         <button onclick="tutupDetailKelas()" style="background:none; border:none; color:var(--neon-green); font-size:13px; font-weight:600; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-arrow-left"></i> Kembali ke Kelas
@@ -257,6 +286,110 @@
                 <button class="btn-action" onclick="loadDataSiswa()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
             </div>
             <ul class="list-data" id="tempat-data-siswa"></ul>
+        </div>
+    </div>
+
+    <!-- ================= PANEL 3: SISWA GURU WALI (BARU) ================= -->
+    <div id="panel-wali" style="display: none;">
+        <button onclick="tutupPanelWali()" style="background:none; border:none; color:var(--neon-green); font-size:13px; font-weight:600; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Kelas
+        </button>
+
+        <h2 class="section-title"><i class="fa-solid fa-user-shield" style="color: var(--neon-purple);"></i> Data Siswa Guru Wali</h2>
+
+        <div class="card-data">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="toggleFormSiswaWali()" class="btn-primary btn-purple" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-user-plus"></i> Form Tambah Siswa Wali
+                </button>
+                <button onclick="downloadSiswaWaliExcel()" id="btn-download-wali" class="btn-primary btn-blue" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-file-excel"></i> Download Data Wali (.xlsx)
+                </button>
+            </div>
+        </div>
+
+        <div class="card-data" id="wrapper-form-siswa-wali" style="display: none; border: 1px solid var(--neon-purple);">
+            <div class="card-header" style="border-bottom-color: var(--neon-purple);">
+                <h3 id="judul-form-siswa-wali" style="color: var(--neon-purple);">Isi Data Siswa Guru Wali</h3>
+                <button onclick="toggleFormSiswaWali()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-weight:600;"><i class="fa-solid fa-times"></i> Tutup</button>
+            </div>
+            <form id="form-tambah-siswa-wali" onsubmit="simpanDataSiswaWali(event)">
+                <div class="desktop-row">
+                    <div class="form-group">
+                        <label>NISN</label>
+                        <input type="text" id="wali-nisn" class="form-control" placeholder="Isi NISN..." required>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Nama Siswa</label>
+                        <input type="text" id="wali-nama" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 0.8;">
+                        <label>Jenis Kelamin</label>
+                        <select id="wali-jk" class="form-control" required>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 0.8;">
+                        <label>Kelas Saat Ini</label>
+                        <input type="text" id="wali-kelas" class="form-control" placeholder="Cth: 7B" required>
+                    </div>
+                </div>
+
+                <div class="desktop-row">
+                    <div class="form-group">
+                        <label>Tempat Lahir</label>
+                        <input type="text" id="wali-tempat-lahir" class="form-control" placeholder="Kota Lahir">
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Lahir</label>
+                        <input type="date" id="wali-tanggal-lahir" class="form-control">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Alamat Tinggal</label>
+                        <input type="text" id="wali-alamat" class="form-control" placeholder="Alamat lengkap...">
+                    </div>
+                </div>
+
+                <div class="desktop-row">
+                    <div class="form-group">
+                        <label>No. WA Siswa</label>
+                        <input type="text" id="wali-wasiswa" class="form-control" placeholder="08...">
+                    </div>
+                    <div class="form-group">
+                        <label>No. WA Orang Tua</label>
+                        <input type="text" id="wali-waortu" class="form-control" placeholder="08...">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Siswa</label>
+                        <input type="email" id="wali-email" class="form-control" placeholder="email@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Instagram</label>
+                        <input type="text" id="wali-ig" class="form-control" placeholder="@username">
+                    </div>
+                </div>
+
+                <div class="desktop-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Foto Profil (Opsional)</label>
+                        <input type="file" id="wali-foto" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="btn-simpan-siswa-wali" class="btn-primary btn-purple" style="width: 100%;">
+                            <i class="fa-solid fa-save"></i> Simpan Data Wali
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3>Daftar Siswa Bimbingan Guru Wali</h3>
+                <button class="btn-action" onclick="loadDataSiswaWali()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
+            </div>
+            <ul class="list-data" id="tempat-data-siswa-wali"></ul>
         </div>
     </div>
 

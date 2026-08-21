@@ -11,24 +11,17 @@
     <style>
         /* ================= CSS GLOBAL: PREMIUM DARK NEON THEME ================= */
         :root {
-            /* Palet Warna Mode Gelap */
-            --bg-main: #0b121e;       /* Biru sangat gelap (nyaris hitam) untuk latar utama */
-            --bg-card: #151d2a;       /* Biru gelap keabu-abuan untuk kotak/kartu */
+            --bg-main: #0b121e;       
+            --bg-card: #151d2a;       
             --bg-card-hover: #1b2534;
-            --border-color: #232f40;  /* Garis batas samar */
-            
-            /* Teks */
+            --border-color: #232f40;  
             --text-putih: #ffffff;
-            --text-abu: #8494a8;      /* Abu-abu terang untuk teks sekunder */
-            
-            /* Warna Aksen Neon */
-            --neon-green: #05d58a;    /* Hijau Zamrud menyala */
+            --text-abu: #8494a8;      
+            --neon-green: #05d58a;    
             --neon-green-dim: rgba(5, 213, 138, 0.15);
             --neon-blue: #2563eb;
             --neon-red: #f43f5e;
             --neon-yellow: #f59e0b;
-            
-            /* Gradasi Tombol Simpan (Biru ke Hijau) */
             --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
         }
 
@@ -41,7 +34,7 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-putih);
-            padding-bottom: 90px; /* Ruang untuk Bottom Nav */
+            padding-bottom: 90px; 
             overflow-x: hidden;
         }
 
@@ -71,16 +64,21 @@
             font-weight: 500; 
         }
 
-        /* Badge Profil "GP" */
+        /* Badge Profil */
         .header-profile {
-            width: 38px; height: 38px; 
+            width: 40px; height: 40px; 
             border-radius: 50%;
-            background-color: var(--text-putih);
-            color: var(--bg-main);
+            background-color: var(--bg-card);
+            color: var(--neon-green);
             display: flex; justify-content: center; align-items: center;
-            font-weight: 800; font-size: 14px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 0 10px rgba(5, 213, 138, 0.2);
+            border: 2px solid var(--neon-green);
+            cursor: pointer;
+            overflow: hidden; 
+            transition: transform 0.2s;
         }
+        .header-profile:active { transform: scale(0.9); }
 
         /* WADAH KONTEN UTAMA */
         #main-content { 
@@ -102,6 +100,7 @@
             box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
         }
 
+        /* Default Mobile: Sembunyikan Sidebar Brand */
         .sidebar-brand { display: none; }
 
         .nav-item {
@@ -112,7 +111,7 @@
         }
         .nav-item i { font-size: 20px; margin-bottom: 5px; transition: transform 0.3s ease; }
 
-        /* Indikator Menu Aktif (Neon Green) */
+        /* Indikator Menu Aktif */
         .nav-item.active { color: var(--neon-green); }
         .nav-item.active i {
             transform: translateY(-4px);
@@ -120,43 +119,83 @@
             text-shadow: 0 0 12px var(--neon-green);
         }
 
-        /* ================= SIDEBAR (DESKTOP) ================= */
+        /* ================= FORM & MODAL PROFIL ================= */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 18, 30, 0.85); z-index: 2000; display: none;
+            justify-content: center; align-items: center; padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--bg-card); border: 1px solid var(--neon-blue);
+            border-radius: 16px; width: 100%; max-width: 500px; max-height: 85vh;
+            overflow-y: auto; padding: 25px; position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content::-webkit-scrollbar { width: 5px; }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; }
+
+        .modal-close {
+            position: absolute; top: 20px; right: 20px; background: none; border: none;
+            color: var(--neon-red); font-size: 22px; cursor: pointer; transition: 0.2s;
+        }
+        .modal-close:hover { transform: scale(1.1); }
+
+        .form-group { margin-bottom: 12px; width: 100%; }
+        .form-group label { display: block; font-size: 10px; color: var(--text-abu); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
+        .form-control { 
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; 
+            font-size: 12px; color: var(--text-putih); background: var(--bg-main); outline: none; transition: 0.3s;
+        }
+        .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 3px rgba(5, 213, 138, 0.1); }
+        .btn-primary { 
+            background: var(--gradient-primary); border: none; border-radius: 12px; color: white; 
+            font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s; display:flex; justify-content:center; align-items:center;
+        }
+        .btn-primary:active { transform: scale(0.97); }
+
+        /* SIDEBAR (DESKTOP) */
         @media (min-width: 768px) {
             body { padding-bottom: 0; padding-left: 260px; }
             
-            .app-header {
-                padding: 20px 30px;
-            }
-
-            #main-content { padding: 30px; margin-top: 0; max-width: 1200px;}
-
+            .header-profile { display: none !important; }
+            
+            .app-header { padding: 20px 30px; max-width: 1200px; margin: 0 auto; }
+            #main-content { padding: 30px; margin: 0 auto; max-width: 1200px; }
+            
             .bottom-nav {
                 flex-direction: column; justify-content: flex-start;
                 top: 0; left: 0; width: 260px; height: 100vh; padding-top: 30px;
-                border-top: none;
-                border-right: 1px solid var(--border-color);
+                border-top: none; border-right: 1px solid var(--border-color);
             }
             
             .sidebar-brand {
-                display: block; padding: 0 25px 25px 25px; margin-bottom: 15px;
-                border-bottom: 1px solid var(--border-color);
-                text-align: center;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                padding: 0 15px 20px 15px; margin-bottom: 15px; cursor: pointer;
+                border-bottom: 1px solid var(--border-color); text-align: center;
+                transition: transform 0.2s;
             }
-            .sidebar-brand h2 { font-size: 22px; color: var(--text-putih); font-weight: 800; letter-spacing: 1px;}
-            .sidebar-brand span { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green-dim); }
+            .sidebar-brand:active { transform: scale(0.95); }
             
-            .nav-item { 
-                flex-direction: row; padding: 14px 25px; font-size: 13px; gap: 15px; 
-                margin: 0 15px 5px 15px; border-radius: 12px;
+            .sidebar-brand img {
+                width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+                object-position: top;
+                border: 3px solid var(--neon-green); margin-bottom: 10px;
+                box-shadow: 0 0 15px rgba(5, 213, 138, 0.2);
             }
-            .nav-item i { margin-bottom: 0; width: 25px; font-size: 16px; text-align: center; }
-            
-            .nav-item:hover { background-color: var(--bg-card-hover); color: var(--text-putih); }
+            .sidebar-brand .default-icon {
+                width: 80px; height: 80px; border-radius: 50%; background: var(--bg-card); 
+                display: flex; justify-content: center; align-items: center; 
+                border: 3px solid var(--neon-green); margin-bottom: 10px;
+            }
+            .sidebar-brand h3 { font-size: 14px; font-weight: 700; color: var(--text-putih); margin-bottom: 4px; line-height: 1.2; }
+            .sidebar-brand p { font-size: 10px; font-weight: 500; color: var(--text-abu); line-height: 1.2; margin: 0; }
 
-            .nav-item.active {
-                background-color: var(--neon-green-dim);
-                color: var(--neon-green);
-            }
+            .nav-item { flex-direction: row; padding: 14px 25px; font-size: 13px; gap: 15px; margin: 0 15px 5px 15px; border-radius: 12px; }
+            .nav-item i { margin-bottom: 0; width: 25px; font-size: 16px; text-align: center; }
+            .nav-item:hover { background-color: var(--bg-card-hover); color: var(--text-putih); }
+            .nav-item.active { background-color: var(--neon-green-dim); color: var(--neon-green); }
             .nav-item.active i { transform: none; text-shadow: none; }
         }
     </style>
@@ -166,10 +205,11 @@
     <header class="app-header">
         <div class="header-info">
             <h1 id="page-title">Presensi Siswa</h1>
-            <p>Tahun Ajaran 2025/2026 - Ganjil</p>
+            <p id="header-subtitle">Tahun Ajaran Aktif - Memuat...</p>
         </div>
-        <div class="header-profile">
-            GP
+        <!-- Pemicu Modal Mobile: Klik 5x di logo ini -->
+        <div class="header-profile" id="profile-btn" onclick="handleProfileClick()">
+            <i class="fa-solid fa-user"></i>
         </div>
     </header>
 
@@ -179,10 +219,64 @@
         </div>
     </main>
 
-    <nav class="bottom-nav">
-        <div class="sidebar-brand">
-            <h2>Portal<span>PAI</span></h2>
+    <!-- MODAL PROFIL APLIKASI -->
+    <div id="modal-profil" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('modal-profil').style.display='none'"><i class="fa-solid fa-times"></i></button>
+            <h3 style="color:var(--neon-blue); margin-bottom:20px; font-weight:700;"><i class="fa-solid fa-user-gear"></i> Pengaturan Profil</h3>
+            
+            <form onsubmit="simpanProfil(event)">
+                <input type="hidden" id="current-foto-url">
+                
+                <h4 style="font-size:12px; color:var(--neon-green); border-bottom:1px solid var(--border-color); padding-bottom:5px; margin-bottom:10px;">Data Guru</h4>
+                <div class="form-group">
+                    <label>Nama Guru Lengkap</label>
+                    <input type="text" id="prof-nama-guru" class="form-control" required>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>NIP Guru</label><input type="text" id="prof-nip" class="form-control"></div>
+                    <div class="form-group" style="flex:1;"><label>WhatsApp</label><input type="text" id="prof-wa" class="form-control"></div>
+                </div>
+                <div class="form-group"><label>Email</label><input type="email" id="prof-email" class="form-control"></div>
+                
+                <div class="form-group">
+                    <label>Foto Profil (Otomatis Dikompres)</label>
+                    <input type="file" id="prof-foto" class="form-control" accept="image/*">
+                </div>
+                
+                <h4 style="font-size:12px; color:var(--neon-green); border-bottom:1px solid var(--border-color); padding-bottom:5px; margin-bottom:10px; margin-top:20px;">Data Sekolah & Sistem</h4>
+                <div class="form-group">
+                    <label>Nama Sekolah</label>
+                    <input type="text" id="prof-sekolah" class="form-control" value="SMPN 8 Balikpapan" required>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>NPSN</label><input type="text" id="prof-npsn" class="form-control"></div>
+                    <div class="form-group" style="flex:1;"><label>Tahun Ajaran</label><input type="text" id="prof-ta" class="form-control" placeholder="Cth: 2025/2026"></div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Semester</label>
+                        <select id="prof-semester" class="form-control">
+                            <option value="Ganjil">Ganjil</option>
+                            <option value="Genap">Genap</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Alamat Sekolah</label><input type="text" id="prof-alamat" class="form-control"></div>
+                
+                <button type="submit" id="btn-simpan-profil" class="btn-primary" style="width:100%; margin-top:20px; padding:12px;">
+                    <i class="fa-solid fa-save" style="margin-right:8px;"></i> Simpan Pengaturan
+                </button>
+            </form>
         </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <!-- Pemicu Modal Desktop: Klik 5x di area profil sidebar ini -->
+        <div class="sidebar-brand" id="sidebar-brand" onclick="handleProfileClick()">
+            <div class="default-icon"><i class="fa-solid fa-user" style="font-size:30px; color:var(--neon-green);"></i></div>
+            <h3>Memuat Profil...</h3>
+            <p>Sistem Administrasi</p>
+        </div>
+        
         <a href="#" class="nav-item active" id="nav-presensi" onclick="loadPage('presensi', 'Presensi Siswa')">
             <i class="fa-solid fa-clipboard-user"></i><span>Presensi</span>
         </a>
@@ -205,6 +299,6 @@
     <script type="module" src="js/modules/presensi.js"></script>
     <script type="module" src="js/modules/penilaian.js"></script>
     <script type="module" src="js/modules/jurnal.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

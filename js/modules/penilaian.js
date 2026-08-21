@@ -33,6 +33,32 @@ const mapSurah = [
     { label: 'Al-\'Adiyat', col: 'aladiyat' }
 ];
 
+// ================= PEWARNAAN DROPDOWN DINAMIS =================
+window.updateSelectColor = function(el) {
+    const val = el.value;
+    const reds = ['Tidak bisa baca', 'Tanpa tajwid', 'Tidak mengenal huruf', 'Banyak salah', 'Tanpa lagu', 'Tidak rapi', 'Belum hafal'];
+    const yellows = ['Terbata-bata', 'Cepat namun banyak salah', 'Cepat dengan sedikit salah', 'Panjang-pendek', 'Tajwid dasar', 'Salah sedikit', 'Kurang jelas', 'Kurang rapi', 'Cukup', 'Nada stabil', 'Tidak lancar'];
+    const greens = ['Lancar', 'Mahir tanpa kesalahan', 'Tajwid lanjutan', 'Mahir', 'Jelas', 'Sangat jelas', 'Sudah tepat', 'Rapi', 'Lagu tilawah', 'Hafal'];
+
+    if (greens.includes(val)) {
+        el.style.color = 'var(--neon-green)';
+        el.style.backgroundColor = 'rgba(5, 213, 138, 0.15)';
+        el.style.borderColor = 'rgba(5, 213, 138, 0.4)';
+    } else if (yellows.includes(val)) {
+        el.style.color = 'var(--neon-yellow)';
+        el.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
+        el.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+    } else if (reds.includes(val)) {
+        el.style.color = '#f472b6'; 
+        el.style.backgroundColor = 'rgba(244, 114, 182, 0.15)';
+        el.style.borderColor = 'rgba(244, 114, 182, 0.4)';
+    } else {
+        el.style.color = 'var(--text-putih)';
+        el.style.backgroundColor = 'var(--bg-card)';
+        el.style.borderColor = 'var(--border-color)';
+    }
+};
+
 // ================= FUNGSI TAB & TOGGLE =================
 window.gantiTabPenilaian = function(tabName) {
     const tabs = ['tugas', 'baca', 'tulis', 'sholat', 'surah'];
@@ -59,7 +85,7 @@ window.toggleTugasBaru = function() {
     if(inputBaru.style.display === 'none') {
         inputBaru.style.display = 'block';
         dropdown.value = ''; 
-        loadNilaiTugas(); // Bersihkan form
+        loadNilaiTugas(); 
     } else {
         inputBaru.style.display = 'none';
         inputBaru.value = '';
@@ -77,6 +103,20 @@ window.setKetuntasan = function(idSiswa, status) {
     document.getElementById(`val-tuntas-${idSiswa}`).value = status;
 };
 
+// FITUR: Auto Ketuntasan (>= 70 = T, < 70 atau kosong = TS)
+window.autoKetuntasan = function(idSiswa, nilai) {
+    if (nilai === "" || nilai === null || nilai === undefined) {
+        window.setKetuntasan(idSiswa, 'TS');
+    } else {
+        const num = parseFloat(nilai);
+        if (num >= 70) {
+            window.setKetuntasan(idSiswa, 'T');
+        } else {
+            window.setKetuntasan(idSiswa, 'TS');
+        }
+    }
+};
+
 // ================= INISIALISASI DATA AWAL =================
 window.loadKelasUntukPenilaian = async function() {
     const selIds = ['pilih-kelas-tugas', 'pilih-kelas-baca', 'pilih-kelas-tulis', 'pilih-kelas-sholat', 'pilih-kelas-surah'];
@@ -84,7 +124,14 @@ window.loadKelasUntukPenilaian = async function() {
     selIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = loadingText; });
 
     try {
-        const { data, error } = await supabase.from('kelas').select('id, tingkat, nama_kelas').order('tingkat', { ascending: true }).order('nama_kelas', { ascending: true });
+        // HANYA MENGAMBIL KELAS DENGAN STATUS AKTIF (status_kelas = true)
+        const { data, error } = await supabase
+            .from('kelas')
+            .select('id, tingkat, nama_kelas')
+            .eq('status_kelas', true)
+            .order('tingkat', { ascending: true })
+            .order('nama_kelas', { ascending: true });
+
         if (error) throw error;
 
         let options = '<option value="">-- Pilih Kelas --</option>';
@@ -120,10 +167,13 @@ window.loadDaftarTugas = async function() {
 window.loadNilaiTugas = async function() {
     const idTugas = document.getElementById('input-nama-tugas-dropdown').value;
     
-    // Reset seluruh form nilai tugas
     document.querySelectorAll('.input-nilai-tugas').forEach(el => { el.value = ''; el.removeAttribute('data-recordid'); });
-    document.querySelectorAll('.val-ketuntasan').forEach(el => el.value = '');
+    
+    // Kembalikan ke default TS jika form direset / tugas baru
+    document.querySelectorAll('.val-ketuntasan').forEach(el => el.value = 'TS');
     document.querySelectorAll('.btn-tuntas').forEach(el => el.classList.remove('active', 't', 'ts'));
+    document.querySelectorAll('.btn-tuntas[data-val="TS"]').forEach(el => el.classList.add('active', 'ts'));
+    
     document.querySelectorAll('.input-refleksi').forEach(el => el.value = '');
 
     if(!idTugas) return;
@@ -152,13 +202,17 @@ const mkSel = (val, target) => (val === target ? 'selected' : '');
 
 window.bukaFormPenilaian = async function(tipe) {
     const idKelas = document.getElementById(`pilih-kelas-${tipe}`).value;
-    if (!idKelas) return;
+    if (!idKelas) {
+        document.getElementById(`area-${tipe}`).style.display = 'none';
+        return;
+    }
 
     document.getElementById(`area-${tipe}`).style.display = 'block';
+    const elRekap = document.getElementById(`area-rekap-${tipe}`);
+    if(elRekap) elRekap.style.display = 'block';
     
     const container = document.getElementById(`tempat-list-${tipe}`);
-    // Warna loading diubah ke Neon Green
-    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa dan data riwayat...</div>';
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
 
     try {
         const { data: dataSiswa, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
@@ -170,13 +224,13 @@ window.bukaFormPenilaian = async function(tipe) {
         dataSiswa.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
         dataSiswaPenilaian = dataSiswa;
 
-        // Tarik Data Riwayat
+        // Tarik Data Riwayat 
         let exBaca = [], exTulis = [], exSholat = [], exSurah = [];
         if (tipe === 'baca') {
             const {data} = await supabase.from('penilaianmembaca').select('*').eq('id_kelas', idKelas);
             exBaca = data || [];
         } else if (tipe === 'tulis') {
-            const {data} = await supabase.from('nilaitulisquran').select('*').eq('id_kelas', idKelas);
+            const {data} = await supabase.from('penilaianmenulis').select('*').eq('id_kelas', idKelas);
             exTulis = data || [];
         } else if (tipe === 'sholat') {
             const {data} = await supabase.from('penilaianhafalansholat').select('*').eq('id_kelas', idKelas);
@@ -188,7 +242,6 @@ window.bukaFormPenilaian = async function(tipe) {
 
         let htmlContent = '';
         dataSiswa.forEach((item) => {
-            // Ikon gender disesuaikan dengan warna neon
             const ikonGender = item.siswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue); font-size:10px;"></i>' : (item.siswa.jenis_kelamin === 'P' ? '<i class="fa-solid fa-venus" style="color:var(--neon-red); font-size:10px;"></i>' : '');
             let inputUI = '';
             let badgeHTML = '';
@@ -197,13 +250,13 @@ window.bukaFormPenilaian = async function(tipe) {
             if(tipe === 'tugas') {
                 inputUI = `
                 <div class="wrap-tugas">
-                    <input type="number" class="input-nilai-tugas form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Nilai" style="width:70px; text-align:center;">
-                    <div id="grp-tuntas-${item.id_siswa}" style="display:flex; gap:6px;">
-                        <input type="hidden" id="val-tuntas-${item.id_siswa}" class="val-ketuntasan" value="">
+                    <input type="number" class="input-nilai-tugas form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Nilai" style="width:60px; text-align:center;" oninput="window.autoKetuntasan('${item.id_siswa}', this.value)">
+                    <div id="grp-tuntas-${item.id_siswa}" style="display:flex; gap:4px;">
+                        <input type="hidden" id="val-tuntas-${item.id_siswa}" class="val-ketuntasan" value="TS">
                         <button type="button" class="btn-tuntas" data-idsiswa="${item.id_siswa}" data-val="T" onclick="setKetuntasan('${item.id_siswa}', 'T')">T</button>
-                        <button type="button" class="btn-tuntas" data-idsiswa="${item.id_siswa}" data-val="TS" onclick="setKetuntasan('${item.id_siswa}', 'TS')">TS</button>
+                        <button type="button" class="btn-tuntas active ts" data-idsiswa="${item.id_siswa}" data-val="TS" onclick="setKetuntasan('${item.id_siswa}', 'TS')">TS</button>
                     </div>
-                    <input type="text" class="input-refleksi form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Catatan/Refleksi..." style="flex:1; min-width: 120px;">
+                    <input type="text" class="input-refleksi form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Catatan/Refleksi..." style="flex:1; min-width: 100px;">
                 </div>`;
                 
                 htmlContent += `
@@ -214,12 +267,11 @@ window.bukaFormPenilaian = async function(tipe) {
                                 <span class="absen-nama">${item.siswa.nama_siswa} ${ikonGender}</span>
                             </div>
                         </div>
-                        <div style="width:100%;">${inputUI}</div>
+                        <div style="width:100%; margin-top:6px;">${inputUI}</div>
                     </div>
                 `;
             } 
             else {
-                // 2. BACA QURAN
                 if (tipe === 'baca') {
                     const ex = exBaca.find(x => x.id_siswa === item.id_siswa) || {};
                     let filled = 0;
@@ -230,17 +282,16 @@ window.bukaFormPenilaian = async function(tipe) {
 
                     inputUI = `
                     <div class="grid-input-nilai">
-                        <div class="form-group" style="margin-bottom:0;"><label>Kelancaran</label><select class="form-control input-kelancaran sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}"><option value="">-Pilih-</option><option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca</option><option value="Terbata-bata" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata')}>Terbata-bata</option><option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah</option><option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah</option><option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar</option><option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Tajwid</label><select class="form-control input-tajwid sel-kecil" data-idsiswa="${item.id_siswa}"><option value="">-Pilih-</option><option value="Tanpa tajwid" ${mkSel(ex.tajwid_bacaan, 'Tanpa tajwid')}>Tanpa tajwid</option><option value="Panjang-pendek" ${mkSel(ex.tajwid_bacaan, 'Panjang-pendek')}>Panjang-pendek</option><option value="Tajwid dasar" ${mkSel(ex.tajwid_bacaan, 'Tajwid dasar')}>Tajwid dasar</option><option value="Tajwid lanjutan" ${mkSel(ex.tajwid_bacaan, 'Tajwid lanjutan')}>Tajwid lanjutan</option><option value="Mahir" ${mkSel(ex.tajwid_bacaan, 'Mahir')}>Mahir</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Makhraj</label><select class="form-control input-makraj sel-kecil" data-idsiswa="${item.id_siswa}"><option value="">-Pilih-</option><option value="Tidak mengenal huruf" ${mkSel(ex.makraj_huruf, 'Tidak mengenal huruf')}>Tidak mengenal huruf</option><option value="Banyak salah" ${mkSel(ex.makraj_huruf, 'Banyak salah')}>Banyak salah</option><option value="Salah sedikit" ${mkSel(ex.makraj_huruf, 'Salah sedikit')}>Salah sedikit</option><option value="Kurang jelas" ${mkSel(ex.makraj_huruf, 'Kurang jelas')}>Kurang jelas</option><option value="Jelas" ${mkSel(ex.makraj_huruf, 'Jelas')}>Jelas</option><option value="Sangat jelas" ${mkSel(ex.makraj_huruf, 'Sangat jelas')}>Sangat jelas</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Nada/Suara</label><select class="form-control input-nada sel-kecil" data-idsiswa="${item.id_siswa}"><option value="">-Pilih-</option><option value="Tanpa lagu" ${mkSel(ex.nada_suara, 'Tanpa lagu')}>Tanpa lagu</option><option value="Nada stabil" ${mkSel(ex.nada_suara, 'Nada stabil')}>Nada stabil</option><option value="Lagu tilawah" ${mkSel(ex.nada_suara, 'Lagu tilawah')}>Lagu tilawah</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Kelancaran</label><select class="form-control input-kelancaran sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca</option><option value="Terbata-bata" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata')}>Terbata-bata</option><option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah</option><option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah</option><option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar</option><option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Tajwid</label><select class="form-control input-tajwid sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa tajwid" ${mkSel(ex.tajwid_bacaan, 'Tanpa tajwid')}>Tanpa tajwid</option><option value="Panjang-pendek" ${mkSel(ex.tajwid_bacaan, 'Panjang-pendek')}>Panjang-pendek</option><option value="Tajwid dasar" ${mkSel(ex.tajwid_bacaan, 'Tajwid dasar')}>Tajwid dasar</option><option value="Tajwid lanjutan" ${mkSel(ex.tajwid_bacaan, 'Tajwid lanjutan')}>Tajwid lanjutan</option><option value="Mahir" ${mkSel(ex.tajwid_bacaan, 'Mahir')}>Mahir</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Makhraj</label><select class="form-control input-makraj sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak mengenal huruf" ${mkSel(ex.makraj_huruf, 'Tidak mengenal huruf')}>Tidak mengenal huruf</option><option value="Banyak salah" ${mkSel(ex.makraj_huruf, 'Banyak salah')}>Banyak salah</option><option value="Salah sedikit" ${mkSel(ex.makraj_huruf, 'Salah sedikit')}>Salah sedikit</option><option value="Kurang jelas" ${mkSel(ex.makraj_huruf, 'Kurang jelas')}>Kurang jelas</option><option value="Jelas" ${mkSel(ex.makraj_huruf, 'Jelas')}>Jelas</option><option value="Sangat jelas" ${mkSel(ex.makraj_huruf, 'Sangat jelas')}>Sangat jelas</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Nada/Suara</label><select class="form-control input-nada sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa lagu" ${mkSel(ex.nada_suara, 'Tanpa lagu')}>Tanpa lagu</option><option value="Nada stabil" ${mkSel(ex.nada_suara, 'Nada stabil')}>Nada stabil</option><option value="Lagu tilawah" ${mkSel(ex.nada_suara, 'Lagu tilawah')}>Lagu tilawah</option></select></div>
                     </div>
                     <div class="wrap-tugas">
-                        <input type="number" class="input-nilai-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Nilai Akhir" style="width:90px;" value="${ex.nilai !== undefined && ex.nilai !== null ? ex.nilai : ''}">
-                        <input type="text" class="input-ket-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Keterangan tambahan..." style="flex:1;" value="${ex.keterangan || ''}">
+                        <input type="number" class="input-nilai-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Nilai Akhir" style="width:80px;" value="${ex.nilai !== undefined && ex.nilai !== null ? ex.nilai : ''}">
+                        <input type="text" class="input-ket-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Keterangan..." style="flex:1;" value="${ex.keterangan || ''}">
                     </div>`;
                 } 
-                // 3. TULIS QURAN
                 else if (tipe === 'tulis') {
                     const ex = exTulis.find(x => x.id_siswa === item.id_siswa) || {};
                     let filled = 0;
@@ -251,11 +302,10 @@ window.bukaFormPenilaian = async function(tipe) {
 
                     inputUI = `
                     <div class="grid-input-nilai" style="grid-template-columns: 1fr 1fr; margin-bottom:0;">
-                        <div class="form-group" style="margin-bottom:0;"><label>Ketepatan Huruf</label><select class="form-control input-tepat sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}"><option value="">-Pilih-</option><option value="Banyak salah" ${mkSel(ex.ketepatan_huruf, 'Banyak salah')}>Banyak salah</option><option value="Sedikit salah" ${mkSel(ex.ketepatan_huruf, 'Sedikit salah')}>Sedikit salah</option><option value="Sudah tepat" ${mkSel(ex.ketepatan_huruf, 'Sudah tepat')}>Sudah tepat</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Kerapian</label><select class="form-control input-rapi sel-kecil" data-idsiswa="${item.id_siswa}"><option value="">-Pilih-</option><option value="Tidak rapi" ${mkSel(ex.kerapian, 'Tidak rapi')}>Tidak rapi</option><option value="Kurang rapi" ${mkSel(ex.kerapian, 'Kurang rapi')}>Kurang rapi</option><option value="Cukup" ${mkSel(ex.kerapian, 'Cukup')}>Cukup</option><option value="Rapi" ${mkSel(ex.kerapian, 'Rapi')}>Rapi</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Ketepatan Huruf</label><select class="form-control input-tepat sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Banyak salah" ${mkSel(ex.ketepatan_huruf, 'Banyak salah')}>Banyak salah</option><option value="Sedikit salah" ${mkSel(ex.ketepatan_huruf, 'Sedikit salah')}>Sedikit salah</option><option value="Sudah tepat" ${mkSel(ex.ketepatan_huruf, 'Sudah tepat')}>Sudah tepat</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Kerapian</label><select class="form-control input-rapi sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak rapi" ${mkSel(ex.kerapian, 'Tidak rapi')}>Tidak rapi</option><option value="Kurang rapi" ${mkSel(ex.kerapian, 'Kurang rapi')}>Kurang rapi</option><option value="Cukup" ${mkSel(ex.kerapian, 'Cukup')}>Cukup</option><option value="Rapi" ${mkSel(ex.kerapian, 'Rapi')}>Rapi</option></select></div>
                     </div>`;
                 } 
-                // 4. HAFALAN SHOLAT
                 else if (tipe === 'sholat') {
                     const ex = exSholat.find(x => x.id_siswa === item.id_siswa) || {};
                     let filledCount = 0;
@@ -264,7 +314,7 @@ window.bukaFormPenilaian = async function(tipe) {
                     mapSholat.forEach(hf => {
                         const val = ex[hf.col];
                         if(val && val !== 'Kosong') filledCount++;
-                        grid += `<div class="hafalan-item"><span class="hafalan-label">${hf.label}</span><select class="form-control sel-sholat sel-kecil" data-col="${hf.col}" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}"><option value="Kosong" ${mkSel(val, 'Kosong')}>Kosong</option><option value="Belum hafal" ${mkSel(val, 'Belum hafal')}>Belum hafal</option><option value="Tidak lancar" ${mkSel(val, 'Tidak lancar')}>Tidak lancar</option><option value="Hafal" ${mkSel(val, 'Hafal')}>Hafal</option></select></div>`;
+                        grid += `<div class="hafalan-item"><span class="hafalan-label">${hf.label}</span><select class="form-control sel-sholat sel-kecil" data-col="${hf.col}" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)"><option value="Kosong" ${mkSel(val, 'Kosong')}>Kosong</option><option value="Belum hafal" ${mkSel(val, 'Belum hafal')}>Belum hafal</option><option value="Tidak lancar" ${mkSel(val, 'Tidak lancar')}>Tidak lancar</option><option value="Hafal" ${mkSel(val, 'Hafal')}>Hafal</option></select></div>`;
                     });
                     grid += '</div>';
                     inputUI = grid;
@@ -273,7 +323,6 @@ window.bukaFormPenilaian = async function(tipe) {
                     else if(filledCount > 0) badgeHTML = `<span class="badge-status bg-sebagian">${filledCount}/${mapSholat.length} Dinilai</span>`;
                     else badgeHTML = '<span class="badge-status bg-belum">Belum Dinilai</span>';
                 } 
-                // 5. SURAH PENDEK
                 else if (tipe === 'surah') {
                     const ex = exSurah.find(x => x.id_siswa === item.id_siswa) || {};
                     let filledCount = 0;
@@ -282,7 +331,7 @@ window.bukaFormPenilaian = async function(tipe) {
                     mapSurah.forEach(sr => {
                         const val = ex[sr.col];
                         if(val && val !== 'Kosong') filledCount++;
-                        grid += `<div class="hafalan-item"><span class="hafalan-label">${sr.label}</span><select class="form-control sel-surah sel-kecil" data-col="${sr.col}" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}"><option value="Kosong" ${mkSel(val, 'Kosong')}>Kosong</option><option value="Belum hafal" ${mkSel(val, 'Belum hafal')}>Belum hafal</option><option value="Tidak lancar" ${mkSel(val, 'Tidak lancar')}>Tidak lancar</option><option value="Hafal" ${mkSel(val, 'Hafal')}>Hafal</option></select></div>`;
+                        grid += `<div class="hafalan-item"><span class="hafalan-label">${sr.label}</span><select class="form-control sel-surah sel-kecil" data-col="${sr.col}" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)"><option value="Kosong" ${mkSel(val, 'Kosong')}>Kosong</option><option value="Belum hafal" ${mkSel(val, 'Belum hafal')}>Belum hafal</option><option value="Tidak lancar" ${mkSel(val, 'Tidak lancar')}>Tidak lancar</option><option value="Hafal" ${mkSel(val, 'Hafal')}>Hafal</option></select></div>`;
                     });
                     grid += '</div>';
                     inputUI = grid;
@@ -302,7 +351,7 @@ window.bukaFormPenilaian = async function(tipe) {
                             </div>
                             <button type="button" onclick="toggleInputPenilaian('${tipe}', '${item.id_siswa}')" class="btn-toggle-input"><i class="fa-solid fa-pen"></i> Isi / Edit</button>
                         </div>
-                        <div id="area-input-${tipe}-${item.id_siswa}" style="display:none; width:100%; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-color);">
+                        <div id="area-input-${tipe}-${item.id_siswa}" style="display:none; width:100%; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-color);">
                             ${inputUI}
                         </div>
                     </div>
@@ -311,14 +360,19 @@ window.bukaFormPenilaian = async function(tipe) {
         });
         
         container.innerHTML = htmlContent;
-        if(tipe === 'tugas') loadNilaiTugas();
+
+        if(tipe === 'tugas') {
+            loadNilaiTugas();
+        } else {
+            container.querySelectorAll('select').forEach(sel => window.updateSelectColor(sel));
+        }
 
     } catch (error) {
         container.innerHTML = `<div style="color:var(--neon-red); text-align:center; padding:20px;">Gagal: ${error.message}</div>`;
     }
 };
 
-// ================= FUNGSI SIMPAN (TANPA TANGGAL, UPSERT HORIZONTAL) =================
+// ================= FUNGSI SIMPAN =================
 window.simpanPenilaian = async function(tipe) {
     const idKelas = document.getElementById(`pilih-kelas-${tipe}`).value;
     const btn = document.getElementById(`btn-simpan-${tipe}`);
@@ -330,7 +384,20 @@ window.simpanPenilaian = async function(tipe) {
 
         let payloadInsert = [];
 
-        // --- 1. SIMPAN TUGAS ---
+        const pushToDatabase = async (tabel, payload) => {
+            const toInsert = payload.filter(p => !p.id); 
+            const toUpdate = payload.filter(p => p.id);  
+            
+            if(toInsert.length > 0) {
+                const { error } = await supabase.from(tabel).insert(toInsert);
+                if (error) throw error;
+            }
+            if(toUpdate.length > 0) {
+                const { error } = await supabase.from(tabel).upsert(toUpdate);
+                if (error) throw error;
+            }
+        };
+
         if (tipe === 'tugas') {
             const dropVal = document.getElementById('input-nama-tugas-dropdown').value;
             const inputBaru = document.getElementById('input-nama-tugas-baru');
@@ -348,22 +415,20 @@ window.simpanPenilaian = async function(tipe) {
                 const iTuntas = document.getElementById(`val-tuntas-${item.id_siswa}`).value;
                 const iRefleksi = document.querySelector(`.input-refleksi[data-idsiswa="${item.id_siswa}"]`);
                 
-                if(inpNilai.value !== "" || iTuntas !== "" || (iRefleksi && iRefleksi.value !== "")) {
+                if(inpNilai.value !== "" || (iRefleksi && iRefleksi.value !== "")) {
                     let record = { 
                         id_tugas: idTugasFinal, id_siswa: item.id_siswa, 
                         nilai_tugas: inpNilai.value ? parseInt(inpNilai.value) : null, 
-                        ketuntasan: iTuntas || null, refleksi: (iRefleksi ? iRefleksi.value : null)
+                        ketuntasan: iTuntas || 'TS', 
+                        refleksi: (iRefleksi ? iRefleksi.value : null)
                     };
-                    if(inpNilai.getAttribute('data-recordid')) record.id = inpNilai.getAttribute('data-recordid');
+                    let recId = inpNilai.getAttribute('data-recordid');
+                    if(recId && recId !== '') record.id = recId;
                     payloadInsert.push(record);
                 }
             });
-            if(payloadInsert.length > 0) {
-                const { error } = await supabase.from('penilaiantugas').upsert(payloadInsert);
-                if (error) throw error;
-            }
+            if(payloadInsert.length > 0) await pushToDatabase('penilaiantugas', payloadInsert);
 
-        // --- 2. BACA QURAN ---
         } else if (tipe === 'baca') {
             dataSiswaPenilaian.forEach(item => {
                 const sel = document.querySelector(`.input-kelancaran[data-idsiswa="${item.id_siswa}"]`);
@@ -381,16 +446,13 @@ window.simpanPenilaian = async function(tipe) {
                         makraj_huruf: iMakraj || null, nada_suara: iNada || null,
                         nilai: iNilai ? parseInt(iNilai) : null, keterangan: iKet || null
                     };
-                    if(sel.getAttribute('data-recordid')) record.id = sel.getAttribute('data-recordid');
+                    let recId = sel.getAttribute('data-recordid');
+                    if(recId && recId !== '') record.id = recId;
                     payloadInsert.push(record);
                 }
             });
-            if(payloadInsert.length > 0) {
-                const { error } = await supabase.from('penilaianmembaca').upsert(payloadInsert);
-                if (error) throw error;
-            }
+            if(payloadInsert.length > 0) await pushToDatabase('penilaianmembaca', payloadInsert);
 
-        // --- 3. TULIS QURAN ---
         } else if (tipe === 'tulis') {
             dataSiswaPenilaian.forEach(item => {
                 const sel = document.querySelector(`.input-tepat[data-idsiswa="${item.id_siswa}"]`);
@@ -399,16 +461,13 @@ window.simpanPenilaian = async function(tipe) {
                 
                 if(iTepat || iRapi) {
                     let record = { id_kelas: idKelas, id_siswa: item.id_siswa, ketepatan_huruf: iTepat || null, kerapian: iRapi || null };
-                    if(sel.getAttribute('data-recordid')) record.id = sel.getAttribute('data-recordid');
+                    let recId = sel.getAttribute('data-recordid');
+                    if(recId && recId !== '') record.id = recId;
                     payloadInsert.push(record);
                 }
             });
-            if(payloadInsert.length > 0) {
-                const { error } = await supabase.from('nilaitulisquran').upsert(payloadInsert);
-                if (error) throw error;
-            }
+            if(payloadInsert.length > 0) await pushToDatabase('penilaianmenulis', payloadInsert);
 
-        // --- 4. SHOLAT (DATABASE HORIZONTAL) ---
         } else if (tipe === 'sholat') {
             dataSiswaPenilaian.forEach(item => {
                 let record = { id_kelas: idKelas, id_siswa: item.id_siswa };
@@ -424,7 +483,10 @@ window.simpanPenilaian = async function(tipe) {
                         } else {
                             record[hf.col] = null; 
                         }
-                        if (!recordId && sel.getAttribute('data-recordid')) recordId = sel.getAttribute('data-recordid');
+                        let rid = sel.getAttribute('data-recordid');
+                        if (!recordId && rid && rid !== 'undefined' && rid !== '') {
+                            recordId = rid;
+                        }
                     }
                 });
 
@@ -433,12 +495,8 @@ window.simpanPenilaian = async function(tipe) {
                     payloadInsert.push(record);
                 }
             });
-            if(payloadInsert.length > 0) {
-                const { error } = await supabase.from('penilaianhafalansholat').upsert(payloadInsert);
-                if (error) throw error;
-            }
+            if(payloadInsert.length > 0) await pushToDatabase('penilaianhafalansholat', payloadInsert);
 
-        // --- 5. SURAH (DATABASE HORIZONTAL) ---
         } else if (tipe === 'surah') {
             dataSiswaPenilaian.forEach(item => {
                 let record = { id_kelas: idKelas, id_siswa: item.id_siswa };
@@ -454,7 +512,10 @@ window.simpanPenilaian = async function(tipe) {
                         } else {
                             record[sr.col] = null;
                         }
-                        if (!recordId && sel.getAttribute('data-recordid')) recordId = sel.getAttribute('data-recordid');
+                        let rid = sel.getAttribute('data-recordid');
+                        if (!recordId && rid && rid !== 'undefined' && rid !== '') {
+                            recordId = rid;
+                        }
                     }
                 });
 
@@ -463,10 +524,7 @@ window.simpanPenilaian = async function(tipe) {
                     payloadInsert.push(record);
                 }
             });
-            if(payloadInsert.length > 0) {
-                const { error } = await supabase.from('hafalansurah').upsert(payloadInsert);
-                if (error) throw error;
-            }
+            if(payloadInsert.length > 0) await pushToDatabase('hafalansurah', payloadInsert);
         }
 
         if(payloadInsert.length === 0) {
@@ -480,5 +538,169 @@ window.simpanPenilaian = async function(tipe) {
     } finally {
         btn.innerHTML = teksAsli;
         btn.disabled = false;
+    }
+};
+
+// ================= FITUR DOWNLOAD REKAP =================
+window.loadExportLibsPenilaian = async function() {
+    const loadScript = (src) => new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+    
+    try {
+        await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+    } catch (e) {
+        throw new Error("Gagal memuat library export.");
+    }
+};
+
+window.downloadRekapPenilaian = async function(tipe, format) {
+    const idKelas = document.getElementById(`pilih-kelas-${tipe}`).value;
+    const selKelas = document.getElementById(`pilih-kelas-${tipe}`);
+    const namaKelas = selKelas.options[selKelas.selectedIndex].text;
+
+    if (!idKelas) { alert("Pilih kelas terlebih dahulu!"); return; }
+
+    try {
+        alert(`Sedang menyusun rekap nilai ${tipe.toUpperCase()}, mohon tunggu...`);
+        await window.loadExportLibsPenilaian();
+
+        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas')
+            .select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`)
+            .eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        if (errSiswa) throw errSiswa;
+        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+
+        let headers = [];
+        let reportData = [];
+        let exData = [];
+        let fileName = `Rekap_Nilai_${tipe.toUpperCase()}_${namaKelas}`;
+
+        if (tipe === 'baca') {
+            const {data} = await supabase.from('penilaianmembaca').select('*').eq('id_kelas', idKelas);
+            exData = data || [];
+            headers = [["No", "Nama Siswa", "L/P", "Kelancaran", "Tajwid", "Makhraj", "Nada/Suara", "Nilai Akhir", "Keterangan"]];
+            siswaData.forEach((s, idx) => {
+                let rec = exData.find(x => x.id_siswa === s.id_siswa) || {};
+                reportData.push([
+                    s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin,
+                    rec.kelancaran_membaca || '-', rec.tajwid_bacaan || '-', rec.makraj_huruf || '-',
+                    rec.nada_suara || '-', rec.nilai || '-', rec.keterangan || '-'
+                ]);
+            });
+        } 
+        else if (tipe === 'tulis') {
+            const {data} = await supabase.from('penilaianmenulis').select('*').eq('id_kelas', idKelas);
+            exData = data || [];
+            headers = [["No", "Nama Siswa", "L/P", "Ketepatan Huruf", "Kerapian"]];
+            siswaData.forEach((s, idx) => {
+                let rec = exData.find(x => x.id_siswa === s.id_siswa) || {};
+                reportData.push([
+                    s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin,
+                    rec.ketepatan_huruf || '-', rec.kerapian || '-'
+                ]);
+            });
+        } 
+        else if (tipe === 'sholat') {
+            const {data} = await supabase.from('penilaianhafalansholat').select('*').eq('id_kelas', idKelas);
+            exData = data || [];
+            let h = ["No", "Nama Siswa", "L/P"];
+            mapSholat.forEach(m => h.push(m.label));
+            headers = [h];
+            siswaData.forEach((s, idx) => {
+                let rec = exData.find(x => x.id_siswa === s.id_siswa) || {};
+                let row = [s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
+                mapSholat.forEach(m => row.push(rec[m.col] || '-'));
+                reportData.push(row);
+            });
+        } 
+        else if (tipe === 'surah') {
+            const {data} = await supabase.from('hafalansurah').select('*').eq('id_kelas', idKelas);
+            exData = data || [];
+            let h = ["No", "Nama Siswa", "L/P"];
+            mapSurah.forEach(m => h.push(m.label));
+            headers = [h];
+            siswaData.forEach((s, idx) => {
+                let rec = exData.find(x => x.id_siswa === s.id_siswa) || {};
+                let row = [s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
+                mapSurah.forEach(m => row.push(rec[m.col] || '-'));
+                reportData.push(row);
+            });
+        } 
+        else if (tipe === 'tugas') {
+            const siswaIds = siswaData.map(s => s.id_siswa);
+            let nilaiTugas = [];
+            
+            if (siswaIds.length > 0) {
+                const { data: nt } = await supabase.from('penilaiantugas').select('*').in('id_siswa', siswaIds);
+                nilaiTugas = nt || [];
+            }
+
+            const activeTugasIds = [...new Set(nilaiTugas.map(n => n.id_tugas))];
+            let listTugas = [];
+            
+            if (activeTugasIds.length > 0) {
+                const { data: lt } = await supabase.from('namatugas').select('id, nama_tugas').in('id', activeTugasIds).order('created_at');
+                listTugas = lt || [];
+            }
+            
+            let h = ["No", "Nama Siswa", "L/P"];
+            listTugas.forEach(t => h.push(t.nama_tugas));
+            headers = [h];
+
+            siswaData.forEach((s, idx) => {
+                let row = [s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
+                listTugas.forEach(t => {
+                    let rec = nilaiTugas.find(x => x.id_siswa === s.id_siswa && x.id_tugas === t.id);
+                    if(rec) {
+                        let val = (rec.nilai_tugas !== null && rec.nilai_tugas !== undefined) ? rec.nilai_tugas : '-';
+                        row.push(val);
+                    } else { 
+                        row.push('-'); 
+                    }
+                });
+                reportData.push(row);
+            });
+        }
+
+        if (format === 'excel') {
+            const ws = window.XLSX.utils.aoa_to_sheet([...headers, ...reportData]);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, `Rekap ${tipe.toUpperCase()}`);
+            window.XLSX.writeFile(wb, `${fileName}.xlsx`);
+        } 
+        else if (format === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'pt', 'a4'); 
+            
+            let pdfFontSize = 8;
+            if (tipe === 'surah') pdfFontSize = 5; 
+            if (tipe === 'sholat') pdfFontSize = 6;
+            if (tipe === 'tugas' && headers[0].length > 10) pdfFontSize = 6;
+            
+            doc.setFontSize(14);
+            doc.text(`Rekapitulasi Nilai ${tipe.toUpperCase()} - ${namaKelas}`, 40, 40);
+
+            doc.autoTable({
+                startY: 60,
+                head: headers,
+                body: reportData,
+                theme: 'grid',
+                styles: { fontSize: pdfFontSize, cellPadding: 2 },
+                headStyles: { fillColor: [5, 213, 138], textColor: 255 } 
+            });
+
+            doc.save(`${fileName}.pdf`);
+        }
+        
+    } catch (e) {
+        alert("Gagal membuat rekapitulasi data: " + e.message);
     }
 };

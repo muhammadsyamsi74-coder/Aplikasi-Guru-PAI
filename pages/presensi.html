@@ -139,14 +139,34 @@
     .btn-primary:active { transform: scale(0.98); }
     .icon-circle { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
 
-    /* RIWAYAT LIST (Dark Mode) */
-    #area-riwayat-kelas, #area-riwayat-sholat { background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border-color); }
+    /* ==========================================================
+       PERBAIKAN: RIWAYAT LIST & ACTION BTN (SLIM CERAH & GELAP)
+       ========================================================== */
+    #area-riwayat-kelas, #area-rekap-kelas, #area-riwayat-sholat, #area-rekap-sholat { background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border-color); }
     .list-data { list-style: none; padding: 0; }
-    .list-data li { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-putih); background: transparent; border-radius:0; box-shadow:none;}
-    .list-data li:last-child { border-bottom: none; }
-    .btn-action { background: var(--bg-main); border: 1px solid var(--border-color); cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 8px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-    .btn-edit { color: var(--neon-blue); }
-    .btn-delete { color: var(--neon-red); }
+    .list-data li { 
+        padding: 10px 12px; 
+        background: rgba(255, 255, 255, 0.9); 
+        border: 1px solid #e2e8f0; 
+        border-radius: 10px; 
+        margin-bottom: 8px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        display: flex; 
+        flex-direction: column; 
+        gap: 4px;
+        align-items: stretch;
+    }
+    .list-data li:last-child { margin-bottom: 0; }
+    
+    .btn-action { 
+        background: #f8fafc; border: 1px solid #cbd5e1; cursor: pointer; 
+        padding: 5px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; 
+        transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; 
+        color: #334155; 
+    }
+    .btn-action:hover { transform: scale(1.05); background: #e2e8f0; }
+    .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
+    .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
 
     /* DESAIN LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
@@ -202,9 +222,34 @@
                     </div>
                 </div>
 
-                <button onclick="simpanPresensiKelas()" id="btn-simpan-absen-kelas" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                <button onclick="simpanPresensiKelas()" id="btn-simpan-absen-kelas" class="btn-primary" style="width: 100%; margin-top: 25px; margin-bottom: 20px;">
                     <span style="flex:1; text-align:left;">Simpan Presensi</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- KOTAK REKAPITULASI KELAS (MENGAJAR) -->
+        <div id="area-rekap-kelas" style="display: none; margin-bottom: 20px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--neon-green); border-bottom: 1px dashed var(--neon-green); padding-bottom: 10px; margin-bottom: 15px;">
+                <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Mengajar
+            </div>
+            <div class="desktop-row">
+                <div class="form-group">
+                    <label>Dari Tanggal</label>
+                    <input type="date" id="rekap-kelas-mulai" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Hingga Tanggal</label>
+                    <input type="date" id="rekap-kelas-akhir" class="form-control">
+                </div>
+            </div>
+            <div class="desktop-row" style="margin-bottom: 0;">
+                <button onclick="downloadRekapKelas('excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-file-excel"></i> Rekap Excel
+                </button>
+                <button onclick="downloadRekapKelas('pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pdf"></i> Rekap PDF
                 </button>
             </div>
         </div>
@@ -231,10 +276,13 @@
                     <div class="form-group" style="flex: 1.5;">
                         <label>Nama Sholat</label>
                         <select id="input-nama-sholat" class="form-control">
-                            <option value="Dhuha">Dhuha</option>
-                            <option value="Zuhur" selected>Zuhur</option>
+                            <option value="Dzuhur" selected>Dzuhur</option>
                             <option value="Ashar">Ashar</option>
+                            <option value="Subuh">Subuh</option>
+                            <option value="Maghrib">Maghrib</option>
+                            <option value="Isya">Isya</option>
                             <option value="Jumat">Jumat</option>
+                            <option value="Sunnah">Sunnah</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1;">
@@ -267,9 +315,34 @@
                     </div>
                 </div>
 
-                <button onclick="simpanPresensiSholat()" id="btn-simpan-absen-sholat" class="btn-primary" style="width: 100%; margin-top: 25px;">
+                <button onclick="simpanPresensiSholat()" id="btn-simpan-absen-sholat" class="btn-primary" style="width: 100%; margin-top: 25px; margin-bottom: 20px;">
                     <span style="flex:1; text-align:left;">Simpan Presensi Sholat</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- KOTAK REKAPITULASI SHOLAT -->
+        <div id="area-rekap-sholat" style="display: none; margin-bottom: 20px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--neon-blue); border-bottom: 1px dashed var(--neon-blue); padding-bottom: 10px; margin-bottom: 15px;">
+                <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Sholat
+            </div>
+            <div class="desktop-row">
+                <div class="form-group">
+                    <label>Dari Tanggal</label>
+                    <input type="date" id="rekap-sholat-mulai" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Hingga Tanggal</label>
+                    <input type="date" id="rekap-sholat-akhir" class="form-control">
+                </div>
+            </div>
+            <div class="desktop-row" style="margin-bottom: 0;">
+                <button onclick="downloadRekapSholat('excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-file-excel"></i> Rekap Excel
+                </button>
+                <button onclick="downloadRekapSholat('pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pdf"></i> Rekap PDF
                 </button>
             </div>
         </div>

@@ -20,21 +20,28 @@ window.loadKelasUntukPresensi = async function() {
     const selSholat = document.getElementById('pilih-kelas-absen-sholat');
     const loadingText = '<option value="">Memuat kelas...</option>';
     
-    selKelas.innerHTML = loadingText;
-    selSholat.innerHTML = loadingText;
+    if (selKelas) selKelas.innerHTML = loadingText;
+    if (selSholat) selSholat.innerHTML = loadingText;
 
     try {
-        const { data, error } = await supabase.from('kelas').select('id, tingkat, nama_kelas').order('tingkat', { ascending: true }).order('nama_kelas', { ascending: true });
+        // HANYA MENGAMBIL KELAS DENGAN STATUS AKTIF (status_kelas = true)
+        const { data, error } = await supabase
+            .from('kelas')
+            .select('id, tingkat, nama_kelas')
+            .eq('status_kelas', true)
+            .order('tingkat', { ascending: true })
+            .order('nama_kelas', { ascending: true });
+            
         if (error) throw error;
 
         let options = '<option value="">-- Pilih Kelas --</option>';
         data.forEach(item => { options += `<option value="${item.id}">${item.nama_kelas} (Kelas ${item.tingkat})</option>`; });
         
-        selKelas.innerHTML = options;
-        selSholat.innerHTML = options;
+        if (selKelas) selKelas.innerHTML = options;
+        if (selSholat) selSholat.innerHTML = options;
     } catch (error) {
-        selKelas.innerHTML = '<option value="">Gagal memuat kelas</option>';
-        selSholat.innerHTML = '<option value="">Gagal memuat kelas</option>';
+        if (selKelas) selKelas.innerHTML = '<option value="">Gagal memuat kelas</option>';
+        if (selSholat) selSholat.innerHTML = '<option value="">Gagal memuat kelas</option>';
     }
 };
 
@@ -77,12 +84,19 @@ window.bukaFormAbsenKelas = async function() {
     const idKelas = document.getElementById('pilih-kelas-absen-kelas').value;
     if (!idKelas) {
         document.getElementById('area-riwayat-kelas').style.display = 'none';
+        document.getElementById('area-rekap-kelas').style.display = 'none';
         return;
     }
 
     editModeKelas = null;
     document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Data Presensi';
     document.getElementById('input-tgl-absen-kelas').valueAsDate = new Date(); 
+
+    document.getElementById('area-rekap-kelas').style.display = 'block';
+    const elMulaiK = document.getElementById('rekap-kelas-mulai');
+    const elAkhirK = document.getElementById('rekap-kelas-akhir');
+    if(elMulaiK && !elMulaiK.value) elMulaiK.valueAsDate = new Date();
+    if(elAkhirK && !elAkhirK.value) elAkhirK.valueAsDate = new Date();
 
     const container = document.getElementById('tempat-list-absen-kelas');
     container.innerHTML = '<div style="text-align:center; padding:20px; color:#007bff;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat daftar siswa...</div>';
@@ -260,14 +274,14 @@ window.loadRiwayatKelas = async function(idKelas) {
         sortedKeys.forEach(k => {
             const g = grouped[k];
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:var(--teal-dark); font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--emerald); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan})</b>
+                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan})</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div style="font-size:10px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:8px; border:1px solid #e2e8f0;">
+                    <div style="font-size:11px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:8px; border:1px solid #e2e8f0; color:#475569;">
                         <span style="color:#10b981;">H:${g.Hadir}</span>
                         <span style="color:#f59e0b;">S:${g.Sakit}</span>
                         <span style="color:#3b82f6;">I:${g.Izin}</span>
@@ -328,13 +342,22 @@ window.bukaFormAbsenSholat = async function() {
     const idKelas = document.getElementById('pilih-kelas-absen-sholat').value;
     if (!idKelas) {
         document.getElementById('area-riwayat-sholat').style.display = 'none';
+        document.getElementById('area-rekap-sholat').style.display = 'none';
         return;
     }
 
     editModeSholat = null;
     document.getElementById('btn-simpan-absen-sholat').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Presensi Sholat';
     document.getElementById('input-tgl-absen-sholat').valueAsDate = new Date(); 
-    document.getElementById('filter-gender-sholat').value = 'Semua'; 
+    
+    document.getElementById('area-rekap-sholat').style.display = 'block';
+    const elMulai = document.getElementById('rekap-sholat-mulai');
+    const elAkhir = document.getElementById('rekap-sholat-akhir');
+    if(elMulai && !elMulai.value) elMulai.valueAsDate = new Date();
+    if(elAkhir && !elAkhir.value) elAkhir.valueAsDate = new Date();
+
+    const filterEl = document.getElementById('filter-gender-sholat');
+    if (filterEl) filterEl.value = 'Semua';
 
     const container = document.getElementById('tempat-list-absen-sholat');
     container.innerHTML = '<div style="text-align:center; padding:20px; color:#007bff;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat daftar siswa...</div>';
@@ -350,8 +373,6 @@ window.bukaFormAbsenSholat = async function() {
         }
 
         data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
-        
-        // Init data tanpa properti keterangan
         dataSiswaAbsenSholat = data.map(item => ({ id_siswa: item.id_siswa, kehadiran: 'SH' }));
 
         let htmlContent = '';
@@ -359,7 +380,9 @@ window.bukaFormAbsenSholat = async function() {
             const jk = item.siswa.jenis_kelamin;
             const ikonGender = jk === 'L' ? '<i class="fa-solid fa-mars" style="color:#007bff; font-size:10px;"></i>' : (jk === 'P' ? '<i class="fa-solid fa-venus" style="color:#e83e8c; font-size:10px;"></i>' : '');
 
-            // KOTAK KET DIHAPUS SEPENUHNYA DARI HTML RENDER INI
+            const disableHD = (jk === 'L') ? 'pointer-events: none; opacity: 0.4;' : '';
+            const clickHD = (jk === 'L') ? '' : `onclick="pilihKehadiranSholat(${index}, 'HD')"`;
+
             htmlContent += `
                 <div class="absen-card absen-card-sholat" data-jk="${jk}">
                     <div class="absen-info">
@@ -375,7 +398,7 @@ window.bukaFormAbsenSholat = async function() {
                                 <div class="btn-opsi btn-izin" onclick="pilihKehadiranSholat(${index}, 'I')">I</div>
                                 <div class="btn-opsi btn-sakit" onclick="pilihKehadiranSholat(${index}, 'S')">S</div>
                                 <div class="btn-opsi btn-alpa" onclick="pilihKehadiranSholat(${index}, 'A')">A</div>
-                                <div class="btn-opsi btn-hd" onclick="pilihKehadiranSholat(${index}, 'HD')">HD</div>
+                                <div class="btn-opsi btn-hd" ${clickHD} style="${disableHD}">HD</div>
                                 <div class="btn-opsi btn-strip" onclick="pilihKehadiranSholat(${index}, '-')">-</div>
                             </div>
                         </div>
@@ -398,9 +421,9 @@ window.terapkanFilterSholat = function() {
     cards.forEach(card => {
         const jk = card.getAttribute('data-jk');
         if (filterVal === 'Semua' || filterVal === jk) {
-            card.style.display = 'flex';
+            card.style.setProperty('display', 'flex', 'important');
         } else {
-            card.style.display = 'none';
+            card.style.setProperty('display', 'none', 'important');
         }
     });
 };
@@ -420,12 +443,23 @@ window.pilihKehadiranSholat = function(indexSiswa, status) {
 };
 
 window.simpanPresensiSholat = async function() {
-    if (dataSiswaAbsenSholat.length === 0) return;
-    const tgl = document.getElementById('input-tgl-absen-sholat').value;
-    const nmSholat = document.getElementById('input-nama-sholat').value;
-    const idKelas = document.getElementById('pilih-kelas-absen-sholat').value;
+    if (dataSiswaAbsenSholat.length === 0) {
+        alert("Data siswa masih kosong!");
+        return; 
+    }
     
-    if (!tgl || !nmSholat) { alert("Tanggal dan Nama Sholat harus diisi!"); return; }
+    const tgl = document.getElementById('input-tgl-absen-sholat').value;
+    const idKelas = document.getElementById('pilih-kelas-absen-sholat').value;
+    const nmSholatFinal = document.getElementById('input-nama-sholat').value; 
+    
+    if (!idKelas || idKelas === '') { 
+        alert("Kelas belum dipilih secara valid! Silakan pilih ulang kelas."); 
+        return; 
+    }
+    if (!tgl) { 
+        alert("Tanggal wajib diisi!"); 
+        return; 
+    }
 
     const btn = document.getElementById('btn-simpan-absen-sholat');
     const teksAsli = btn.innerHTML;
@@ -435,21 +469,35 @@ window.simpanPresensiSholat = async function() {
         btn.disabled = true;
 
         if (editModeSholat) {
-            await supabase.from('absensholat').delete().eq('id_kelas', idKelas).eq('tanggal', editModeSholat.tanggal).eq('nama_sholat', editModeSholat.nama_sholat);
+            await supabase.from('absensholat').delete()
+                .eq('id_kelas', idKelas)
+                .eq('tanggal', editModeSholat.tanggal)
+                .eq('nama_sholat', editModeSholat.nama_sholat);
         }
 
-        const payloadInsert = dataSiswaAbsenSholat.map(item => ({
-            id_kelas: idKelas, id_siswa: item.id_siswa, tanggal: tgl,
-            nama_sholat: nmSholat, kehadiran: item.kehadiran, keterangan: null // Pastikan dikirim null ke database
-        }));
+        const payloadInsert = dataSiswaAbsenSholat
+            .filter(item => item.id_siswa) 
+            .map(item => ({
+                id_kelas: idKelas, 
+                id_siswa: item.id_siswa, 
+                tanggal: tgl,
+                nama_sholat: nmSholatFinal, 
+                kehadiran: item.kehadiran
+            }));
+            
+        if (payloadInsert.length === 0) throw new Error("Tidak ada data presensi siswa yang valid untuk disimpan.");
 
         const { error } = await supabase.from('absensholat').insert(payloadInsert);
-        if (error) throw error;
+        
+        if (error) {
+            console.error("Detail Error Supabase:", error);
+            throw new Error(`${error.message} - ${error.details || ''} (Kode: ${error.code})`);
+        }
 
-        alert(`Berhasil menyimpan presensi sholat ${nmSholat} untuk ${payloadInsert.length} siswa!`);
+        alert(`Berhasil menyimpan presensi sholat ${nmSholatFinal} untuk ${payloadInsert.length} siswa!`);
         bukaFormAbsenSholat(); 
     } catch (error) {
-        alert("Gagal menyimpan presensi sholat! " + error.message);
+        alert("Gagal menyimpan presensi sholat!\n\nPesan Asli Supabase: " + error.message);
     } finally {
         btn.innerHTML = teksAsli;
         btn.disabled = false;
@@ -487,14 +535,14 @@ window.loadRiwayatSholat = async function(idKelas) {
         sortedKeys.forEach(k => {
             const g = grouped[k];
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:var(--teal-dark); font-size:12px;"><i class="fa-solid fa-mosque" style="color:var(--emerald); margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
+                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-mosque" style="color:var(--neon-green); margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div style="font-size:10px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:10px; border:1px solid #e2e8f0;">
+                    <div style="font-size:11px; background:#f8fafc; padding:5px 8px; border-radius:6px; font-weight:700; display:flex; gap:10px; border:1px solid #e2e8f0; color:#475569;">
                         <span style="color:#10b981;">Sholat: ${g.SH}</span>
                         <span style="color:#ef4444;">Tidak: ${g.TS}</span>
                     </div>
@@ -515,7 +563,12 @@ window.loadRiwayatSholat = async function(idKelas) {
 window.editRiwayatSholat = async function(tanggal, sholat) {
     const idKelas = document.getElementById('pilih-kelas-absen-sholat').value;
     document.getElementById('input-tgl-absen-sholat').value = tanggal;
-    document.getElementById('input-nama-sholat').value = sholat;
+    
+    const selNamaSholat = document.getElementById('input-nama-sholat');
+    if (selNamaSholat) {
+        const normalized = (sholat === 'Zuhur') ? 'Dzuhur' : sholat;
+        selNamaSholat.value = normalized;
+    }
     
     try {
         const { data, error } = await supabase.from('absensholat').select('*').eq('id_kelas', idKelas).eq('tanggal', tanggal).eq('nama_sholat', sholat);
@@ -543,4 +596,198 @@ window.hapusRiwayatSholat = async function(tanggal, sholat) {
         alert('Riwayat berhasil dihapus.');
         loadRiwayatSholat(idKelas); 
     } catch(e) { alert('Gagal hapus: '+e.message); }
+};
+
+// ================= FITUR DOWNLOAD REKAP (MENGAJAR & SHOLAT) =================
+window.loadExportLibs = async function() {
+    const loadScript = (src) => new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+    
+    try {
+        await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+    } catch (e) {
+        throw new Error("Gagal memuat library export. Pastikan Anda terhubung ke internet.");
+    }
+};
+
+window.downloadRekapKelas = async function(format) {
+    const idKelas = document.getElementById('pilih-kelas-absen-kelas').value;
+    const selKelas = document.getElementById('pilih-kelas-absen-kelas');
+    const namaKelas = selKelas.options[selKelas.selectedIndex].text;
+    const tglAwal = document.getElementById('rekap-kelas-mulai').value;
+    const tglAkhir = document.getElementById('rekap-kelas-akhir').value;
+
+    if (!idKelas) { alert("Pilih kelas terlebih dahulu!"); return; }
+    if (!tglAwal || !tglAkhir) { alert("Pilih rentang tanggal (Dari & Hingga) terlebih dahulu!"); return; }
+    if (tglAwal > tglAkhir) { alert("Tanggal Awal tidak boleh lebih besar dari Tanggal Akhir!"); return; }
+
+    try {
+        alert("Sedang menyusun rekap kelas, mohon tunggu...");
+        await window.loadExportLibs();
+        
+        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        if (errSiswa) throw errSiswa;
+        
+        const { data: absenData, error: errAbsen } = await supabase.from('absenkelas').select('*').eq('id_kelas', idKelas).gte('tanggal', tglAwal).lte('tanggal', tglAkhir).order('tanggal');
+        if (errAbsen) throw errAbsen;
+
+        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+
+        const dateSet = new Set();
+        absenData.forEach(a => dateSet.add(`${a.tanggal} (P.${a.pertemuan_ke})`));
+        const uniqueDates = Array.from(dateSet).sort();
+
+        let headers = ["No", "Nama Siswa", "L/P", ...uniqueDates, "Jml Hadir", "Jml Sakit", "Jml Izin", "Jml Alpa"];
+        let reportData = [];
+
+        siswaData.forEach((s, idx) => {
+            let row = [s.nomor_absen || (idx + 1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
+            let countH = 0, countS = 0, countI = 0, countA = 0;
+            
+            let absenSiswa = absenData.filter(a => a.id_siswa === s.id_siswa);
+            
+            uniqueDates.forEach(dateKey => {
+                let record = absenSiswa.find(a => `${a.tanggal} (P.${a.pertemuan_ke})` === dateKey);
+                let status = record ? record.kehadiran.charAt(0) : '-';
+                row.push(status);
+                
+                if (record) {
+                    if (record.kehadiran === 'Hadir') countH++;
+                    else if (record.kehadiran === 'Sakit') countS++;
+                    else if (record.kehadiran === 'Izin') countI++;
+                    else if (record.kehadiran === 'Alpa') countA++;
+                }
+            });
+
+            row.push(countH, countS, countI, countA);
+            reportData.push(row);
+        });
+
+        const fileName = `Rekap_Mengajar_${namaKelas}_${tglAwal}_sd_${tglAkhir}`;
+
+        if (format === 'excel') {
+            const ws = window.XLSX.utils.aoa_to_sheet([headers, ...reportData]);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, "Rekap Kelas");
+            window.XLSX.writeFile(wb, `${fileName}.xlsx`);
+        } 
+        else if (format === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'pt', 'a4'); 
+            
+            doc.setFontSize(14);
+            doc.text(`Rekapitulasi Presensi Mengajar - ${namaKelas}`, 40, 40);
+            doc.setFontSize(10);
+            doc.text(`Periode: ${tglAwal} s.d ${tglAkhir}`, 40, 60);
+
+            doc.autoTable({
+                startY: 75,
+                head: [headers],
+                body: reportData,
+                theme: 'grid',
+                styles: { fontSize: 7, cellPadding: 3 },
+                headStyles: { fillColor: [5, 213, 138], textColor: 255 } 
+            });
+
+            doc.save(`${fileName}.pdf`);
+        }
+    } catch (e) {
+        alert("Gagal membuat rekapitulasi data: " + e.message);
+    }
+};
+
+window.downloadRekapSholat = async function(format) {
+    const idKelas = document.getElementById('pilih-kelas-absen-sholat').value;
+    const selSholat = document.getElementById('pilih-kelas-absen-sholat');
+    const namaKelas = selSholat.options[selSholat.selectedIndex].text;
+    const tglAwal = document.getElementById('rekap-sholat-mulai').value;
+    const tglAkhir = document.getElementById('rekap-sholat-akhir').value;
+
+    if (!idKelas) { alert("Pilih kelas terlebih dahulu!"); return; }
+    if (!tglAwal || !tglAkhir) { alert("Pilih rentang tanggal (Dari & Hingga) terlebih dahulu!"); return; }
+    if (tglAwal > tglAkhir) { alert("Tanggal Awal tidak boleh lebih besar dari Tanggal Akhir!"); return; }
+
+    try {
+        alert("Sedang menyusun rekap sholat, mohon tunggu...");
+        await window.loadExportLibs();
+        
+        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        if (errSiswa) throw errSiswa;
+        
+        const { data: absenData, error: errAbsen } = await supabase.from('absensholat').select('*').eq('id_kelas', idKelas).gte('tanggal', tglAwal).lte('tanggal', tglAkhir).order('tanggal');
+        if (errAbsen) throw errAbsen;
+
+        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+
+        const dateSet = new Set();
+        absenData.forEach(a => dateSet.add(`${a.tanggal} (${a.nama_sholat})`));
+        const uniqueDates = Array.from(dateSet).sort();
+
+        let headers = ["No", "Nama Siswa", "L/P", ...uniqueDates, "Jml SH", "Jml TS", "Jml I", "Jml S", "Jml A", "Jml HD"];
+        let reportData = [];
+
+        siswaData.forEach((s, idx) => {
+            let row = [s.nomor_absen || (idx + 1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
+            let countSH = 0, countTS = 0, countI = 0, countS = 0, countA = 0, countHD = 0;
+            
+            let absenSiswa = absenData.filter(a => a.id_siswa === s.id_siswa);
+            
+            uniqueDates.forEach(dateKey => {
+                let record = absenSiswa.find(a => `${a.tanggal} (${a.nama_sholat})` === dateKey);
+                let status = record ? record.kehadiran : '-';
+                row.push(status);
+                
+                if (record) {
+                    if (record.kehadiran === 'SH') countSH++;
+                    else if (record.kehadiran === 'TS') countTS++;
+                    else if (record.kehadiran === 'I') countI++;
+                    else if (record.kehadiran === 'S') countS++;
+                    else if (record.kehadiran === 'A') countA++;
+                    else if (record.kehadiran === 'HD') countHD++;
+                }
+            });
+
+            row.push(countSH, countTS, countI, countS, countA, countHD);
+            reportData.push(row);
+        });
+
+        const fileName = `Rekap_Sholat_${namaKelas}_${tglAwal}_sd_${tglAkhir}`;
+
+        if (format === 'excel') {
+            const ws = window.XLSX.utils.aoa_to_sheet([headers, ...reportData]);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, "Rekap Sholat");
+            window.XLSX.writeFile(wb, `${fileName}.xlsx`);
+        } 
+        else if (format === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'pt', 'a4'); 
+            
+            doc.setFontSize(14);
+            doc.text(`Rekapitulasi Presensi Sholat - ${namaKelas}`, 40, 40);
+            doc.setFontSize(10);
+            doc.text(`Periode: ${tglAwal} s.d ${tglAkhir}`, 40, 60);
+
+            doc.autoTable({
+                startY: 75,
+                head: [headers],
+                body: reportData,
+                theme: 'grid',
+                styles: { fontSize: 7, cellPadding: 3 },
+                headStyles: { fillColor: [5, 213, 138], textColor: 255 } 
+            });
+
+            doc.save(`${fileName}.pdf`);
+        }
+    } catch (e) {
+        alert("Gagal membuat rekapitulasi data: " + e.message);
+    }
 };
