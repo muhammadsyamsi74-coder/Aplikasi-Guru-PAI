@@ -1,0 +1,293 @@
+<!-- pages/paiapps-dashboard.html -->
+<style>
+    /* =========================================================
+       DASHBOARD PAI-APPS PREMIUM DARK NEON THEME
+       ========================================================= */
+    .dashboard-container { animation: fadeIn 0.4s ease-out; }
+
+    /* GRID METRIK ATAS */
+    .grid-metrik-utama {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    .card-metrik {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .icon-metrik {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    .val-metrik {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-putih);
+        line-height: 1.2;
+    }
+    .lbl-metrik {
+        font-size: 10px;
+        color: var(--text-abu);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* KARTU PENGINGAT (ACTIONABLE ALERTS) */
+    .alert-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .alert-card {
+        padding: 12px 16px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .alert-card:hover { transform: translateY(-2px); }
+    .alert-warning {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--neon-red);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    .alert-info {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--neon-yellow);
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+    .alert-success {
+        background: rgba(5, 213, 138, 0.1);
+        color: var(--neon-green);
+        border-color: rgba(5, 213, 138, 0.3);
+    }
+
+    /* KARTU KONTEN UTAMA */
+    .card-data { 
+        background: var(--bg-card); 
+        border-radius: 16px; 
+        padding: 20px; 
+        border: 1px solid var(--border-color); 
+        margin-bottom: 20px; 
+    }
+    .card-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 15px; 
+        padding-bottom: 10px; 
+        border-bottom: 1px dashed var(--border-color); 
+    }
+    .card-header h3 { 
+        font-size: 13px; 
+        font-weight: 700; 
+        color: var(--text-putih); 
+        margin: 0; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+    }
+
+    /* KISI PINTASAN CEPAT (QUICK ACTIONS) */
+    .grid-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+    }
+    .quick-btn {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 14px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+    .quick-btn:hover {
+        border-color: var(--neon-green);
+        transform: translateY(-3px);
+        background: var(--bg-card-hover, #1b2534);
+    }
+    .quick-btn i { font-size: 20px; }
+    .quick-btn span { font-size: 11px; font-weight: 600; color: var(--text-putih); }
+
+    /* LIST JADWAL HARI INI */
+    .jadwal-list { list-style: none; padding: 0; margin: 0; }
+    .jadwal-item {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .jadwal-item:last-child { margin-bottom: 0; }
+
+    /* WADAH GRAFIK AL-QURAN */
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 280px;
+        max-height: 360px;
+    }
+
+    /* PROGRESS BAR ANALITIK */
+    .progress-bar-wrap {
+        background: var(--bg-main);
+        border-radius: 8px;
+        height: 8px;
+        width: 100%;
+        overflow: hidden;
+        margin-top: 6px;
+        border: 1px solid var(--border-color);
+    }
+    .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.6s ease;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="dashboard-container">
+
+    <!-- 1. METRIK UTAMA -->
+    <div class="grid-metrik-utama">
+        <div class="card-metrik">
+            <div class="icon-metrik" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue);">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <div class="val-metrik" id="dash-jml-siswa">-</div>
+                <div class="lbl-metrik">Total Siswa</div>
+            </div>
+        </div>
+        <div class="card-metrik">
+            <div class="icon-metrik" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green);">
+                <i class="fa-solid fa-chalkboard"></i>
+            </div>
+            <div>
+                <div class="val-metrik" id="dash-jml-kelas">-</div>
+                <div class="lbl-metrik">Kelas Aktif</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. KARTU PENGINGAT (ACTIONABLE ALERTS) -->
+    <div class="alert-container" id="dash-alert-container">
+        <div class="alert-card alert-info" style="display:flex; justify-content:center;">
+            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memeriksa pengingat tugas & jurnal...
+        </div>
+    </div>
+
+    <!-- 3. TOMBOL PINTASAN CEPAT (QUICK ACTIONS) -->
+    <div class="card-data">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-bolt" style="color: var(--neon-yellow);"></i> Pintasan Cepat</h3>
+        </div>
+        <div class="grid-quick-actions">
+            <div class="quick-btn" onclick="loadPage('presensi', 'Presensi Siswa')">
+                <i class="fa-solid fa-clipboard-user" style="color: var(--neon-green);"></i>
+                <span>Presensi Kelas</span>
+            </div>
+            <div class="quick-btn" onclick="loadPage('jurnal', 'Jurnal Guru')">
+                <i class="fa-solid fa-book" style="color: var(--neon-blue);"></i>
+                <span>Jurnal Mengajar</span>
+            </div>
+            <div class="quick-btn" onclick="loadPage('penilaian', 'Penilaian')">
+                <i class="fa-solid fa-clipboard-check" style="color: var(--neon-purple);"></i>
+                <span>Input Nilai</span>
+            </div>
+            <div class="quick-btn" onclick="pintasanJurnalSikap()">
+                <i class="fa-solid fa-user-check" style="color: var(--neon-yellow);"></i>
+                <span>Jurnal Sikap</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PENGINGAT JADWAL MENGAJAR HARI INI -->
+    <div class="card-data">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal Mengajar Hari Ini (<span id="dash-nama-hari">-</span>)</h3>
+            <button onclick="loadPage('master', 'Data Master')" class="btn-action" style="font-size:10px; padding:4px 8px; color:var(--text-abu);">
+                <i class="fa-solid fa-gear"></i> Kelola
+            </button>
+        </div>
+        <ul class="jadwal-list" id="dash-list-jadwal-hari-ini">
+            <li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Memuat jadwal hari ini...
+            </li>
+        </ul>
+    </div>
+
+    <!-- 5. GRAFIK KEMAMPUAN MEMBACA AL-QUR'AN PER KELAS -->
+    <div class="card-data">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i> Grafik Kemampuan Membaca Al-Qur'an Per Kelas</h3>
+            <span style="font-size:10px; color:var(--text-abu);"><i class="fa-solid fa-chart-column"></i> Batang Ke Atas</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="chart-quran-dashboard"></canvas>
+        </div>
+        <div id="chart-quran-kosong" style="display:none; text-align:center; padding:20px; color:var(--text-abu); font-size:12px;">
+            Belum ada data penilaian membaca Al-Qur'an pada kelas aktif.
+        </div>
+    </div>
+
+    <!-- 6. ANALITIK: PERSENTASE KEHADIRAN PER KELAS -->
+    <div class="card-data">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-chart-pie" style="color: var(--neon-blue);"></i> Persentase Kehadiran Per Kelas</h3>
+        </div>
+        <div id="dash-list-analitik-kehadiran" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="text-align:center; padding:10px; color:var(--text-abu); font-size:12px;">Memuat analitik kehadiran...</div>
+        </div>
+    </div>
+
+    <!-- 7. ANALITIK: KETUNTASAN PENILAIAN TUGAS PER KELAS -->
+    <div class="card-data">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-list-check" style="color: var(--neon-purple);"></i> Ketuntasan Penilaian Tugas</h3>
+        </div>
+        <div id="dash-list-analitik-tugas" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="text-align:center; padding:10px; color:var(--text-abu); font-size:12px;">Memuat analitik tugas...</div>
+        </div>
+    </div>
+
+    <!-- 8. INFORMASI SISTEM & TENTANG APLIKASI -->
+    <div class="card-data" style="border: 1px dashed var(--border-color); background: transparent;">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-circle-info" style="color: var(--neon-green);"></i> Identitas Administrasi</h3>
+        </div>
+        <div id="dash-info-sistem" style="font-size: 11px; color: var(--text-abu); line-height: 1.7;">
+            Memuat informasi profil...
+        </div>
+    </div>
+
+</div>

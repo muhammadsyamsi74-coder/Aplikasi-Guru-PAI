@@ -17,6 +17,7 @@
         --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
         --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
+        --gradient-yellow: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
     }
 
     .master-container { animation: fadeIn 0.4s ease-out; }
@@ -52,6 +53,7 @@
 
     .btn-blue { background: var(--gradient-blue); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2); }
     .btn-purple { background: var(--gradient-purple); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.2); }
+    .btn-yellow { background: var(--gradient-yellow); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2); }
 
     /* DESAIN LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
@@ -89,6 +91,9 @@
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 <button onclick="toggleFormKelas()" class="btn-primary" style="flex: 1; min-width: 140px;">
                     <i class="fa-solid fa-chalkboard"></i> Form Tambah Kelas
+                </button>
+                <button onclick="bukaPanelJadwal()" class="btn-primary btn-yellow" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-calendar-days"></i> Jadwal Mengajar
                 </button>
                 <button onclick="bukaPanelWali()" class="btn-primary btn-purple" style="flex: 1; min-width: 140px;">
                     <i class="fa-solid fa-user-shield"></i> Siswa Guru Wali
@@ -390,6 +395,90 @@
                 <button class="btn-action" onclick="loadDataSiswaWali()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
             </div>
             <ul class="list-data" id="tempat-data-siswa-wali"></ul>
+        </div>
+    </div>
+
+    <!-- ================= PANEL 4: JADWAL MENGAJAR (BARU) ================= -->
+    <div id="panel-jadwal" style="display: none;">
+        <button onclick="tutupPanelJadwal()" style="background:none; border:none; color:var(--neon-green); font-size:13px; font-weight:600; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Kelas
+        </button>
+
+        <h2 class="section-title"><i class="fa-solid fa-calendar-days" style="color: var(--neon-yellow);"></i> Master Jadwal Mengajar</h2>
+
+        <div class="card-data">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="toggleFormJadwal()" class="btn-primary btn-yellow" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-calendar-plus"></i> Tambah Jadwal Mengajar
+                </button>
+            </div>
+        </div>
+
+        <div class="card-data" id="wrapper-form-jadwal" style="display: none; border: 1px solid var(--neon-yellow);">
+            <div class="card-header" style="border-bottom-color: var(--neon-yellow);">
+                <h3 id="judul-form-jadwal" style="color: var(--neon-yellow);">Isi Data Jadwal Mengajar</h3>
+                <button onclick="toggleFormJadwal()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-weight:600;"><i class="fa-solid fa-times"></i> Tutup</button>
+            </div>
+            <form id="form-tambah-jadwal" onsubmit="simpanDataJadwal(event)">
+                <div class="desktop-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Hari</label>
+                        <select id="jadwal-hari" class="form-control" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1.5;">
+                        <label>Pilih Kelas</label>
+                        <select id="jadwal-kelas" class="form-control" required></select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Jam Ke- (JP)</label>
+                        <input type="text" id="jadwal-jam-ke" class="form-control" placeholder="Cth: 1-2 atau 5" required>
+                    </div>
+                    <div class="form-group" style="flex: 0.8;">
+                        <label>Jumlah JP</label>
+                        <select id="jadwal-jumlah-jp" class="form-control" required>
+                            <option value="1">1 JP</option>
+                            <option value="2" selected>2 JP</option>
+                            <option value="3">3 JP</option>
+                            <option value="4">4 JP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="desktop-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Jam Mulai</label>
+                        <input type="time" id="jadwal-jam-mulai" class="form-control">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Jam Selesai</label>
+                        <input type="time" id="jadwal-jam-selesai" class="form-control">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Keterangan / Ruang</label>
+                        <input type="text" id="jadwal-keterangan" class="form-control" placeholder="Cth: Ruang Kelas / Lab / Tadarus">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <button type="submit" id="btn-simpan-jadwal" class="btn-primary btn-yellow" style="width: 100%;">
+                            <i class="fa-solid fa-save"></i> Simpan Jadwal
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3>Daftar Jadwal Mengajar Guru</h3>
+                <button class="btn-action" onclick="loadDataJadwal()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
+            </div>
+            <ul class="list-data" id="tempat-data-jadwal"></ul>
         </div>
     </div>
 

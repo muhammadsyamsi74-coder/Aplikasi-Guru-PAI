@@ -124,7 +124,6 @@ window.loadKelasUntukPenilaian = async function() {
     selIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = loadingText; });
 
     try {
-        // HANYA MENGAMBIL KELAS DENGAN STATUS AKTIF (status_kelas = true)
         const { data, error } = await supabase
             .from('kelas')
             .select('id, tingkat, nama_kelas')
@@ -138,30 +137,40 @@ window.loadKelasUntukPenilaian = async function() {
         data.forEach(item => { options += `<option value="${item.id}">${item.nama_kelas} (Kelas ${item.tingkat})</option>`; });
         selIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = options; });
 
-        await loadDaftarTugas();
     } catch (error) {
         selIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = '<option value="">Gagal</option>'; });
     }
 };
 
-window.loadDaftarTugas = async function() {
+// Load daftar tugas khusus berdasarkan id_kelas yang dipilih
+window.loadDaftarTugas = async function(idKelas) {
+    const dd = document.getElementById('input-nama-tugas-dropdown');
+    if (!dd) return;
+
+    if (!idKelas) {
+        dd.innerHTML = '<option value="">-- Pilih Tugas --</option>';
+        return;
+    }
+
     try {
-        const { data, error } = await supabase.from('namatugas').select('id, nama_tugas');
+        const { data, error } = await supabase
+            .from('namatugas')
+            .select('id, nama_tugas')
+            .eq('id_kelas', idKelas)
+            .order('created_at', { ascending: true });
+
         if (error) throw error;
-        
-        const dd = document.getElementById('input-nama-tugas-dropdown');
+
         let html = '<option value="">-- Pilih Tugas --</option>';
-        const uniqueTugas = [];
-        const mapTugas = new Map();
-        for (const item of data) {
-            if(!mapTugas.has(item.nama_tugas)){
-                mapTugas.set(item.nama_tugas, true);
-                uniqueTugas.push({ id: item.id, nama: item.nama_tugas });
-            }
+        if (data && data.length > 0) {
+            data.forEach(t => { 
+                html += `<option value="${t.id}">${t.nama_tugas}</option>`; 
+            });
         }
-        uniqueTugas.forEach(t => { html += `<option value="${t.id}">${t.nama}</option>`; });
-        if(dd) dd.innerHTML = html;
-    } catch (e) { console.error("Gagal load tugas", e); }
+        dd.innerHTML = html;
+    } catch (e) { 
+        console.error("Gagal load tugas per kelas", e); 
+    }
 };
 
 window.loadNilaiTugas = async function() {
@@ -195,6 +204,48 @@ window.loadNilaiTugas = async function() {
             });
         }
     } catch(e) { console.error("Gagal load nilai tugas", e); }
+};
+
+// ================= FITUR HAPUS TUGAS BESERTA NILAI =================
+window.hapusTugasAktif = async function() {
+    const dd = document.getElementById('input-nama-tugas-dropdown');
+    const idTugas = dd.value;
+    const namaTugas = dd.options[dd.selectedIndex] ? dd.options[dd.selectedIndex].text : '';
+    const idKelas = document.getElementById('pilih-kelas-tugas').value;
+
+    if (!idTugas) {
+        alert("Pilih tugas yang ingin dihapus terlebih dahulu!");
+        return;
+    }
+
+    if (!confirm(`PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS tugas "${namaTugas}"?\nSemua nilai siswa yang terkait dengan tugas ini akan ikut terhapus permanen.`)) {
+        return;
+    }
+
+    try {
+        // 1. Hapus semua nilai siswa pada tugas ini
+        const { error: errNilai } = await supabase
+            .from('penilaiantugas')
+            .delete()
+            .eq('id_tugas', idTugas);
+        if (errNilai) throw errNilai;
+
+        // 2. Hapus data tugas dari tabel namatugas
+        const { error: errTugas } = await supabase
+            .from('namatugas')
+            .delete()
+            .eq('id', idTugas);
+        if (errTugas) throw errTugas;
+
+        alert(`Tugas "${namaTugas}" beserta semua nilainya berhasil dihapus!`);
+
+        // Muat ulang daftar tugas dan bersihkan input
+        await window.loadDaftarTugas(idKelas);
+        window.loadNilaiTugas();
+
+    } catch (e) {
+        alert("Gagal menghapus tugas: " + e.message);
+    }
 };
 
 // ================= RENDER FORM DINAMIS =================
@@ -361,7 +412,9 @@ window.bukaFormPenilaian = async function(tipe) {
         
         container.innerHTML = htmlContent;
 
+        // Panggil daftar tugas milik kelas ini secara spesifik
         if(tipe === 'tugas') {
+            await loadDaftarTugas(idKelas);
             loadNilaiTugas();
         } else {
             container.querySelectorAll('select').forEach(sel => window.updateSelectColor(sel));
@@ -384,6 +437,7 @@ window.simpanPenilaian = async function(tipe) {
 
         let payloadInsert = [];
 
+        // PERBAIKAN: Menggunakan parameter tabel dinamis (bukan string 'tabel')
         const pushToDatabase = async (tabel, payload) => {
             const toInsert = payload.filter(p => !p.id); 
             const toUpdate = payload.filter(p => p.id);  
@@ -510,7 +564,7 @@ window.simpanPenilaian = async function(tipe) {
                             record[sr.col] = sel.value;
                             hasData = true;
                         } else {
-                            record[sr.col] = null;
+                            record[sr.col] = null; 
                         }
                         let rid = sel.getAttribute('data-recordid');
                         if (!recordId && rid && rid !== 'undefined' && rid !== '') {
@@ -519,7 +573,7 @@ window.simpanPenilaian = async function(tipe) {
                     }
                 });
 
-                if (hasData || recordId) {
+                if (hasData || recordId) { 
                     if (recordId) record.id = recordId;
                     payloadInsert.push(record);
                 }
@@ -635,20 +689,22 @@ window.downloadRekapPenilaian = async function(tipe, format) {
             });
         } 
         else if (tipe === 'tugas') {
-            const siswaIds = siswaData.map(s => s.id_siswa);
-            let nilaiTugas = [];
+            const { data: lt } = await supabase
+                .from('namatugas')
+                .select('id, nama_tugas')
+                .eq('id_kelas', idKelas)
+                .order('created_at', { ascending: true });
             
-            if (siswaIds.length > 0) {
-                const { data: nt } = await supabase.from('penilaiantugas').select('*').in('id_siswa', siswaIds);
-                nilaiTugas = nt || [];
-            }
+            const listTugas = lt || [];
+            const listTugasIds = listTugas.map(t => t.id);
 
-            const activeTugasIds = [...new Set(nilaiTugas.map(n => n.id_tugas))];
-            let listTugas = [];
-            
-            if (activeTugasIds.length > 0) {
-                const { data: lt } = await supabase.from('namatugas').select('id, nama_tugas').in('id', activeTugasIds).order('created_at');
-                listTugas = lt || [];
+            let nilaiTugas = [];
+            if (listTugasIds.length > 0) {
+                const { data: nt } = await supabase
+                    .from('penilaiantugas')
+                    .select('*')
+                    .in('id_tugas', listTugasIds);
+                nilaiTugas = nt || [];
             }
             
             let h = ["No", "Nama Siswa", "L/P"];

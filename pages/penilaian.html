@@ -123,9 +123,14 @@
                     <label style="color:var(--text-putih);">Pilih Tugas / Buat Baru</label>
                     <div class="desktop-row" style="margin-bottom: 0;">
                         <div class="form-group" style="flex: 2;">
-                            <select id="input-nama-tugas-dropdown" class="form-control" onchange="loadNilaiTugas()">
-                                <option value="">-- Pilih Tugas --</option>
-                            </select>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select id="input-nama-tugas-dropdown" class="form-control" onchange="loadNilaiTugas()" style="flex: 1;">
+                                    <option value="">-- Pilih Tugas --</option>
+                                </select>
+                                <button type="button" id="btn-hapus-tugas" onclick="hapusTugasAktif()" class="btn-toggle-input" style="color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); padding: 10px 12px; border-radius: 8px;" title="Hapus Tugas Ini">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                             <input type="text" id="input-nama-tugas-baru" class="form-control" placeholder="Ketik nama tugas baru..." style="display:none; margin-top:6px;">
                         </div>
                         <div class="form-group" style="flex: 1;">

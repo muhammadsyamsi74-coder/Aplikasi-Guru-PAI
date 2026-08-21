@@ -1,27 +1,77 @@
 <!-- pages/paiapps.html -->
 <style>
-    .paiapps-container { animation: fadeIn 0.3s ease-in-out; text-align: center; padding-top: 30px; }
-    .coming-soon-icon { font-size: 60px; color: var(--biru-muda); margin-bottom: 20px; }
-    .coming-soon-title { font-size: 18px; font-weight: 600; color: var(--biru-tua); margin-bottom: 10px; }
-    .coming-soon-text { font-size: 13px; color: var(--abu-teks); line-height: 1.6; padding: 0 20px; }
-    
-    .tool-box {
-        background: var(--putih); border-radius: 12px; padding: 20px; 
-        border: 1px dashed #ced4da; margin-top: 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    :root {
+        --bg-main: #0b121e;
+        --bg-card: #151d2a;
+        --border-color: #232f40;
+        --text-putih: #ffffff;
+        --text-abu: #8494a8;
+        --neon-green: #05d58a;
+        --neon-blue: #3b82f6;
+        --neon-purple: #8b5cf6;
+        --neon-yellow: #f59e0b;
+        --neon-red: #ef4444;
+    }
+
+    .paiapps-container { animation: fadeIn 0.4s ease-out; }
+
+    /* SUB-TAB NAVIGASI UTAMA */
+    .subtab-container { 
+        display: flex; 
+        background: var(--bg-card); 
+        border-radius: 12px; 
+        padding: 5px; 
+        border: 1px solid var(--border-color); 
+        margin-bottom: 20px; 
+        gap: 5px;
+    }
+    .subtab-btn { 
+        flex: 1; 
+        background: transparent; 
+        border: none; 
+        padding: 10px 15px; 
+        font-size: 12px; 
+        font-weight: 600; 
+        color: var(--text-abu); 
+        cursor: pointer; 
+        transition: all 0.3s; 
+        border-radius: 8px; 
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .subtab-btn.active { 
+        background: rgba(5, 213, 138, 0.15); 
+        color: var(--neon-green); 
+    }
+
+    /* WADAH KONTEN SUB-HALAMAN */
+    #paiapps-sub-content {
+        min-height: 300px;
+        animation: fadeIn 0.3s ease-out;
     }
 </style>
 
 <div class="paiapps-container">
-    <i class="fa-solid fa-toolbox coming-soon-icon"></i>
-    <h2 class="coming-soon-title">PAI-APPS</h2>
-    <p class="coming-soon-text">
-        Kumpulan *tools* penunjang administrasi dan pengajaran Guru Pendidikan Agama Islam.
-    </p>
     
-    <div class="tool-box">
-        <i class="fa-solid fa-person-digging" style="font-size: 40px; color: var(--biru-dasar); margin-bottom: 15px;"></i>
-        <h3 style="font-size: 14px; color: var(--biru-tua); margin-bottom: 5px;">Sedang Dalam Pengembangan</h3>
-        <p style="font-size: 11px; color: var(--abu-teks);">Menu ini sengaja dikosongkan untuk pengembangan fitur tambahan di masa mendatang.</p>
+    <!-- NAVIGASI SUB-TAB -->
+    <div class="subtab-container">
+        <button class="subtab-btn active" id="btn-subtab-dashboard" onclick="bukaSubTabPaiApps('dashboard')">
+            <i class="fa-solid fa-chart-line"></i> <span>Dashboard Ringkasan</span>
+        </button>
+        <button class="subtab-btn" id="btn-subtab-tools" onclick="bukaSubTabPaiApps('tools')">
+            <i class="fa-solid fa-toolbox"></i> <span>Tools & APPS</span>
+        </button>
     </div>
+
+    <!-- WADAH DINAMIS UNTUK FILE SUB-HALAMAN -->
+    <div id="paiapps-sub-content">
+        <div style="text-align:center; padding: 40px 10px; color: var(--neon-green);">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i>
+            <p style="font-size: 12px; margin-top: 10px; color: var(--text-abu);">Memuat modul...</p>
+        </div>
+    </div>
+
 </div>

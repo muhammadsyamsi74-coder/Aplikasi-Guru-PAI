@@ -144,6 +144,8 @@ window.bukaDetailKelas = function(idKelas, namaKelas) {
     document.getElementById('judul-detail-kelas').innerText = "Data Siswa " + namaKelas;
     document.getElementById('panel-kelas').style.display = 'none';
     document.getElementById('panel-wali').style.display = 'none';
+    const pJadwal = document.getElementById('panel-jadwal');
+    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-siswa').style.display = 'block';
     
     document.getElementById('wrapper-form-siswa').style.display = 'none';
@@ -156,6 +158,8 @@ window.tutupDetailKelas = function() {
     currentKelasId = null;
     document.getElementById('panel-siswa').style.display = 'none';
     document.getElementById('panel-wali').style.display = 'none';
+    const pJadwal = document.getElementById('panel-jadwal');
+    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-kelas').style.display = 'block';
 };
 
@@ -370,6 +374,8 @@ let currentDataSiswaWali = [];
 window.bukaPanelWali = function() {
     document.getElementById('panel-kelas').style.display = 'none';
     document.getElementById('panel-siswa').style.display = 'none';
+    const pJadwal = document.getElementById('panel-jadwal');
+    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-wali').style.display = 'block';
     
     document.getElementById('wrapper-form-siswa-wali').style.display = 'none';
@@ -379,6 +385,8 @@ window.bukaPanelWali = function() {
 window.tutupPanelWali = function() {
     document.getElementById('panel-wali').style.display = 'none';
     document.getElementById('panel-siswa').style.display = 'none';
+    const pJadwal = document.getElementById('panel-jadwal');
+    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-kelas').style.display = 'block';
 };
 
@@ -589,6 +597,195 @@ window.downloadSiswaWaliExcel = async function() {
             btn.innerHTML = textAsli;
             btn.disabled = false;
         }
+    }
+};
+
+// ================= FUNGSI JADWAL MENGAJAR (BARU) =================
+let editingJadwalId = null;
+let currentDataJadwal = [];
+
+window.bukaPanelJadwal = async function() {
+    document.getElementById('panel-kelas').style.display = 'none';
+    document.getElementById('panel-siswa').style.display = 'none';
+    document.getElementById('panel-wali').style.display = 'none';
+    document.getElementById('panel-jadwal').style.display = 'block';
+    
+    document.getElementById('wrapper-form-jadwal').style.display = 'none';
+    await loadOpsiKelasJadwal();
+    loadDataJadwal();
+};
+
+window.tutupPanelJadwal = function() {
+    document.getElementById('panel-jadwal').style.display = 'none';
+    document.getElementById('panel-siswa').style.display = 'none';
+    document.getElementById('panel-wali').style.display = 'none';
+    document.getElementById('panel-kelas').style.display = 'block';
+};
+
+window.toggleFormJadwal = function() {
+    const formWrapper = document.getElementById('wrapper-form-jadwal');
+    if (formWrapper.style.display === 'none') {
+        formWrapper.style.display = 'block';
+        document.getElementById('form-tambah-jadwal').reset();
+        editingJadwalId = null;
+        document.getElementById('judul-form-jadwal').innerText = "Isi Data Jadwal Mengajar";
+        document.getElementById('btn-simpan-jadwal').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Jadwal';
+    } else {
+        formWrapper.style.display = 'none';
+    }
+};
+
+async function loadOpsiKelasJadwal() {
+    const sel = document.getElementById('jadwal-kelas');
+    if (!sel) return;
+    try {
+        const { data, error } = await supabase.from('kelas').select('id, tingkat, nama_kelas').eq('status_kelas', true).order('tingkat').order('nama_kelas');
+        if (error) throw error;
+        let opt = '<option value="">-- Pilih Kelas --</option>';
+        data.forEach(k => { opt += `<option value="${k.id}">${k.nama_kelas} (Tingkat ${k.tingkat})</option>`; });
+        sel.innerHTML = opt;
+    } catch (e) {
+        console.error("Gagal load opsi kelas jadwal:", e);
+    }
+}
+
+window.loadDataJadwal = async function() {
+    const container = document.getElementById('tempat-data-jadwal');
+    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--neon-yellow);">Memuat jadwal mengajar... <i class="fa-solid fa-spinner fa-spin"></i></li>';
+
+    try {
+        const { data, error } = await supabase
+            .from('jadwalmengajar')
+            .select(`id, id_kelas, hari, jam_ke, jumlah_jp, jam_mulai, jam_selesai, keterangan, kelas (nama_kelas, tingkat)`);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--text-abu);">Belum ada jadwal mengajar yang disetel.</li>';
+            currentDataJadwal = [];
+            return;
+        }
+
+        const urutanHari = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6 };
+        data.sort((a, b) => (urutanHari[a.hari] || 99) - (urutanHari[b.hari] || 99) || String(a.jam_ke).localeCompare(String(b.jam_ke)));
+        currentDataJadwal = data;
+
+        let htmlContent = '';
+        data.forEach(item => {
+            const namaKls = item.kelas ? item.kelas.nama_kelas : '-';
+            const jamMulai = item.jam_mulai ? item.jam_mulai.substring(0, 5) : '';
+            const jamSelesai = item.jam_selesai ? item.jam_selesai.substring(0, 5) : '';
+            const rentangJam = (jamMulai && jamSelesai) ? `(${jamMulai} - ${jamSelesai})` : '';
+            const ket = item.keterangan ? ` | ${item.keterangan}` : '';
+
+            htmlContent += `
+                <li>
+                    <div style="display: flex; align-items: center; gap: 10px; width:75%;">
+                        <div style="background: rgba(245, 158, 11, 0.15); color: var(--neon-yellow); font-weight:700; font-size:11px; padding:6px 10px; border-radius:8px; min-width:65px; text-align:center; border: 1px solid rgba(245, 158, 11, 0.3);">
+                            ${item.hari}
+                        </div>
+                        <div>
+                            <div style="font-size:13px; font-weight:600; color:var(--text-putih);">
+                                Kelas ${namaKls} - <span style="color:var(--neon-green);">JP ${item.jam_ke}</span> (${item.jumlah_jp || 1} JP)
+                            </div>
+                            <div style="font-size:10px; color:var(--text-abu); margin-top:2px;">
+                                <i class="fa-regular fa-clock"></i> ${rentangJam || 'Waktu belum diatur'} ${ket}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="editJadwal('${item.id}')" class="btn-action btn-edit" title="Edit"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="hapusJadwal('${item.id}', '${item.hari}', '${namaKls}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </li>
+            `;
+        });
+        container.innerHTML = htmlContent;
+    } catch (error) {
+        container.innerHTML = `<li style="display:block; text-align:center; color: var(--neon-red); padding: 10px;">Gagal: ${error.message}</li>`;
+    }
+};
+
+window.editJadwal = function(id) {
+    const j = currentDataJadwal.find(item => item.id === id);
+    if (!j) return;
+
+    editingJadwalId = id;
+    document.getElementById('jadwal-hari').value = j.hari || 'Senin';
+    document.getElementById('jadwal-kelas').value = j.id_kelas || '';
+    document.getElementById('jadwal-jam-ke').value = j.jam_ke || '';
+    document.getElementById('jadwal-jumlah-jp').value = j.jumlah_jp || '1';
+    document.getElementById('jadwal-jam-mulai').value = j.jam_mulai || '';
+    document.getElementById('jadwal-jam-selesai').value = j.jam_selesai || '';
+    document.getElementById('jadwal-keterangan').value = j.keterangan || '';
+
+    document.getElementById('judul-form-jadwal').innerText = `Edit Jadwal: ${j.hari} (JP ${j.jam_ke})`;
+    document.getElementById('btn-simpan-jadwal').innerHTML = '<i class="fa-solid fa-save"></i> Perbarui Jadwal';
+    document.getElementById('wrapper-form-jadwal').style.display = 'block';
+    document.getElementById('wrapper-form-jadwal').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.hapusJadwal = async function(id, hari, namaKelas) {
+    if (!confirm(`Yakin ingin MENGHAPUS jadwal mengajar ${hari} untuk Kelas ${namaKelas}?`)) return;
+
+    try {
+        const { error } = await supabase.from('jadwalmengajar').delete().eq('id', id);
+        if (error) throw error;
+        alert('Jadwal mengajar berhasil dihapus.');
+        loadDataJadwal();
+    } catch (err) {
+        alert("Gagal menghapus jadwal: " + err.message);
+    }
+};
+
+window.simpanDataJadwal = async function(event) {
+    event.preventDefault();
+
+    const hari = document.getElementById('jadwal-hari').value;
+    const idKelas = document.getElementById('jadwal-kelas').value;
+    const jamKe = document.getElementById('jadwal-jam-ke').value.trim();
+    const jumlahJp = parseInt(document.getElementById('jadwal-jumlah-jp').value) || 1;
+    const jamMulai = document.getElementById('jadwal-jam-mulai').value || null;
+    const jamSelesai = document.getElementById('jadwal-jam-selesai').value || null;
+    const keterangan = document.getElementById('jadwal-keterangan').value.trim() || null;
+
+    if (!idKelas) { alert("Pilih kelas terlebih dahulu!"); return; }
+
+    const btn = document.getElementById('btn-simpan-jadwal');
+    const textAsli = btn.innerHTML;
+
+    try {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.disabled = true;
+
+        const payload = {
+            id_kelas: idKelas,
+            hari: hari,
+            jam_ke: jamKe,
+            jumlah_jp: jumlahJp,
+            jam_mulai: jamMulai,
+            jam_selesai: jamSelesai,
+            keterangan: keterangan
+        };
+
+        if (editingJadwalId) {
+            const { error } = await supabase.from('jadwalmengajar').update(payload).eq('id', editingJadwalId);
+            if (error) throw error;
+            alert('Jadwal mengajar berhasil diperbarui!');
+        } else {
+            const { error } = await supabase.from('jadwalmengajar').insert([payload]);
+            if (error) throw error;
+            alert('Jadwal mengajar baru berhasil ditambahkan!');
+        }
+
+        document.getElementById('wrapper-form-jadwal').style.display = 'none';
+        editingJadwalId = null;
+        loadDataJadwal();
+    } catch (error) {
+        alert('Gagal menyimpan jadwal: ' + error.message);
+    } finally {
+        btn.innerHTML = textAsli;
+        btn.disabled = false;
     }
 };
 

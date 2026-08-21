@@ -1,0 +1,166 @@
+<!-- pages/paiapps-tools.html -->
+<style>
+    .card-data {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 15px;
+    }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed var(--border-color);
+    }
+    .card-header h3 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-putih);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* GRID TOOLS APPS */
+    .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+    }
+    .app-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 18px 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .app-card:hover {
+        border-color: var(--neon-green);
+        transform: translateY(-3px);
+        background: var(--bg-card-hover, #1b2534);
+    }
+    .app-card i {
+        font-size: 26px;
+    }
+    .app-card span {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-putih);
+    }
+
+    /* MODAL BOX ALAT BANTU */
+    .tool-box-area {
+        display: none;
+        background: var(--bg-main);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid var(--neon-blue);
+        margin-top: 15px;
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
+
+<div class="card-data">
+    <div class="card-header">
+        <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-green);"></i> Alat Bantu Pengajaran PAI</h3>
+    </div>
+    
+    <div class="apps-grid">
+        <div class="app-card" onclick="bukaTool('acak-siswa')">
+            <i class="fa-solid fa-shuffle" style="color: var(--neon-blue);"></i>
+            <span>Acak Siswa</span>
+        </div>
+        <div class="app-card" onclick="bukaTool('timer-kbm')">
+            <i class="fa-solid fa-stopwatch" style="color: var(--neon-yellow);"></i>
+            <span>Timer / Stopwatch</span>
+        </div>
+        <div class="app-card" onclick="bukaTool('bank-hadis')">
+            <i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i>
+            <span>Kutipan Hadis</span>
+        </div>
+        <div class="app-card" onclick="bukaTool('kalkulator-nilai')">
+            <i class="fa-solid fa-calculator" style="color: var(--neon-purple);"></i>
+            <span>Kalkulator Nilai</span>
+        </div>
+    </div>
+
+    <!-- AREA TOOL 1: ACAK SISWA -->
+    <div id="box-tool-acak-siswa" class="tool-box-area">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="font-size:12px; color:var(--neon-blue);"><i class="fa-solid fa-shuffle"></i> Pengacak Nama Siswa</b>
+            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+            <select id="pilih-kelas-acak" class="form-control" onchange="loadSiswaUntukAcak()"></select>
+        </div>
+        <div id="hasil-acak-siswa" style="padding:20px; text-align:center; background:var(--bg-card); border-radius:10px; border:1px dashed var(--border-color); font-size:16px; font-weight:700; color:var(--neon-green); margin-bottom:10px;">
+            Klik tombol untuk mengacak
+        </div>
+        <button onclick="putarAcakSiswa()" class="btn-primary" style="width:100%; justify-content:center; padding:10px;">
+            <i class="fa-solid fa-play" style="margin-right:6px;"></i> Acak Sekarang
+        </button>
+    </div>
+
+    <!-- AREA TOOL 2: TIMER KBM -->
+    <div id="box-tool-timer-kbm" class="tool-box-area">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="font-size:12px; color:var(--neon-yellow);"><i class="fa-solid fa-stopwatch"></i> Timer Pembelajaran</b>
+            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div id="display-timer" style="font-size:32px; font-weight:800; text-align:center; color:var(--text-putih); padding:15px; background:var(--bg-card); border-radius:10px; margin-bottom:10px;">
+            00:00
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button onclick="setTimerMenit(5)" class="btn-action" style="flex:1;">5 Mnt</button>
+            <button onclick="setTimerMenit(10)" class="btn-action" style="flex:1;">10 Mnt</button>
+            <button onclick="setTimerMenit(15)" class="btn-action" style="flex:1;">15 Mnt</button>
+            <button onclick="mulaiTimer()" class="btn-primary" style="flex:1; justify-content:center; background:var(--gradient-primary);"><i class="fa-solid fa-play"></i></button>
+            <button onclick="stopTimer()" class="btn-primary" style="flex:1; justify-content:center; background:var(--neon-red);"><i class="fa-solid fa-stop"></i></button>
+        </div>
+    </div>
+
+    <!-- AREA TOOL 3: BANK HADIS -->
+    <div id="box-tool-bank-hadis" class="tool-box-area">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="font-size:12px; color:var(--neon-green);"><i class="fa-solid fa-book-quran"></i> Mutiara Hadis Pilihan</b>
+            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div id="isi-kutipan-hadis" style="padding:15px; background:var(--bg-card); border-radius:10px; font-size:12px; color:var(--text-putih); line-height:1.6; margin-bottom:10px;">
+            "Menuntut ilmu itu wajib atas setiap muslim." (HR. Ibnu Majah)
+        </div>
+        <button onclick="gantiHadisAcak()" class="btn-action" style="width:100%; justify-content:center; color:var(--neon-green); border-color:var(--neon-green);">
+            <i class="fa-solid fa-rotate" style="margin-right:6px;"></i> Hadis Lainnya
+        </button>
+    </div>
+
+    <!-- AREA TOOL 4: KALKULATOR NILAI -->
+    <div id="box-tool-kalkulator-nilai" class="tool-box-area">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="font-size:12px; color:var(--neon-purple);"><i class="fa-solid fa-calculator"></i> Kalkulator Skor Cepat</b>
+            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label>Skor Benar</label>
+                <input type="number" id="calc-benar" class="form-control" placeholder="Cth: 18" oninput="hitungNilaiCepat()">
+            </div>
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label>Total Soal</label>
+                <input type="number" id="calc-total" class="form-control" placeholder="Cth: 20" oninput="hitungNilaiCepat()">
+            </div>
+        </div>
+        <div id="hasil-kalkulator" style="text-align:center; padding:10px; background:var(--bg-card); border-radius:10px; font-size:18px; font-weight:800; color:var(--neon-purple);">
+            Nilai: 0
+        </div>
+    </div>
+</div>

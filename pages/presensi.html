@@ -207,6 +207,16 @@
                     <div class="summary-item"><div class="sum-top" style="color:var(--neon-red);"><i class="fa-regular fa-circle-xmark"></i> <span class="sum-val" id="sum-m-a">-</span></div><div class="sum-text">Alpa</div></div>
                 </div>
 
+                <!-- TOMBOL AKSI CEPAT PRESENSI -->
+                <div style="display: flex; gap: 8px; margin-bottom: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="setSemuaPresensiHadir()" class="btn-action" style="background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border-color: rgba(5, 213, 138, 0.3);">
+                        <i class="fa-solid fa-check-double"></i> Semua Hadir
+                    </button>
+                    <button type="button" onclick="setModeGuruTugas()" class="btn-action" style="background: rgba(245, 158, 11, 0.1); color: var(--neon-yellow); border-color: rgba(245, 158, 11, 0.3);">
+                        <i class="fa-solid fa-book-bookmark"></i> Guru Tugas (Tidak Masuk)
+                    </button>
+                </div>
+
                 <!-- TABEL BISA DI GESER (SCROLL) -->
                 <div class="table-scroll">
                     <div class="table-inner">

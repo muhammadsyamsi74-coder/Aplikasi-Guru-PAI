@@ -89,7 +89,7 @@ window.bukaFormAbsenKelas = async function() {
     }
 
     editModeKelas = null;
-    document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Data Presensi';
+    document.getElementById('btn-simpan-absen-kelas').innerHTML = '<span style="flex:1; text-align:left;">Simpan Presensi</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
     document.getElementById('input-tgl-absen-kelas').valueAsDate = new Date(); 
 
     document.getElementById('area-rekap-kelas').style.display = 'block';
@@ -170,7 +170,11 @@ window.pilihKehadiranKelas = function(indexSiswa, status) {
     btnsHadir.forEach(btn => btn.classList.remove('active'));
     
     const classMap = { 'Hadir': 'btn-hadir', 'Sakit': 'btn-sakit', 'Izin': 'btn-izin', 'Alpa': 'btn-alpa' };
-    btnsHadir.forEach(btn => { if(btn.classList.contains(classMap[status])) btn.classList.add('active'); });
+    btnsHadir.forEach(btn => { 
+        if(classMap[status] && btn.classList.contains(classMap[status])) {
+            btn.classList.add('active'); 
+        }
+    });
 
     const grpQuran = document.getElementById(`kg-quran-${indexSiswa}`);
     const btnsQuran = grpQuran.querySelectorAll('.btn-opsi');
@@ -204,6 +208,36 @@ window.pilihQuranKelas = function(indexSiswa, status) {
     btnsQuran.forEach(btn => { if(btn.classList.contains(classMap[status])) btn.classList.add('active'); });
 };
 
+// ================= TOMBOL AKSI CEPAT PRESENSI =================
+window.setSemuaPresensiHadir = function() {
+    dataSiswaAbsenKelas.forEach((item, idx) => {
+        pilihKehadiranKelas(idx, 'Hadir');
+    });
+};
+
+window.setModeGuruTugas = function() {
+    dataSiswaAbsenKelas.forEach((item, idx) => {
+        item.kehadiran = 'Dispensasi';
+        item.quran = 'Kosong';
+
+        const grpHadir = document.getElementById(`kg-hadir-${idx}`);
+        if (grpHadir) {
+            grpHadir.querySelectorAll('.btn-opsi').forEach(btn => btn.classList.remove('active'));
+        }
+
+        const grpQuran = document.getElementById(`kg-quran-${idx}`);
+        if (grpQuran) {
+            grpQuran.querySelectorAll('.btn-opsi').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.4';
+                if (btn.innerText === '-') btn.classList.add('active');
+            });
+        }
+    });
+    hitungRekapKelas();
+};
+
 window.simpanPresensiKelas = async function() {
     if (dataSiswaAbsenKelas.length === 0) return;
     const tgl = document.getElementById('input-tgl-absen-kelas').value;
@@ -216,25 +250,78 @@ window.simpanPresensiKelas = async function() {
     const teksAsli = btn.innerHTML;
 
     try {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
-        if (editModeKelas) {
-            await supabase.from('absenkelas').delete().eq('id_kelas', idKelas).eq('tanggal', editModeKelas.tanggal).eq('pertemuan_ke', editModeKelas.pertemuan_ke);
+        // 1. SINKRONISASI KE JURNAL MENGAJAR TERLEBIH DAHULU (Mendapatkan id_jurnal)
+        let idJurnalTarget = null;
+        const { data: jurnalAda, error: errCekJurnal } = await supabase
+            .from('jurnalmengajar')
+            .select('id')
+            .eq('id_kelas', idKelas)
+            .eq('tanggal', tgl)
+            .eq('pertemuan_ke', pert)
+            .maybeSingle();
+
+        if (errCekJurnal) throw errCekJurnal;
+
+        if (jurnalAda) {
+            idJurnalTarget = jurnalAda.id;
+        } else {
+            const isSemuaDispensasi = dataSiswaAbsenKelas.every(s => s.kehadiran === 'Dispensasi');
+            const judulMateriAuto = isSemuaDispensasi ? 'Penugasan Mandiri (Guru Berhalangan)' : '[Draft] Belum Mengisi Materi';
+            const deskripsiAuto = isSemuaDispensasi ? 'Guru memberikan tugas mandiri kepada siswa.' : null;
+
+            const { data: jurnalBaru, error: errJurnal } = await supabase
+                .from('jurnalmengajar')
+                .insert([{
+                    id_kelas: idKelas,
+                    tanggal: tgl,
+                    pertemuan_ke: pert,
+                    judul_materi: judulMateriAuto,
+                    deskripsi_materi: deskripsiAuto
+                }])
+                .select('id')
+                .single();
+
+            if (errJurnal) throw errJurnal;
+            idJurnalTarget = jurnalBaru.id;
         }
 
+        // 2. HAPUS DATA PRESENSI LAMA JIKA DALAM MODE EDIT ATAU PERBARUI
+        if (editModeKelas) {
+            await supabase.from('absenkelas').delete()
+                .eq('id_kelas', idKelas)
+                .eq('tanggal', editModeKelas.tanggal)
+                .eq('pertemuan_ke', editModeKelas.pertemuan_ke);
+        } else {
+            await supabase.from('absenkelas').delete()
+                .eq('id_kelas', idKelas)
+                .eq('tanggal', tgl)
+                .eq('pertemuan_ke', pert);
+        }
+
+        // 3. SIMPAN PRESENSI DENGAN MENYERTAKAN id_jurnal (Foreign Key)
         const payloadInsert = dataSiswaAbsenKelas.map(item => {
             let bawaQuranBool = null;
             if (item.quran === 'Bawa') bawaQuranBool = true;
             else if (item.quran === 'Tidak Bawa') bawaQuranBool = false;
 
-            return { id_kelas: idKelas, id_siswa: item.id_siswa, tanggal: tgl, pertemuan_ke: pert, kehadiran: item.kehadiran, bawa_quran: bawaQuranBool };
+            return { 
+                id_jurnal: idJurnalTarget,
+                id_kelas: idKelas, 
+                id_siswa: item.id_siswa, 
+                tanggal: tgl, 
+                pertemuan_ke: pert, 
+                kehadiran: item.kehadiran, 
+                bawa_quran: bawaQuranBool 
+            };
         });
 
         const { error } = await supabase.from('absenkelas').insert(payloadInsert);
         if (error) throw error;
 
-        alert(`Berhasil menyimpan presensi mengajar untuk ${payloadInsert.length} siswa!`);
+        alert(`Berhasil menyimpan presensi mengajar dan otomatis terhubung ke Jurnal!`);
         bukaFormAbsenKelas(); 
     } catch (error) {
         alert("Gagal menyimpan presensi! " + error.message);
@@ -264,7 +351,7 @@ window.loadRiwayatKelas = async function(idKelas) {
         const grouped = {};
         data.forEach(item => {
             const key = `${item.tanggal}|${item.pertemuan_ke}`;
-            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, pertemuan: item.pertemuan_ke, Hadir:0, Sakit:0, Izin:0, Alpa:0 };
+            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, pertemuan: item.pertemuan_ke, Hadir:0, Sakit:0, Izin:0, Alpa:0, Dispensasi:0 };
             if(grouped[key][item.kehadiran] !== undefined) grouped[key][item.kehadiran]++;
         });
 
@@ -273,6 +360,7 @@ window.loadRiwayatKelas = async function(idKelas) {
         let html = '';
         sortedKeys.forEach(k => {
             const g = grouped[k];
+            const badgeTugas = g.Dispensasi > 0 ? `<span style="color:#8b5cf6;">D(Tugas):${g.Dispensasi}</span>` : '';
             html += `
             <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
@@ -286,6 +374,7 @@ window.loadRiwayatKelas = async function(idKelas) {
                         <span style="color:#f59e0b;">S:${g.Sakit}</span>
                         <span style="color:#3b82f6;">I:${g.Izin}</span>
                         <span style="color:#ef4444;">A:${g.Alpa}</span>
+                        ${badgeTugas}
                     </div>
                     <div style="display:flex; gap:6px;">
                         <button onclick="editRiwayatKelas('${g.tanggal}', '${g.pertemuan}')" class="btn-action btn-edit" style="width: 28px; height: 28px; padding:0; justify-content:center;" title="Edit"><i class="fa-solid fa-edit"></i></button>
@@ -321,7 +410,7 @@ window.editRiwayatKelas = async function(tanggal, pertemuan) {
         });
         
         editModeKelas = { tanggal, pertemuan_ke: pertemuan };
-        document.getElementById('btn-simpan-absen-kelas').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Perbarui Data Presensi';
+        document.getElementById('btn-simpan-absen-kelas').innerHTML = '<span style="flex:1; text-align:left;">Perbarui Data Presensi</span><div class="icon-circle"><i class="fa-solid fa-cloud-arrow-up"></i></div>';
         document.getElementById('area-absen-kelas').scrollIntoView({ behavior: 'smooth' });
     } catch(e) { alert('Gagal memuat data edit: ' + e.message); }
 };
@@ -347,7 +436,7 @@ window.bukaFormAbsenSholat = async function() {
     }
 
     editModeSholat = null;
-    document.getElementById('btn-simpan-absen-sholat').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Presensi Sholat';
+    document.getElementById('btn-simpan-absen-sholat').innerHTML = '<span style="flex:1; text-align:left;">Simpan Presensi Sholat</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
     document.getElementById('input-tgl-absen-sholat').valueAsDate = new Date(); 
     
     document.getElementById('area-rekap-sholat').style.display = 'block';
@@ -465,7 +554,7 @@ window.simpanPresensiSholat = async function() {
     const teksAsli = btn.innerHTML;
 
     try {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
         if (editModeSholat) {
@@ -582,7 +671,7 @@ window.editRiwayatSholat = async function(tanggal, sholat) {
         });
         
         editModeSholat = { tanggal, nama_sholat: sholat };
-        document.getElementById('btn-simpan-absen-sholat').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Perbarui Presensi Sholat';
+        document.getElementById('btn-simpan-absen-sholat').innerHTML = '<span style="flex:1; text-align:left;">Perbarui Presensi Sholat</span><div class="icon-circle"><i class="fa-solid fa-cloud-arrow-up"></i></div>';
         document.getElementById('area-absen-sholat').scrollIntoView({ behavior: 'smooth' });
     } catch(e) { alert('Gagal memuat data edit: ' + e.message); }
 };
@@ -645,18 +734,18 @@ window.downloadRekapKelas = async function(format) {
         absenData.forEach(a => dateSet.add(`${a.tanggal} (P.${a.pertemuan_ke})`));
         const uniqueDates = Array.from(dateSet).sort();
 
-        let headers = ["No", "Nama Siswa", "L/P", ...uniqueDates, "Jml Hadir", "Jml Sakit", "Jml Izin", "Jml Alpa"];
+        let headers = ["No", "Nama Siswa", "L/P", ...uniqueDates, "Jml Hadir", "Jml Sakit", "Jml Izin", "Jml Alpa", "Jml Dispensasi"];
         let reportData = [];
 
         siswaData.forEach((s, idx) => {
             let row = [s.nomor_absen || (idx + 1), s.siswa.nama_siswa, s.siswa.jenis_kelamin];
-            let countH = 0, countS = 0, countI = 0, countA = 0;
+            let countH = 0, countS = 0, countI = 0, countA = 0, countD = 0;
             
             let absenSiswa = absenData.filter(a => a.id_siswa === s.id_siswa);
             
             uniqueDates.forEach(dateKey => {
                 let record = absenSiswa.find(a => `${a.tanggal} (P.${a.pertemuan_ke})` === dateKey);
-                let status = record ? record.kehadiran.charAt(0) : '-';
+                let status = record ? (record.kehadiran === 'Dispensasi' ? 'D' : record.kehadiran.charAt(0)) : '-';
                 row.push(status);
                 
                 if (record) {
@@ -664,10 +753,11 @@ window.downloadRekapKelas = async function(format) {
                     else if (record.kehadiran === 'Sakit') countS++;
                     else if (record.kehadiran === 'Izin') countI++;
                     else if (record.kehadiran === 'Alpa') countA++;
+                    else if (record.kehadiran === 'Dispensasi') countD++;
                 }
             });
 
-            row.push(countH, countS, countI, countA);
+            row.push(countH, countS, countI, countA, countD);
             reportData.push(row);
         });
 

@@ -334,10 +334,23 @@ window.loadRiwayatMengajar = async function() {
 
         let html = '';
         data.forEach(d => {
+            const isDraft = (d.judul_materi && d.judul_materi.includes('[Draft]'));
+            const isTugas = (d.judul_materi && d.judul_materi.includes('Penugasan Mandiri'));
+            
+            let statusBadge = '';
+            if (isDraft) {
+                statusBadge = '<span style="font-size:9px; color:#ef4444; font-weight:700; background: rgba(239, 68, 68, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 6px; border: 1px solid rgba(239, 68, 68, 0.2);"><i class="fa-solid fa-triangle-exclamation"></i> Perlu Diedit</span>';
+            } else if (isTugas) {
+                statusBadge = '<span style="font-size:9px; color:#8b5cf6; font-weight:700; background: rgba(139, 92, 246, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 6px; border: 1px solid rgba(139, 92, 246, 0.2);"><i class="fa-solid fa-book-bookmark"></i> Penugasan</span>';
+            }
+
             html += `
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                    <b style="color:#0f172a; font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
+                    <div style="display:flex; align-items:center;">
+                        <b style="color:#0f172a; font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
+                        ${statusBadge}
+                    </div>
                     <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
                 <div style="font-size:10px; color:#475569; margin-top:2px;"><b>Jam:</b> ${d.jam_ke || '-'} | <b>Materi:</b> ${d.judul_materi || '-'}</div>
@@ -362,7 +375,10 @@ window.panggilEditMengajar = async function(id) {
         document.getElementById('jm-tanggal').value = data.tanggal || '';
         document.getElementById('jm-pertemuan').value = data.pertemuan_ke || '';
         document.getElementById('jm-jam').value = data.jam_ke || '';
-        document.getElementById('jm-judul').value = data.judul_materi || '';
+        
+        // Kosongkan judul jika masih berisi teks penanda draft otomatis
+        const judul = data.judul_materi === '[Draft] Belum Mengisi Materi' ? '' : (data.judul_materi || '');
+        document.getElementById('jm-judul').value = judul;
         document.getElementById('jm-deskripsi').value = data.deskripsi_materi || '';
         document.getElementById('jm-refleksi').value = data.refleksi || '';
         

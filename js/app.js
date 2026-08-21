@@ -10,7 +10,6 @@ window.loadPage = function(pageName, pageTitle) {
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => item.classList.remove('active'));
     
-    // Cek apakah item navigasi bawah/sidebar ada sebelum diberi kelas active
     const navEl = document.getElementById('nav-' + pageName);
     if (navEl) navEl.classList.add('active');
 
@@ -25,9 +24,6 @@ window.loadPage = function(pageName, pageTitle) {
             document.getElementById('main-content').innerHTML = html;
 
             setTimeout(() => {
-                if (pageName === 'dashboard' && typeof window.initDashboard === 'function') {
-                    window.initDashboard();
-                }
                 if (pageName === 'master' && typeof window.loadDataKelas === 'function') {
                     window.loadDataKelas();
                 }
@@ -41,6 +37,9 @@ window.loadPage = function(pageName, pageTitle) {
                 }
                 if (pageName === 'jurnal' && typeof window.initJurnal === 'function') {
                     window.initJurnal();
+                }
+                if (pageName === 'paiapps' && typeof window.initPaiApps === 'function') {
+                    window.initPaiApps();
                 }
             }, 50);
         })
@@ -146,7 +145,7 @@ window.fetchProfile = async function() {
     }
 };
 
-// ================= LOGIKA KLIK 1x (DASHBOARD) & 5x (PENGATURAN PROFIL) =================
+// ================= LOGIKA KLIK 7x (BUKA MODAL PENGATURAN PROFIL) =================
 let clickCount = 0;
 let clickTimeout = null;
 
@@ -154,16 +153,13 @@ window.handleProfileClick = function() {
     clickCount++;
     if (clickTimeout) clearTimeout(clickTimeout);
     
-    if (clickCount >= 5) {
+    if (clickCount >= 7) {
         document.getElementById('modal-profil').style.display = 'flex';
         clickCount = 0; 
     } else {
         clickTimeout = setTimeout(() => { 
-            if (clickCount === 1) {
-                loadPage('dashboard', 'Dashboard Guru');
-            }
             clickCount = 0; 
-        }, 400);
+        }, 500);
     }
 };
 
