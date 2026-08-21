@@ -232,6 +232,7 @@ window.simpanProfil = async function(e) {
 
 // ================= INIT PADA SAAT WEBSITE DIMUAT =================
 document.addEventListener('DOMContentLoaded', () => {
-    loadPage('presensi', 'Presensi Siswa');
+    // Memuat modul PAI-APPS (Dashboard) secara default saat aplikasi dibuka
+    loadPage('paiapps', 'PAI-APPS');
     fetchProfile(); 
 });

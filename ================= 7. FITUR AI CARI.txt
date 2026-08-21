@@ -1,0 +1,150 @@
+// ================= 7. FITUR AI CARI AYAT & HADIS TEMATIK (GROQ API) =================
+window.toggleSectionAiDalil = function() {
+    const content = document.getElementById('section-ai-content');
+    const icon = document.getElementById('icon-chevron-ai');
+    const btn = document.getElementById('btn-toggle-ai-section');
+
+    if (!content) return;
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        if (icon) icon.className = 'fa-solid fa-chevron-up';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-up" id="icon-chevron-ai"></i> Tutup';
+    } else {
+        content.style.display = 'none';
+        if (icon) icon.className = 'fa-solid fa-chevron-down';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-down" id="icon-chevron-ai"></i> Buka AI Dalil';
+    }
+};
+
+window.cariDalilAiGroq = async function() {
+    const inputTema = document.getElementById('input-tema-dalil');
+    const tema = inputTema.value.trim();
+    const btn = document.getElementById('btn-cari-dalil');
+    const boxHasil = document.getElementById('container-hasil-ai-dalil');
+    const renderBox = document.getElementById('box-render-dalil');
+
+    if (!tema) {
+        alert("Silakan masukkan tema materi terlebih dahulu!");
+        return;
+    }
+
+    const txtAsli = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mencari...';
+    btn.disabled = true;
+    boxHasil.style.display = 'block';
+    renderBox.innerHTML = '<div style="text-align:center; padding:15px; color:var(--neon-purple); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Sedang meneliti ayat & hadis sahih via AI Groq...</div>';
+
+    // Instruksi ketat JSON agar tidak memicu 'Failed to validate JSON'
+    const systemPrompt = `You are an expert Islamic scholar in Quran and Sahih Hadith.
+You MUST output your response strictly as a valid JSON object.
+Rules:
+1. Provide up to 2 Quran verses (complete with surah name, ayah number, Arabic text with harakat, and Indonesian translation).
+2. Provide up to 2 Sahih Hadiths (must be authentic with clear narrators like HR. Bukhari, Muslim, Abu Dawud, Tirmidzi, Arabic text, and Indonesian translation).
+3. If the topic is very specific, providing at least 1 authentic verse/hadith is acceptable.
+4. The response MUST strictly follow this JSON schema:
+{
+  "tema": "string",
+  "ayat": [
+    { "surah": "string", "nomor": "string", "arab": "string", "arti": "string" }
+  ],
+  "hadis": [
+    { "perawi": "string", "arab": "string", "arti": "string" }
+  ],
+  "ringkasan_hikmah": "string"
+}`;
+
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'openai/gpt-oss-20b',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: `Please provide Quran and Hadith references for topic "${tema}" in pure JSON format.` }
+                ],
+                response_format: { type: "json_object" },
+                temperature: 0.1
+            })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `HTTP Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        let rawContent = data.choices[0]?.message?.content || '{}';
+
+        // Bersihkan markdown code blocks jika model menyisipkannya
+        rawContent = rawContent.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        const parsed = JSON.parse(rawContent);
+
+        let html = '';
+        let textSalinBuilder = `📚 TEMA: ${parsed.tema || tema}\n\n`;
+
+        // Render Ayat
+        if (parsed.ayat && parsed.ayat.length > 0) {
+            html += `<b style="font-size:11px; color:var(--neon-green); display:block; margin:6px 0;"><i class="fa-solid fa-book-quran"></i> Dalil Al-Qur'an:</b>`;
+            textSalinBuilder += `--- DALIL AL-QUR'AN ---\n`;
+            parsed.ayat.forEach((ay, idx) => {
+                html += `
+                    <div class="dalil-item-card">
+                        <div style="font-size:10px; font-weight:700; color:var(--neon-yellow); margin-bottom:4px;">
+                            QS. ${ay.surah} : Ayat ${ay.nomor}
+                        </div>
+                        <div class="arabic-text">${ay.arab}</div>
+                        <div style="font-size:10px; color:var(--text-abu); line-height:1.4; margin-top:4px;">
+                            <b>Artinya:</b> "${ay.arti}"
+                        </div>
+                    </div>
+                `;
+                textSalinBuilder += `${idx + 1}. QS. ${ay.surah} : Ayat ${ay.nomor}\n${ay.arab}\nArtinya: "${ay.arti}"\n\n`;
+            });
+        }
+
+        // Render Hadis
+        if (parsed.hadis && parsed.hadis.length > 0) {
+            html += `<b style="font-size:11px; color:var(--neon-blue); display:block; margin:10px 0 6px 0;"><i class="fa-solid fa-scroll"></i> Dalil Hadis Sahih:</b>`;
+            textSalinBuilder += `--- DALIL HADIS SAHIH ---\n`;
+            parsed.hadis.forEach((hd, idx) => {
+                html += `
+                    <div class="dalil-item-card">
+                        <div style="font-size:10px; font-weight:700; color:var(--neon-blue); margin-bottom:4px;">
+                            Hadits Riwayat: ${hd.perawi}
+                        </div>
+                        <div class="arabic-text">${hd.arab}</div>
+                        <div style="font-size:10px; color:var(--text-abu); line-height:1.4; margin-top:4px;">
+                            <b>Artinya:</b> "${hd.arti}"
+                        </div>
+                    </div>
+                `;
+                textSalinBuilder += `${idx + 1}. HR. ${hd.perawi}\n${hd.arab}\nArtinya: "${hd.arti}"\n\n`;
+            });
+        }
+
+        // Render Ringkasan
+        if (parsed.ringkasan_hikmah) {
+            html += `
+                <div style="background:var(--bg-card); border-left:3px solid var(--neon-purple); padding:8px; border-radius:4px; font-size:10px; color:var(--text-putih); line-height:1.4; margin-top:8px;">
+                    <b>💡 Intisari Hikmah:</b> ${parsed.ringkasan_hikmah}
+                </div>
+            `;
+            textSalinBuilder += `💡 Intisari Hikmah: ${parsed.ringkasan_hikmah}`;
+        }
+
+        textRawHasilAiDalil = textSalinBuilder;
+        renderBox.innerHTML = html;
+
+    } catch (e) {
+        renderBox.innerHTML = `<div style="text-align:center; padding:10px; color:var(--neon-red); font-size:11px;">Gagal memuat dalil: ${e.message}</div>`;
+    } finally {
+        btn.innerHTML = txtAsli;
+        btn.disabled = false;
+    }
+};

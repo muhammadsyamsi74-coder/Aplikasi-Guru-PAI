@@ -1,166 +1,656 @@
 <!-- pages/paiapps-tools.html -->
 <style>
-    .card-data {
+    /* =========================================================
+       COMPACT UI - TOOLS & DOKUMEN AJAR PAI (VERTIKAL STACK)
+       ========================================================= */
+    .card-data-compact {
         background: var(--bg-card);
-        border-radius: 16px;
-        padding: 20px;
+        border-radius: 12px;
+        padding: 12px;
         border: 1px solid var(--border-color);
         margin-bottom: 15px;
     }
-    .card-header {
+    .card-header-compact {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
         border-bottom: 1px dashed var(--border-color);
     }
-    .card-header h3 {
-        font-size: 13px;
+    .card-header-compact h3 {
+        font-size: 11px;
         font-weight: 700;
         color: var(--text-putih);
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
     }
 
-    /* GRID TOOLS APPS */
-    .apps-grid {
+    /* GRID MENU ALAT BANTU */
+    .apps-grid-compact {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
-    .app-card {
+    @media (min-width: 768px) {
+        .apps-grid-compact { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    }
+
+    .app-card-compact {
         background: var(--bg-main);
         border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 18px 12px;
+        border-radius: 10px;
+        padding: 10px 8px;
         text-align: center;
         cursor: pointer;
         transition: all 0.2s;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
+        gap: 8px;
     }
-    .app-card:hover {
+    .app-card-compact:hover, .app-card-compact:active {
         border-color: var(--neon-green);
-        transform: translateY(-3px);
         background: var(--bg-card-hover, #1b2534);
     }
-    .app-card i {
-        font-size: 26px;
-    }
-    .app-card span {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-putih);
-    }
+    .app-card-compact i { font-size: 14px; }
+    .app-card-compact span { font-size: 10px; font-weight: 600; color: var(--text-putih); }
 
     /* MODAL BOX ALAT BANTU */
     .tool-box-area {
         display: none;
         background: var(--bg-main);
-        border-radius: 12px;
-        padding: 15px;
+        border-radius: 10px;
+        padding: 10px;
         border: 1px solid var(--neon-blue);
-        margin-top: 15px;
+        margin-top: 10px;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .sel-compact {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+    }
+    .btn-compact {
+        padding: 6px 10px !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: none;
+    }
+
+    /* GRID HASIL KELOMPOK */
+    .hasil-kelompok-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        margin-top: 10px;
+    }
+    @media (min-width: 768px) {
+        .hasil-kelompok-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    }
+    .box-kelompok-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px;
+    }
+    .box-kelompok-item h4 {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--neon-green);
+        margin: 0 0 4px 0;
+        padding-bottom: 3px;
+        border-bottom: 1px dashed var(--border-color);
+        display: flex;
+        justify-content: space-between;
+    }
+    .box-kelompok-item ol {
+        margin: 0;
+        padding-left: 16px;
+        font-size: 10px;
+        color: var(--text-putih);
+        line-height: 1.4;
+    }
+
+    /* LIST DOKUMEN 1 BARIS (SINGLE-LINE ROW) */
+    .doc-grid-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .item-doc-row {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 6px 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .item-doc-row.pinned {
+        border-color: rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.03);
+    }
+    .doc-left-area {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+    }
+    .doc-text-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+    }
+    .doc-actions-wrap {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+
+    /* TOMBOL IKON MINIMALIS */
+    .btn-icon-doc {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-abu);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        padding: 0;
+    }
+    .btn-icon-doc:hover {
+        border-color: var(--neon-green);
+        color: var(--text-putih);
+    }
+    .badge-doc-tag {
+        font-size: 8px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--neon-blue);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        flex-shrink: 0;
+    }
+
+    .btn-muat-semua {
+        width: 100%;
+        margin-top: 8px;
+        background: var(--bg-main);
+        border: 1px dashed var(--border-color);
+        color: var(--text-abu);
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-muat-semua:hover {
+        border-color: var(--neon-green);
+        color: var(--neon-green);
+    }
+
+    /* KARTU AI TEMA AYAT & HADIS */
+    .arabic-text {
+        font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
+        direction: rtl;
+        text-align: right;
+        font-size: 16px;
+        line-height: 1.8;
+        color: #f8fafc;
+        margin: 6px 0;
+    }
+    .dalil-item-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+
+    /* GRID WHATSAPP GROUP KELAS */
+    .wa-grid-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 10px;
         animation: fadeIn 0.3s ease-out;
+    }
+    @media (min-width: 768px) {
+        .wa-grid-container {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+    }
+
+    .card-wa-kelas {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: all 0.2s;
+    }
+    .card-wa-kelas:hover {
+        border-color: rgba(5, 213, 138, 0.4);
+    }
+    .header-wa-kelas {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header-wa-kelas b {
+        font-size: 12px;
+        color: var(--text-putih);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-open-group {
+        width: 100%;
+        background: linear-gradient(135deg, #059669 0%, #05d58a 100%);
+        color: #0b121e;
+        border: none;
+        border-radius: 8px;
+        padding: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+    .btn-open-group:active { transform: scale(0.98); }
+    .btn-open-group.disabled {
+        background: var(--bg-card);
+        color: var(--text-abu);
+        border: 1px solid var(--border-color);
+        cursor: not-allowed;
+    }
+
+    .pengurus-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 10px;
+    }
+    .pengurus-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-card);
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+    .btn-wa-personal {
+        background: rgba(5, 213, 138, 0.15);
+        color: var(--neon-green);
+        border: 1px solid rgba(5, 213, 138, 0.3);
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 9px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        text-decoration: none;
+    }
+    .btn-wa-personal:hover {
+        background: var(--neon-green);
+        color: var(--bg-main);
     }
 </style>
 
-<div class="card-data">
-    <div class="card-header">
-        <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-green);"></i> Alat Bantu Pengajaran PAI</h3>
-    </div>
-    
-    <div class="apps-grid">
-        <div class="app-card" onclick="bukaTool('acak-siswa')">
-            <i class="fa-solid fa-shuffle" style="color: var(--neon-blue);"></i>
-            <span>Acak Siswa</span>
+<div class="paiapps-tools-container">
+
+    <!-- ================= 1. BAGIAN ALAT BANTU ================= -->
+    <div class="card-data-compact">
+        <div class="card-header-compact">
+            <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-green);"></i> Alat Bantu Pengajaran PAI</h3>
         </div>
-        <div class="app-card" onclick="bukaTool('timer-kbm')">
-            <i class="fa-solid fa-stopwatch" style="color: var(--neon-yellow);"></i>
-            <span>Timer / Stopwatch</span>
+        
+        <div class="apps-grid-compact">
+            <div class="app-card-compact" onclick="bukaTool('acak-siswa')">
+                <i class="fa-solid fa-shuffle" style="color: var(--neon-blue);"></i>
+                <span>Acak Siswa</span>
+            </div>
+            <div class="app-card-compact" onclick="bukaTool('timer-kbm')">
+                <i class="fa-solid fa-stopwatch" style="color: var(--neon-yellow);"></i>
+                <span>Timer KBM</span>
+            </div>
+            <div class="app-card-compact" onclick="bukaTool('spin-maju')">
+                <i class="fa-solid fa-arrows-spin" style="color: var(--neon-purple);"></i>
+                <span>Spin Maju</span>
+            </div>
+            <div class="app-card-compact" onclick="bukaTool('bagi-kelompok')">
+                <i class="fa-solid fa-people-group" style="color: var(--neon-green);"></i>
+                <span>Bagi Kelompok</span>
+            </div>
         </div>
-        <div class="app-card" onclick="bukaTool('bank-hadis')">
-            <i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i>
-            <span>Kutipan Hadis</span>
+
+        <!-- AREA MODAL 1: ACAK SISWA -->
+        <div id="box-tool-acak-siswa" class="tool-box-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="font-size:11px; color:var(--neon-blue);"><i class="fa-solid fa-shuffle"></i> Acak Siswa</b>
+                <button onclick="tutupSemuaTools()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-size:12px;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <select id="pilih-kelas-acak" class="form-control sel-compact" onchange="loadSiswaUntukAcak()" style="flex:1;"></select>
+                <button onclick="putarAcakSiswa()" class="btn-compact btn-primary" style="background:var(--neon-blue); color:#fff; width:auto; padding:6px 12px !important;">
+                    <i class="fa-solid fa-play"></i> Putar
+                </button>
+            </div>
+            <div id="hasil-acak-siswa" style="padding:10px; text-align:center; background:var(--bg-card); border-radius:8px; border:1px dashed var(--border-color); font-size:13px; font-weight:700; color:var(--neon-green);">
+                Pilih kelas lalu putar
+            </div>
         </div>
-        <div class="app-card" onclick="bukaTool('kalkulator-nilai')">
-            <i class="fa-solid fa-calculator" style="color: var(--neon-purple);"></i>
-            <span>Kalkulator Nilai</span>
+
+        <!-- AREA MODAL 2: TIMER KBM -->
+        <div id="box-tool-timer-kbm" class="tool-box-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="font-size:11px; color:var(--neon-yellow);"><i class="fa-solid fa-stopwatch"></i> Timer KBM</b>
+                <button onclick="tutupSemuaTools()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-size:12px;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div id="display-timer" style="font-size:24px; font-weight:800; text-align:center; color:var(--text-putih); padding:6px; background:var(--bg-card); border-radius:8px; margin-bottom:8px; font-family:monospace;">
+                00:00
+            </div>
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+                <button onclick="setTimerMenit(5)" class="btn-compact btn-action" style="flex:1; background:var(--bg-card); color:var(--text-putih);">5m</button>
+                <button onclick="setTimerMenit(10)" class="btn-compact btn-action" style="flex:1; background:var(--bg-card); color:var(--text-putih);">10m</button>
+                <button onclick="setTimerMenit(15)" class="btn-compact btn-action" style="flex:1; background:var(--bg-card); color:var(--text-putih);">15m</button>
+                <input type="number" id="input-kustom-menit" class="form-control sel-compact" placeholder="Mnt" style="width:50px; text-align:center;">
+                <button onclick="setTimerKustom()" class="btn-compact btn-action" style="color:var(--neon-yellow); border:1px solid var(--neon-yellow); background:transparent;">Set</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button onclick="mulaiTimer()" class="btn-compact" style="flex:1; background:var(--gradient-primary); color:#fff;"><i class="fa-solid fa-play"></i> Mulai</button>
+                <button onclick="stopTimer()" class="btn-compact" style="flex:1; background:var(--neon-red); color:#fff;"><i class="fa-solid fa-stop"></i> Stop</button>
+            </div>
+        </div>
+
+        <!-- AREA MODAL 3: SPIN MAJU -->
+        <div id="box-tool-spin-maju" class="tool-box-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="font-size:11px; color:var(--neon-purple);"><i class="fa-solid fa-arrows-spin"></i> Undian Giliran Maju</b>
+                <button onclick="tutupSemuaTools()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-size:12px;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <input type="text" id="input-list-giliran" class="form-control sel-compact" placeholder="Nama / Kelompok pisahkan koma..." style="margin-bottom:6px;">
+            <div id="display-spin-pemenang" style="padding:8px; text-align:center; background:var(--bg-card); border-radius:8px; border:1px dashed var(--neon-purple); font-size:13px; font-weight:700; color:var(--neon-purple); margin-bottom:6px;">
+                Siap diundi
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button onclick="putarUndianMaju()" class="btn-compact" style="flex:2; background:var(--gradient-purple); color:#fff;">
+                    <i class="fa-solid fa-play"></i> Putar Giliran
+                </button>
+                <button onclick="resetUndianMaju()" class="btn-compact btn-action" style="flex:1; color:var(--neon-red); border:1px solid rgba(239,68,68,0.3); background:transparent;">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+            <div id="daftar-sudah-maju-box" style="margin-top:6px; font-size:9px; color:var(--text-abu); display:none;">
+                <b>Maju:</b> <span id="text-sudah-maju" style="color:var(--neon-green);"></span>
+            </div>
+        </div>
+
+        <!-- AREA MODAL 4: BAGI KELOMPOK -->
+        <div id="box-tool-bagi-kelompok" class="tool-box-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="font-size:11px; color:var(--neon-green);"><i class="fa-solid fa-people-group"></i> Pembagi Kelompok</b>
+                <button onclick="tutupSemuaTools()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-size:12px;"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:6px;">
+                <select id="pilih-kelas-kelompok" class="form-control sel-compact" style="flex:2;"></select>
+                <input type="number" id="input-jumlah-kelompok" class="form-control sel-compact" min="2" max="15" value="4" placeholder="Jml" style="flex:1; text-align:center;">
+                <button onclick="prosesBagiKelompok()" class="btn-compact btn-primary" style="background:var(--gradient-primary); padding:6px 12px !important;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Bagi
+                </button>
+            </div>
+            <div id="hasil-pembagian-kelompok" class="hasil-kelompok-grid"></div>
         </div>
     </div>
 
-    <!-- AREA TOOL 1: ACAK SISWA -->
-    <div id="box-tool-acak-siswa" class="tool-box-area">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <b style="font-size:12px; color:var(--neon-blue);"><i class="fa-solid fa-shuffle"></i> Pengacak Nama Siswa</b>
-            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+    <!-- ================= 2. BAGIAN MATERI AJAR ================= -->
+    <div class="card-data-compact">
+        <div class="card-header-compact">
+            <h3><i class="fa-solid fa-book-open" style="color: var(--neon-green);"></i> Bank Materi Ajar</h3>
+            <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:1px solid rgba(5,213,138,0.3);">
+                <i class="fa-solid fa-plus"></i> Upload Materi
+            </button>
         </div>
-        <div class="form-group" style="margin-bottom:10px;">
-            <select id="pilih-kelas-acak" class="form-control" onchange="loadSiswaUntukAcak()"></select>
+
+        <!-- FORM TAMBAH MATERI -->
+        <div id="form-wrap-materi" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-green); margin-bottom:10px;">
+            <form onsubmit="simpanMateriAjar(event)">
+                <div style="display:flex; gap:6px; margin-bottom:6px;">
+                    <select id="mat-jenis" class="form-control sel-compact" style="flex:1.2;" onchange="toggleInputLainnyaMateri(this)" required>
+                        <option value="Materi Utama">Materi Utama</option>
+                        <option value="Power Point">Power Point</option>
+                        <option value="Referensi Dokumen">Referensi Dokumen</option>
+                        <option value="Ringkasan">Ringkasan</option>
+                        <option value="Web">Web</option>
+                        <option value="Lainnya">Lainnya (Ketik Sendiri)</option>
+                    </select>
+                    <select id="mat-semester" class="form-control sel-compact" style="flex:0.8;" required>
+                        <option value="Ganjil">Ganjil</option>
+                        <option value="Genap">Genap</option>
+                    </select>
+                </div>
+                <input type="text" id="mat-jenis-kustom" class="form-control sel-compact" placeholder="Tulis jenis materi..." style="display:none; margin-bottom:6px;">
+                <input type="text" id="mat-judul" class="form-control sel-compact" placeholder="Judul Materi..." style="margin-bottom:6px;" required>
+                <input type="text" id="mat-deskripsi" class="form-control sel-compact" placeholder="Deskripsi singkat..." style="margin-bottom:6px;">
+                <div style="display:flex; gap:6px; margin-bottom:6px;">
+                    <input type="text" id="mat-tahun" class="form-control sel-compact" placeholder="Thn Ajaran" style="flex:1;" required>
+                    <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih); flex:1;">
+                        <input type="checkbox" id="mat-pin" style="accent-color:var(--neon-yellow);"> <label for="mat-pin">Pin ke atas</label>
+                    </div>
+                </div>
+                <input type="url" id="mat-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Canva / Web...)" style="margin-bottom:8px;" required>
+                <button type="submit" id="btn-simpan-materi" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-primary);"><i class="fa-solid fa-save"></i> Simpan Materi</button>
+            </form>
         </div>
-        <div id="hasil-acak-siswa" style="padding:20px; text-align:center; background:var(--bg-card); border-radius:10px; border:1px dashed var(--border-color); font-size:16px; font-weight:700; color:var(--neon-green); margin-bottom:10px;">
-            Klik tombol untuk mengacak
+
+        <div id="list-cards-materi" class="doc-grid-list">
+            <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat materi...</div>
         </div>
-        <button onclick="putarAcakSiswa()" class="btn-primary" style="width:100%; justify-content:center; padding:10px;">
-            <i class="fa-solid fa-play" style="margin-right:6px;"></i> Acak Sekarang
+        <button id="btn-expand-materi" onclick="toggleExpandMateri()" class="btn-muat-semua" style="display:none;">
+            <i class="fa-solid fa-chevron-down"></i> Tampilkan Semua
         </button>
     </div>
 
-    <!-- AREA TOOL 2: TIMER KBM -->
-    <div id="box-tool-timer-kbm" class="tool-box-area">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <b style="font-size:12px; color:var(--neon-yellow);"><i class="fa-solid fa-stopwatch"></i> Timer Pembelajaran</b>
-            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+    <!-- ================= 3. BAGIAN PERANGKAT AJAR (TERSEMBUNYI DEFAULT) ================= -->
+    <div class="card-data-compact">
+        <div class="card-header-compact" onclick="toggleSectionPerangkat()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <h3>
+                <i class="fa-solid fa-folder-tree" style="color: var(--neon-blue);"></i> 
+                Perangkat Ajar Guru
+            </h3>
+            <button id="btn-toggle-perangkat-section" class="btn-compact" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-perangkat"></i> Buka Perangkat
+            </button>
         </div>
-        <div id="display-timer" style="font-size:32px; font-weight:800; text-align:center; color:var(--text-putih); padding:15px; background:var(--bg-card); border-radius:10px; margin-bottom:10px;">
-            00:00
-        </div>
-        <div style="display:flex; gap:8px;">
-            <button onclick="setTimerMenit(5)" class="btn-action" style="flex:1;">5 Mnt</button>
-            <button onclick="setTimerMenit(10)" class="btn-action" style="flex:1;">10 Mnt</button>
-            <button onclick="setTimerMenit(15)" class="btn-action" style="flex:1;">15 Mnt</button>
-            <button onclick="mulaiTimer()" class="btn-primary" style="flex:1; justify-content:center; background:var(--gradient-primary);"><i class="fa-solid fa-play"></i></button>
-            <button onclick="stopTimer()" class="btn-primary" style="flex:1; justify-content:center; background:var(--neon-red);"><i class="fa-solid fa-stop"></i></button>
+
+        <!-- WADAH KONTEN PERANGKAT AJAR (TERSEMBUNYI) -->
+        <div id="section-perangkat-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button onclick="toggleFormPerangkatAjar()" class="btn-compact" style="background:rgba(59,130,246,0.15); color:var(--neon-blue); border:1px solid rgba(59,130,246,0.3);">
+                    <i class="fa-solid fa-plus"></i> Upload Perangkat
+                </button>
+            </div>
+
+            <!-- FORM TAMBAH PERANGKAT -->
+            <div id="form-wrap-perangkat" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-blue); margin-bottom:10px;">
+                <form onsubmit="simpanPerangkatAjar(event)">
+                    <div style="display:flex; gap:6px; margin-bottom:6px;">
+                        <select id="per-jenis" class="form-control sel-compact" style="flex:1.2;" onchange="toggleInputLainnyaPerangkat(this)" required>
+                            <option value="Modul">Modul</option>
+                            <option value="Prota">Prota</option>
+                            <option value="Prosem">Prosem</option>
+                            <option value="KKTP">KKTP</option>
+                            <option value="ATP">ATP</option>
+                            <option value="Tujuan Pembelajaran">Tujuan Pembelajaran</option>
+                            <option value="Capaian Pembelajaran">Capaian Pembelajaran</option>
+                            <option value="RPE">RPE</option>
+                            <option value="Lainnya">Lainnya (Ketik Sendiri)</option>
+                        </select>
+                        <select id="per-semester" class="form-control sel-compact" style="flex:0.8;" required>
+                            <option value="Ganjil">Ganjil</option>
+                            <option value="Genap">Genap</option>
+                            <option value="1 Tahun">1 Tahun</option>
+                        </select>
+                    </div>
+                    <input type="text" id="per-jenis-kustom" class="form-control sel-compact" placeholder="Tulis jenis perangkat..." style="display:none; margin-bottom:6px;">
+                    <input type="text" id="per-deskripsi" class="form-control sel-compact" placeholder="Deskripsi singkat perangkat..." style="margin-bottom:6px;">
+                    <div style="display:flex; gap:6px; margin-bottom:6px;">
+                        <input type="text" id="per-tahun" class="form-control sel-compact" placeholder="Tahun Ajaran" style="flex:1;" required>
+                        <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih); flex:1;">
+                            <input type="checkbox" id="per-pin" style="accent-color:var(--neon-yellow);"> <label for="per-pin">Pin ke atas</label>
+                        </div>
+                    </div>
+                    <input type="url" id="per-link" class="form-control sel-compact" placeholder="Link Perangkat Ajar..." style="margin-bottom:8px;" required>
+                    <button type="submit" id="btn-simpan-perangkat" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-blue);"><i class="fa-solid fa-save"></i> Simpan Perangkat</button>
+                </form>
+            </div>
+
+            <div id="list-cards-perangkat" class="doc-grid-list">
+                <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat perangkat...</div>
+            </div>
+            <button id="btn-expand-perangkat" onclick="toggleExpandPerangkat()" class="btn-muat-semua" style="display:none;">
+                <i class="fa-solid fa-chevron-down"></i> Tampilkan Semua
+            </button>
         </div>
     </div>
 
-    <!-- AREA TOOL 3: BANK HADIS -->
-    <div id="box-tool-bank-hadis" class="tool-box-area">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <b style="font-size:12px; color:var(--neon-green);"><i class="fa-solid fa-book-quran"></i> Mutiara Hadis Pilihan</b>
-            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+    <!-- ================= 4. BAGIAN AI CARI AYAT & HADIS (BARU) ================= -->
+    <div class="card-data-compact">
+        <div class="card-header-compact" onclick="toggleSectionAiDalil()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <h3>
+                <i class="fa-solid fa-brain" style="color: var(--neon-purple);"></i> 
+                AI Cari Ayat & Hadis Tematik
+            </h3>
+            <button id="btn-toggle-ai-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-ai"></i> Buka AI Dalil
+            </button>
         </div>
-        <div id="isi-kutipan-hadis" style="padding:15px; background:var(--bg-card); border-radius:10px; font-size:12px; color:var(--text-putih); line-height:1.6; margin-bottom:10px;">
-            "Menuntut ilmu itu wajib atas setiap muslim." (HR. Ibnu Majah)
+
+        <!-- WADAH KONTEN AI (TERSEMBUNYI DEFAULT) -->
+        <div id="section-ai-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                <input type="text" id="input-tema-dalil" class="form-control sel-compact" placeholder="Tulis tema materi (cth: Sabar, Adab Guru, Sholat)..." style="flex: 1;">
+                <button onclick="cariDalilAiGroq()" id="btn-cari-dalil" class="btn-compact btn-primary" style="background: var(--gradient-purple); padding: 6px 12px !important;">
+                    <i class="fa-solid fa-magnifying-glass"></i> Cari Dalil
+                </button>
+            </div>
+
+            <!-- HASIL AI -->
+            <div id="container-hasil-ai-dalil" style="display: none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <b style="font-size:11px; color:var(--neon-purple);"><i class="fa-solid fa-scroll"></i> Hasil Temuan Dalil:</b>
+                    <button onclick="copySemuaDalilText()" class="btn-compact" style="background:var(--bg-main); border:1px solid var(--border-color); color:var(--neon-green);">
+                        <i class="fa-solid fa-copy"></i> Salin Semua
+                    </button>
+                </div>
+                <div id="box-render-dalil"></div>
+            </div>
         </div>
-        <button onclick="gantiHadisAcak()" class="btn-action" style="width:100%; justify-content:center; color:var(--neon-green); border-color:var(--neon-green);">
-            <i class="fa-solid fa-rotate" style="margin-right:6px;"></i> Hadis Lainnya
-        </button>
     </div>
 
-    <!-- AREA TOOL 4: KALKULATOR NILAI -->
-    <div id="box-tool-kalkulator-nilai" class="tool-box-area">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <b style="font-size:12px; color:var(--neon-purple);"><i class="fa-solid fa-calculator"></i> Kalkulator Skor Cepat</b>
-            <button onclick="tutupSemuaTools()" class="btn-action" style="color:var(--neon-red);"><i class="fa-solid fa-times"></i></button>
+    <!-- ================= 5. BAGIAN WHATSAPP GROUP (TERSEMBUNYI DEFAULT) ================= -->
+    <div class="card-data-compact">
+        <div class="card-header-compact" onclick="toggleSectionWaGroup()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <h3>
+                <i class="fa-brands fa-whatsapp" style="color: var(--neon-green);"></i> 
+                WhatsApp Group & Pengurus Kelas
+            </h3>
+            <button id="btn-toggle-wa-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-wa"></i> Buka Grup
+            </button>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <div class="form-group" style="flex:1; margin-bottom:0;">
-                <label>Skor Benar</label>
-                <input type="number" id="calc-benar" class="form-control" placeholder="Cth: 18" oninput="hitungNilaiCepat()">
+        
+        <!-- WADAH KONTEN GRUP WA (TERSEMBUNYI) -->
+        <div id="section-wa-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <div id="container-wa-kelas" class="wa-grid-container">
+                <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat grup kelas...</div>
             </div>
-            <div class="form-group" style="flex:1; margin-bottom:0;">
-                <label>Total Soal</label>
-                <input type="number" id="calc-total" class="form-control" placeholder="Cth: 20" oninput="hitungNilaiCepat()">
-            </div>
-        </div>
-        <div id="hasil-kalkulator" style="text-align:center; padding:10px; background:var(--bg-card); border-radius:10px; font-size:18px; font-weight:800; color:var(--neon-purple);">
-            Nilai: 0
         </div>
     </div>
+
+    <!-- MODAL EDIT WHATSAPP & PENGURUS KELAS -->
+    <div id="modal-edit-wa-kelas" class="modal-overlay">
+        <div class="modal-content" style="max-width: 440px;">
+            <button class="modal-close" onclick="document.getElementById('modal-edit-wa-kelas').style.display='none'"><i class="fa-solid fa-times"></i></button>
+            <h3 style="color:var(--neon-green); margin-bottom:15px; font-size:13px; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Atur WA & Pengurus: <span id="modal-wa-title-kelas">-</span></h3>
+            
+            <form onsubmit="simpanKonfigurasiWaKelas(event)">
+                <input type="hidden" id="modal-wa-id-kelas">
+                
+                <div class="form-group">
+                    <label>Link Undangan Grup WhatsApp</label>
+                    <input type="url" id="modal-wa-link-grup" class="form-control sel-compact" placeholder="https://chat.whatsapp.com/..." style="font-size:11px;">
+                </div>
+                
+                <!-- KETUA KELAS -->
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:8px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--neon-yellow); margin-bottom:4px;">☀️ Ketua Kelas</div>
+                    <select id="modal-wa-id-ketua" class="form-control sel-compact" onchange="sinkronNomorPengurus('ketua')" style="margin-bottom:4px;"></select>
+                    <input type="text" id="modal-wa-no-ketua" class="form-control sel-compact" placeholder="No. WA Ketua (cth: 08123456789)">
+                </div>
+
+                <!-- SEKRETARIS -->
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:8px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--neon-blue); margin-bottom:4px;">🌙 Sekretaris</div>
+                    <select id="modal-wa-id-sekretaris" class="form-control sel-compact" onchange="sinkronNomorPengurus('sekretaris')" style="margin-bottom:4px;"></select>
+                    <input type="text" id="modal-wa-no-sekretaris" class="form-control sel-compact" placeholder="No. WA Sekretaris (cth: 08123456789)">
+                </div>
+
+                <!-- BENDAHARA -->
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--neon-red); margin-bottom:4px;">⭕ Bendahara</div>
+                    <select id="modal-wa-id-bendahara" class="form-control sel-compact" onchange="sinkronNomorPengurus('bendahara')" style="margin-bottom:4px;"></select>
+                    <input type="text" id="modal-wa-no-bendahara" class="form-control sel-compact" placeholder="No. WA Bendahara (cth: 08123456789)">
+                </div>
+                
+                <button type="submit" id="btn-simpan-wa-modal" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-primary); padding:10px !important;">
+                    <i class="fa-solid fa-save"></i> Simpan Pengaturan WA
+                </button>
+            </form>
+        </div>
+    </div>
+
 </div>
