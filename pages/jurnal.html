@@ -14,6 +14,7 @@
         --neon-yellow: #f59e0b;
         --neon-red: #ef4444;
         --neon-purple: #8b5cf6;
+        --border-blue-subtle: rgba(59, 130, 246, 0.28);
         --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
         --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
@@ -21,11 +22,13 @@
 
     .jurnal-container { animation: fadeIn 0.4s ease-out; }
     
-    /* DESAIN KARTU GELAP UTAMA */
+    /* DESAIN KARTU GELAP UTAMA (GARIS MENYELURUH TIPIS BIRU ELEGAN) */
     .card-data { 
         background: var(--bg-card); 
         border-radius: 16px; padding: 20px; 
-        border: 1px solid var(--border-color); margin-bottom: 20px; 
+        border: 1px solid var(--border-blue-subtle);
+        margin-bottom: 20px; 
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
@@ -39,7 +42,7 @@
         font-size: 13px; color: var(--text-putih); outline: none; transition: all 0.3s ease; 
         background: var(--bg-main); font-weight: 500;
     }
-    .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 4px rgba(5, 213, 138, 0.1); }
+    .form-control:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
     textarea.form-control { resize: vertical; min-height: 80px; }
     
     /* TOMBOL SIMPAN PREMIUM */
@@ -62,10 +65,11 @@
     }
     .btn-cancel:hover { background: var(--neon-red); color: white; border-style: solid; }
 
-    /* DESAIN TAB (PILL SHAPE DARK) */
+    /* DESAIN TAB (GARIS MENYELURUH TIPIS BIRU) */
     .tab-container { 
         display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; border: 1px solid var(--border-color);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 25px; 
+        border: 1px solid var(--border-blue-subtle);
         overflow-x: auto; scrollbar-width: none; margin-top: 5px; 
     }
     .tab-container::-webkit-scrollbar { display: none; }
@@ -76,15 +80,48 @@
     }
     .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
 
-    .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
+    .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
 
-    /* RIWAYAT LIST & ACTION BTN (SLIM CERAH) */
+    /* GRID TOMBOL JAM 1 SAMPAI 9 */
+    .jam-btn-grid {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 4px;
+        background: var(--bg-main);
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .btn-jam-num {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-abu);
+        border-radius: 8px;
+        padding: 8px 0;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    .btn-jam-num:hover {
+        border-color: var(--neon-green);
+        color: var(--text-putih);
+    }
+    .btn-jam-num.active {
+        background: rgba(5, 213, 138, 0.2);
+        color: var(--neon-green);
+        border-color: var(--neon-green);
+        box-shadow: 0 0 10px rgba(5, 213, 138, 0.3);
+    }
+
+    /* RIWAYAT LIST & ACTION BTN */
     .list-data { list-style: none; padding: 0; }
     .list-data li { 
         padding: 10px 12px; 
-        background: rgba(255, 255, 255, 0.9); 
-        border: 1px solid #e2e8f0; 
+        background: rgba(255, 255, 255, 0.95); 
+        border: 1px solid rgba(59, 130, 246, 0.35); 
         border-radius: 10px; 
         margin-bottom: 8px; 
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
@@ -105,11 +142,20 @@
     .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
     .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
 
-    /* CHECKBOX & KOTAK SISWA (DARK THEME) */
-    .check-all-wrapper { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(5, 213, 138, 0.05); border-radius: 12px; font-weight: 600; font-size: 12px; color: var(--neon-green); margin-bottom: 10px; border: 1px solid rgba(5, 213, 138, 0.2); }
+    /* CHECKBOX & KOTAK SISWA (GARIS MENYELURUH TIPIS BIRU) */
+    .check-all-wrapper { 
+        display: flex; align-items: center; gap: 10px; padding: 12px; 
+        background: rgba(5, 213, 138, 0.05); border-radius: 12px; font-weight: 600; 
+        font-size: 12px; color: var(--neon-green); margin-bottom: 10px; 
+        border: 1px solid var(--border-blue-subtle);
+    }
     .check-all-wrapper input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--neon-green); }
     
-    .student-list-box { max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; background: var(--bg-main); }
+    .student-list-box { 
+        max-height: 250px; overflow-y: auto; 
+        border: 1px solid var(--border-blue-subtle); 
+        border-radius: 12px; padding: 10px; background: var(--bg-main); 
+    }
     .student-checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s; border-radius: 6px; }
     .student-checkbox-item:hover { background: var(--bg-card); }
     .student-checkbox-item:last-child { border-bottom: none; }
@@ -131,25 +177,41 @@
     <!-- ================= TAB 1: JURNAL MENGAJAR ================= -->
     <div id="tab-jurnal-mengajar" style="display: block;">
         <div class="card-data">
-            <div class="form-group">
-                <label>Pilih Kelas</label>
-                <select id="pilih-kelas-mengajar" class="form-control" onchange="setAutoPertemuanMengajar()"></select>
-            </div>
-            
             <div class="desktop-row">
+                <div class="form-group" style="flex: 1.2;">
+                    <label>Pilih Kelas</label>
+                    <select id="pilih-kelas-mengajar" class="form-control" onchange="setAutoPertemuanMengajar()"></select>
+                </div>
                 <div class="form-group" style="flex: 1;">
                     <label>Tanggal</label>
                     <input type="date" id="jm-tanggal" class="form-control" required>
                 </div>
-                <div class="form-group" style="flex: 0.5;">
+                <div class="form-group" style="flex: 0.8;">
                     <label>Pertemuan Ke</label>
-                    <input type="number" id="jm-pertemuan" class="form-control" placeholder="Cth: 1">
-                </div>
-                <div class="form-group" style="flex: 0.5;">
-                    <label>Jam Ke</label>
-                    <input type="text" id="jm-jam" class="form-control" placeholder="Cth: 1-2">
+                    <input type="number" id="jm-pertemuan" class="form-control" placeholder="Cth: 1" required>
                 </div>
             </div>
+
+            <!-- PILIHAN ANGKA JAM KE 1-9 (PILIH 1 ATAU 2 ANGKA) -->
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="margin:0;">Jam Ke- (Pilih 1 atau 2 Angka Sekaligus):</label>
+                    <span id="label-terpilih-jam" style="font-size:11px; color:var(--neon-green); font-weight:700;">-</span>
+                </div>
+                <input type="hidden" id="jm-jam">
+                <div class="jam-btn-grid" id="grid-jam-angka">
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(1)">1</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(2)">2</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(3)">3</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(4)">4</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(5)">5</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(6)">6</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(7)">7</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(8)">8</button>
+                    <button type="button" class="btn-jam-num" onclick="pilihAngkaJam(9)">9</button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Judul Materi</label>
                 <input type="text" id="jm-judul" class="form-control" placeholder="Cth: Rukun Iman">
@@ -339,7 +401,7 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: JURNAL WALI (LANGSUNG SISWAGURUWALI) ================= -->
+    <!-- ================= TAB 3: JURNAL WALI ================= -->
     <div id="tab-jurnal-wali" style="display: none;">
         <div class="card-data">
             <div class="form-group">

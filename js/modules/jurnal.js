@@ -5,6 +5,81 @@ let editModeMengajar = null;
 let editModeSikap = null;
 let editModeWali = null;
 let modeInputSikap = 'kelas'; // 'kelas' atau 'manual'
+let selectedJam = []; // Menampung pilihan angka jam ke (maks 2 angka)
+
+// ================= FUNGSI SORTING SISWA =================
+function sortSiswaJurnal(listData) {
+    return listData.sort((a, b) => {
+        const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 99999;
+        const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 99999;
+
+        if (noA !== noB) {
+            return noA - noB;
+        }
+
+        const namaA = (a.siswa && a.siswa.nama_siswa) ? a.siswa.nama_siswa : '';
+        const namaB = (b.siswa && b.siswa.nama_siswa) ? b.siswa.nama_siswa : '';
+        return namaA.localeCompare(namaB);
+    });
+}
+
+// ================= FUNGSI PILIH ANGKA JAM KE- (1-9, MAKS 2) =================
+window.pilihAngkaJam = function(angka) {
+    angka = parseInt(angka);
+    
+    // Jika angka sudah ada, hapus (toggle off)
+    if (selectedJam.includes(angka)) {
+        selectedJam = selectedJam.filter(n => n !== angka);
+    } else {
+        // Jika sudah memilih 2 angka, reset dan mulai dari angka baru yang diklik
+        if (selectedJam.length >= 2) {
+            selectedJam = [angka];
+        } else {
+            selectedJam.push(angka);
+        }
+    }
+    
+    // Urutkan angka dari kecil ke besar (misal [2, 1] menjadi [1, 2])
+    selectedJam.sort((a, b) => a - b);
+    
+    renderPilihanJam();
+};
+
+function renderPilihanJam() {
+    const inputVal = document.getElementById('jm-jam');
+    const labelTampil = document.getElementById('label-terpilih-jam');
+    const gridBtns = document.querySelectorAll('.btn-jam-num');
+
+    // Update class active pada tombol angka 1-9
+    gridBtns.forEach(btn => {
+        const val = parseInt(btn.innerText);
+        if (selectedJam.includes(val)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Format nilai string hasil gabungan (contoh: "1" atau "1-2")
+    const strVal = selectedJam.join('-');
+    if (inputVal) inputVal.value = strVal;
+    if (labelTampil) labelTampil.innerText = strVal ? `Jam ${strVal}` : '-';
+}
+
+window.setNilaiJamEksplisit = function(valStr) {
+    selectedJam = [];
+    if (valStr) {
+        const parts = String(valStr).split('-');
+        parts.forEach(p => {
+            const num = parseInt(p.trim());
+            if (!isNaN(num) && num >= 1 && num <= 9) {
+                selectedJam.push(num);
+            }
+        });
+        selectedJam.sort((a, b) => a - b);
+    }
+    renderPilihanJam();
+};
 
 // ================= FUNGSI TAB & INISIALISASI =================
 window.gantiTabJurnal = function(tabName) {
@@ -111,10 +186,11 @@ window.batalkanEdit = function(tipe) {
         editModeMengajar = null;
         if (document.getElementById('jm-tanggal')) document.getElementById('jm-tanggal').value = today;
         if (document.getElementById('jm-pertemuan')) document.getElementById('jm-pertemuan').value = '';
-        if (document.getElementById('jm-jam')) document.getElementById('jm-jam').value = '';
         if (document.getElementById('jm-judul')) document.getElementById('jm-judul').value = '';
         if (document.getElementById('jm-deskripsi')) document.getElementById('jm-deskripsi').value = '';
         if (document.getElementById('jm-refleksi')) document.getElementById('jm-refleksi').value = '';
+        
+        window.setNilaiJamEksplisit('');
         
         const btn = document.getElementById('btn-simpan-mengajar');
         if (btn) btn.innerHTML = '<span style="flex:1; text-align:left;">Simpan Jurnal Mengajar</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
@@ -204,6 +280,9 @@ window.loadSiswaJurnal = async function(tipe) {
                 return;
             }
 
+            // Urutkan siswa guru wali berdasarkan abjad nama A-Z
+            data.sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
+
             let htmlContent = '';
             data.forEach((item, index) => {
                 const ikonGender = item.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
@@ -237,16 +316,22 @@ window.loadSiswaJurnal = async function(tipe) {
         const { data, error } = await supabase
             .from('anggota_kelas')
             .select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`)
-            .eq('id_kelas', idKelas)
-            .order('nomor_absen', { ascending: true });
+            .eq('id_kelas', idKelas);
 
         if (error) throw error;
 
-        data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-abu); text-align:center; padding:10px;">Belum ada siswa di kelas ini.</div>';
+            return;
+        }
+
+        // Urutkan berdasarkan nomor absen 1-seterusnya, jika sama berdasarkan nama, tanpa absen di belakang
+        sortSiswaJurnal(data);
 
         let htmlContent = '';
         data.forEach((item, index) => {
-            const ikonGender = item.siswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
+            const jk = item.siswa.jenis_kelamin;
+            const ikonGender = jk === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
             htmlContent += `
                 <label class="student-checkbox-item" for="cb-${tipe}-${index}">
                     <input type="checkbox" id="cb-${tipe}-${index}" class="check-siswa-${tipe}" value="${item.id_siswa}">
@@ -272,8 +357,13 @@ window.togglePilihSemua = function(tipe) {
 window.simpanJurnalMengajar = async function() {
     const elKelas = document.getElementById('pilih-kelas-mengajar');
     const elTgl = document.getElementById('jm-tanggal');
+    const elPertemuan = document.getElementById('jm-pertemuan');
+    const elJam = document.getElementById('jm-jam');
+
     if (!elKelas || !elKelas.value) { alert('Pilih Kelas terlebih dahulu!'); return; }
     if (!elTgl || !elTgl.value) { alert('Tanggal harus diisi!'); return; }
+    if (!elPertemuan || !elPertemuan.value) { alert('Pertemuan Ke harus diisi!'); return; }
+    if (!elJam || !elJam.value) { alert('Silakan pilih nomor Jam Ke- (1 sampai 9)!'); return; }
 
     const btn = document.getElementById('btn-simpan-mengajar');
     const teksAsli = btn.innerHTML;
@@ -285,8 +375,8 @@ window.simpanJurnalMengajar = async function() {
         const payload = {
             id_kelas: elKelas.value, 
             tanggal: elTgl.value,
-            pertemuan_ke: document.getElementById('jm-pertemuan').value || null, 
-            jam_ke: document.getElementById('jm-jam').value || null, 
+            pertemuan_ke: elPertemuan.value, 
+            jam_ke: elJam.value, 
             judul_materi: document.getElementById('jm-judul').value || null,
             deskripsi_materi: document.getElementById('jm-deskripsi').value || null,
             refleksi: document.getElementById('jm-refleksi').value || null
@@ -374,9 +464,9 @@ window.panggilEditMengajar = async function(id) {
         document.getElementById('pilih-kelas-mengajar').value = data.id_kelas;
         document.getElementById('jm-tanggal').value = data.tanggal || '';
         document.getElementById('jm-pertemuan').value = data.pertemuan_ke || '';
-        document.getElementById('jm-jam').value = data.jam_ke || '';
         
-        // Kosongkan judul jika masih berisi teks penanda draft otomatis
+        window.setNilaiJamEksplisit(data.jam_ke || '');
+        
         const judul = data.judul_materi === '[Draft] Belum Mengisi Materi' ? '' : (data.judul_materi || '');
         document.getElementById('jm-judul').value = judul;
         document.getElementById('jm-deskripsi').value = data.deskripsi_materi || '';
@@ -425,7 +515,6 @@ window.simpanJurnalSikap = async function() {
             const kelasManual = document.getElementById('js-manual-kelas').value.trim();
             if (!namaManual) { alert("Tuliskan nama siswa!"); return; }
 
-            // Menyimpan nama dan kelas manual ke deskripsi kejadian
             const fullDeskripsi = `[${kelasManual || 'Luar Kelas'}] ${namaManual}: ${deskripsi || '-'}`;
             
             const payload = {

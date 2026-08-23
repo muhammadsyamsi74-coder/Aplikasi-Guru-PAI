@@ -33,6 +33,22 @@ const mapSurah = [
     { label: 'Al-\'Adiyat', col: 'aladiyat' }
 ];
 
+// ================= FUNGSI SORTING STANDAR (ABSEN LALU NAMA) =================
+function sortSiswaPenilaian(listData) {
+    return listData.sort((a, b) => {
+        const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 99999;
+        const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 99999;
+
+        if (noA !== noB) {
+            return noA - noB;
+        }
+
+        const namaA = (a.siswa && a.siswa.nama_siswa) ? a.siswa.nama_siswa : '';
+        const namaB = (b.siswa && b.siswa.nama_siswa) ? b.siswa.nama_siswa : '';
+        return namaA.localeCompare(namaB);
+    });
+}
+
 // ================= PEWARNAAN DROPDOWN DINAMIS =================
 window.updateSelectColor = function(el) {
     const val = el.value;
@@ -230,14 +246,12 @@ window.hapusTugasAktif = async function() {
     }
 
     try {
-        // 1. Hapus semua nilai siswa pada tugas ini
         const { error: errNilai } = await supabase
             .from('penilaiantugas')
             .delete()
             .eq('id_tugas', idTugas);
         if (errNilai) throw errNilai;
 
-        // 2. Hapus data tugas dari tabel namatugas
         const { error: errTugas } = await supabase
             .from('namatugas')
             .delete()
@@ -246,7 +260,6 @@ window.hapusTugasAktif = async function() {
 
         alert(`Tugas "${namaTugas}" beserta semua nilainya berhasil dihapus!`);
 
-        // Muat ulang daftar tugas dan bersihkan input
         await window.loadDaftarTugas(idKelas);
         window.loadNilaiTugas();
 
@@ -273,13 +286,15 @@ window.bukaFormPenilaian = async function(tipe) {
     container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
 
     try {
-        const { data: dataSiswa, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        const { data: dataSiswa, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas);
         if (errSiswa) throw errSiswa;
         if (dataSiswa.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-abu);">Belum ada siswa di kelas ini.</div>';
             return;
         }
-        dataSiswa.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+
+        // Pengurutan nomor absen 1-seterusnya, jika sama berdasarkan nama, tanpa absen di belakang
+        sortSiswaPenilaian(dataSiswa);
         dataSiswaPenilaian = dataSiswa;
 
         // Tarik Data Riwayat 
@@ -430,7 +445,6 @@ window.bukaFormPenilaian = async function(tipe) {
         
         container.innerHTML = htmlContent;
 
-        // Panggil daftar tugas milik kelas ini secara spesifik
         if(tipe === 'tugas') {
             await loadDaftarTugas(idKelas);
             loadNilaiTugas();
@@ -455,7 +469,6 @@ window.simpanPenilaian = async function(tipe) {
 
         let payloadInsert = [];
 
-        // Penanganan tabel dinamis
         const pushToDatabase = async (tabel, payload) => {
             const toInsert = payload.filter(p => !p.id); 
             const toUpdate = payload.filter(p => p.id);  
@@ -646,9 +659,11 @@ window.downloadRekapPenilaian = async function(tipe, format) {
 
         const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas')
             .select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`)
-            .eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+            .eq('id_kelas', idKelas);
         if (errSiswa) throw errSiswa;
-        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+
+        // Pengurutan nomor absen lalu nama
+        sortSiswaPenilaian(siswaData);
 
         let headers = [];
         let reportData = [];

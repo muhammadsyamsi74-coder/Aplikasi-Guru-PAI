@@ -20,17 +20,30 @@ window.loadDashboardPaiApps = async function() {
     const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const hariIni = hariList[new Date().getDay()];
 
+    // JIKA HARI INI MINGGU, SET JADWAL DEFAULT KE HARI SENIN
+    const hariJadwalDefault = (hariIni === 'Minggu') ? 'Senin' : hariIni;
+
     const elNamaHari = document.getElementById('dash-nama-hari');
-    if (elNamaHari) elNamaHari.innerText = hariIni;
+    if (elNamaHari) elNamaHari.innerText = hariJadwalDefault;
+
+    const selectHari = document.getElementById('pilih-hari-jadwal');
+    if (selectHari) selectHari.value = hariJadwalDefault;
 
     await Promise.all([
         loadRingkasanMetrikDanAlert(),
-        loadJadwalHariIni(hariIni),
+        loadJadwalHariIni(hariJadwalDefault),
         loadGrafikMembacaQuran(),
         loadAnalitikKehadiranPerKelas(),
         loadAnalitikKetuntasanTugas(),
         loadInfoSistem()
     ]);
+};
+
+// ================= GANTI HARI JADWAL MENGAJAR =================
+window.gantiHariJadwal = function(hariDipilih) {
+    const elNamaHari = document.getElementById('dash-nama-hari');
+    if (elNamaHari) elNamaHari.innerText = hariDipilih;
+    loadJadwalHariIni(hariDipilih);
 };
 
 // ================= 1. METRIK UTAMA & ACTIONABLE ALERTS (HANYA KELAS AKTIF) =================
@@ -105,7 +118,7 @@ async function loadRingkasanMetrikDanAlert() {
     }
 }
 
-// ================= 2. PENGINGAT JADWAL MENGAJAR (HANYA KELAS AKTIF) =================
+// ================= 2. PENGINGAT JADWAL MENGAJAR (DENGAN REAL-TIME HIGHLIGHT) =================
 async function loadJadwalHariIni(hari) {
     const container = document.getElementById('dash-list-jadwal-hari-ini');
     if (!container) return;
@@ -114,7 +127,7 @@ async function loadJadwalHariIni(hari) {
         container.innerHTML = `
             <li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;">
                 <i class="fa-solid fa-mug-hot" style="color:var(--neon-green); font-size:18px; margin-bottom:6px; display:block;"></i>
-                Hari ini hari libur (Minggu). Tidak ada jadwal KBM.
+                Hari Minggu adalah hari libur. Tidak ada jadwal KBM.
             </li>
         `;
         return;
@@ -144,6 +157,14 @@ async function loadJadwalHariIni(hari) {
 
         jadwalAktif.sort((a, b) => String(a.jam_ke).localeCompare(String(b.jam_ke)));
 
+        // AMBIL WAKTU REAL-TIME SEKARANG
+        const now = new Date();
+        const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const hariAsliSekarang = hariList[now.getDay()];
+        const nowJam = String(now.getHours()).padStart(2, '0');
+        const nowMenit = String(now.getMinutes()).padStart(2, '0');
+        const currentTimeStr = `${nowJam}:${nowMenit}`; // Format "HH:mm"
+
         let html = '';
         jadwalAktif.forEach(item => {
             const kls = mapKelasAktif.get(item.id_kelas);
@@ -153,10 +174,26 @@ async function loadJadwalHariIni(hari) {
             const jamStr = (jM && jS) ? `${jM} - ${jS}` : 'Waktu Fleksibel';
             const ketStr = item.keterangan ? ` | ${item.keterangan}` : '';
 
+            // CEK APAKAH JADWAL INI SEDANG BERLANGSUNG
+            let isCurrentLive = false;
+            if (hari === hariAsliSekarang && jM && jS) {
+                if (currentTimeStr >= jM && currentTimeStr <= jS) {
+                    isCurrentLive = true;
+                }
+            }
+
+            const liveClass = isCurrentLive ? 'jadwal-item-aktif' : '';
+            const liveBadge = isCurrentLive ? '<span class="badge-live-kbm"><i class="fa-solid fa-circle-play"></i> SEDANG BERLANGSUNG</span>' : '';
+
             html += `
-                <li class="jadwal-item">
+                <li class="jadwal-item ${liveClass}">
                     <div>
-                        <b style="color:var(--text-putih); font-size:13px;"><i class="fa-solid fa-chalkboard" style="color:var(--neon-yellow); margin-right:6px;"></i> Kelas ${namaKls}</b>
+                        <div style="display:flex; align-items:center; flex-wrap:wrap;">
+                            <b style="color:var(--text-putih); font-size:13px;">
+                                <i class="fa-solid fa-chalkboard" style="color:var(--neon-yellow); margin-right:6px;"></i> Kelas ${namaKls}
+                            </b>
+                            ${liveBadge}
+                        </div>
                         <div style="font-size:10px; color:var(--text-abu); margin-top:2px;">
                             JP ${item.jam_ke} (${item.jumlah_jp || 1} JP) ${ketStr}
                         </div>
@@ -229,7 +266,7 @@ async function loadGrafikMembacaQuran() {
                         val === 'Tidak bisa baca' || 
                         val === 'Terbata-bata ada salah' || 
                         val === 'Terbata-bata bacaan benar' ||
-                        val === 'Terbata-bata' // Kompatibilitas data lama
+                        val === 'Terbata-bata'
                     ) {
                         countTerbata++;
                     } else if (
@@ -349,7 +386,7 @@ async function loadGrafikMembacaQuran() {
     }
 }
 
-// ================= 4. ANALITIK KEHADIRAN (HANYA KELAS AKTIF) =================
+// ================= 4. ANALITIK KEHADIRAN (HANYA KELAS AKTIF & BEBAS PENGURANG DISPENSASI) =================
 async function loadAnalitikKehadiranPerKelas() {
     const container = document.getElementById('dash-list-analitik-kehadiran');
     if (!container) return;
@@ -370,11 +407,13 @@ async function loadAnalitikKehadiranPerKelas() {
 
         let html = '';
         listKelas.forEach(kls => {
-            const absenKls = listAbsen.filter(a => a.id_kelas === kls.id);
+            // Filter hanya absensi kelas yang bukan dispensasi / tugas guru
+            const absenValid = listAbsen.filter(a => a.id_kelas === kls.id && a.kehadiran !== 'Dispensasi');
+            
             let persen = 0;
-            if (absenKls.length > 0) {
-                const jmlHadir = absenKls.filter(a => a.kehadiran === 'Hadir').length;
-                persen = Math.round((jmlHadir / absenKls.length) * 100);
+            if (absenValid.length > 0) {
+                const jmlHadir = absenValid.filter(a => a.kehadiran === 'Hadir').length;
+                persen = Math.round((jmlHadir / absenValid.length) * 100);
             }
 
             let clr = 'var(--neon-green)';
@@ -385,7 +424,7 @@ async function loadAnalitikKehadiranPerKelas() {
                 <div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
                         <span style="color:var(--text-putih);">${kls.nama_kelas}</span>
-                        <span style="color:${clr}; font-weight:700;">${persen}% Hadir (${absenKls.length} data)</span>
+                        <span style="color:${clr}; font-weight:700;">${persen}% Hadir (${absenValid.length} data)</span>
                     </div>
                     <div class="progress-bar-wrap">
                         <div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div>

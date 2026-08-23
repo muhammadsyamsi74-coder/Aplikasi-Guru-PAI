@@ -3,13 +3,28 @@
     /* =========================================================
        COMPACT UI - TOOLS & DOKUMEN AJAR PAI (VERTIKAL STACK)
        ========================================================= */
+    :root {
+        --border-blue-subtle: rgba(59, 130, 246, 0.3);
+        --border-green-subtle: rgba(5, 213, 138, 0.3);
+        --border-yellow-subtle: rgba(245, 158, 11, 0.3);
+        --border-purple-subtle: rgba(168, 85, 247, 0.3);
+        --border-emerald-subtle: rgba(16, 185, 129, 0.35);
+    }
+
     .card-data-compact {
         background: var(--bg-card);
-        border-radius: 12px;
-        padding: 12px;
+        border-radius: 14px;
+        padding: 14px;
         border: 1px solid var(--border-color);
-        margin-bottom: 15px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
+    /* VARIASI WARNA BORDER MENYELURUH */
+    .card-data-compact.border-yellow { border: 1px solid var(--border-yellow-subtle); }
+    .card-data-compact.border-green { border: 1px solid var(--border-green-subtle); }
+    .card-data-compact.border-blue { border: 1px solid var(--border-blue-subtle); }
+    .card-data-compact.border-emerald { border: 1px solid var(--border-emerald-subtle); }
+
     .card-header-compact {
         display: flex;
         justify-content: space-between;
@@ -19,7 +34,7 @@
         border-bottom: 1px dashed var(--border-color);
     }
     .card-header-compact h3 {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         color: var(--text-putih);
         margin: 0;
@@ -123,7 +138,7 @@
         line-height: 1.4;
     }
 
-    /* LIST DOKUMEN 1 BARIS (SINGLE-LINE ROW) */
+    /* LIST DOKUMEN 1 BARIS */
     .doc-grid-list {
         display: flex;
         flex-direction: column;
@@ -223,24 +238,6 @@
         color: var(--neon-green);
     }
 
-    /* KARTU AI TEMA AYAT & HADIS */
-    .arabic-text {
-        font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
-        direction: rtl;
-        text-align: right;
-        font-size: 16px;
-        line-height: 1.8;
-        color: #f8fafc;
-        margin: 6px 0;
-    }
-    .dalil-item-card {
-        background: var(--bg-main);
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 8px;
-    }
-
     /* GRID WHATSAPP GROUP KELAS */
     .wa-grid-container {
         display: grid;
@@ -258,7 +255,7 @@
 
     .card-wa-kelas {
         background: var(--bg-main);
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--border-emerald-subtle);
         border-radius: 12px;
         padding: 12px;
         display: flex;
@@ -267,7 +264,7 @@
         transition: all 0.2s;
     }
     .card-wa-kelas:hover {
-        border-color: rgba(5, 213, 138, 0.4);
+        border-color: rgba(5, 213, 138, 0.6);
     }
     .header-wa-kelas {
         display: flex;
@@ -342,10 +339,10 @@
 
 <div class="paiapps-tools-container">
 
-    <!-- ================= 1. BAGIAN ALAT BANTU ================= -->
-    <div class="card-data-compact">
+    <!-- ================= 1. BAGIAN ALAT BANTU (GARIS KUNING LEMBUT) ================= -->
+    <div class="card-data-compact border-yellow">
         <div class="card-header-compact">
-            <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-green);"></i> Alat Bantu Pengajaran PAI</h3>
+            <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-yellow);"></i> Alat Bantu Pengajaran PAI</h3>
         </div>
         
         <div class="apps-grid-compact">
@@ -446,8 +443,8 @@
         </div>
     </div>
 
-    <!-- ================= 2. BAGIAN MATERI AJAR ================= -->
-    <div class="card-data-compact">
+    <!-- ================= 2. BAGIAN MATERI AJAR (GARIS HIJAU LEMBUT) ================= -->
+    <div class="card-data-compact border-green">
         <div class="card-header-compact">
             <h3><i class="fa-solid fa-book-open" style="color: var(--neon-green);"></i> Bank Materi Ajar</h3>
             <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:1px solid rgba(5,213,138,0.3);">
@@ -494,8 +491,8 @@
         </button>
     </div>
 
-    <!-- ================= 3. BAGIAN PERANGKAT AJAR (TERSEMBUNYI DEFAULT) ================= -->
-    <div class="card-data-compact">
+    <!-- ================= 3. BAGIAN PERANGKAT AJAR (GARIS BIRU LEMBUT) ================= -->
+    <div class="card-data-compact border-blue">
         <div class="card-header-compact" onclick="toggleSectionPerangkat()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-solid fa-folder-tree" style="color: var(--neon-blue);"></i> 
@@ -557,42 +554,8 @@
         </div>
     </div>
 
-    <!-- ================= 4. BAGIAN AI CARI AYAT & HADIS (BARU) ================= -->
-    <div class="card-data-compact">
-        <div class="card-header-compact" onclick="toggleSectionAiDalil()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-            <h3>
-                <i class="fa-solid fa-brain" style="color: var(--neon-purple);"></i> 
-                AI Cari Ayat & Hadis Tematik
-            </h3>
-            <button id="btn-toggle-ai-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3);">
-                <i class="fa-solid fa-chevron-down" id="icon-chevron-ai"></i> Buka AI Dalil
-            </button>
-        </div>
-
-        <!-- WADAH KONTEN AI (TERSEMBUNYI DEFAULT) -->
-        <div id="section-ai-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
-            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                <input type="text" id="input-tema-dalil" class="form-control sel-compact" placeholder="Tulis tema materi (cth: Sabar, Adab Guru, Sholat)..." style="flex: 1;">
-                <button onclick="cariDalilAiGroq()" id="btn-cari-dalil" class="btn-compact btn-primary" style="background: var(--gradient-purple); padding: 6px 12px !important;">
-                    <i class="fa-solid fa-magnifying-glass"></i> Cari Dalil
-                </button>
-            </div>
-
-            <!-- HASIL AI -->
-            <div id="container-hasil-ai-dalil" style="display: none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <b style="font-size:11px; color:var(--neon-purple);"><i class="fa-solid fa-scroll"></i> Hasil Temuan Dalil:</b>
-                    <button onclick="copySemuaDalilText()" class="btn-compact" style="background:var(--bg-main); border:1px solid var(--border-color); color:var(--neon-green);">
-                        <i class="fa-solid fa-copy"></i> Salin Semua
-                    </button>
-                </div>
-                <div id="box-render-dalil"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= 5. BAGIAN WHATSAPP GROUP (TERSEMBUNYI DEFAULT) ================= -->
-    <div class="card-data-compact">
+    <!-- ================= 4. BAGIAN WHATSAPP GROUP (GARIS EMERALD/GREEN) ================= -->
+    <div class="card-data-compact border-emerald">
         <div class="card-header-compact" onclick="toggleSectionWaGroup()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-brands fa-whatsapp" style="color: var(--neon-green);"></i> 
@@ -613,7 +576,7 @@
 
     <!-- MODAL EDIT WHATSAPP & PENGURUS KELAS -->
     <div id="modal-edit-wa-kelas" class="modal-overlay">
-        <div class="modal-content" style="max-width: 440px;">
+        <div class="modal-content" style="max-width: 440px; border: 1px solid var(--border-emerald-subtle);">
             <button class="modal-close" onclick="document.getElementById('modal-edit-wa-kelas').style.display='none'"><i class="fa-solid fa-times"></i></button>
             <h3 style="color:var(--neon-green); margin-bottom:15px; font-size:13px; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Atur WA & Pengurus: <span id="modal-wa-title-kelas">-</span></h3>
             
@@ -626,21 +589,21 @@
                 </div>
                 
                 <!-- KETUA KELAS -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:8px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(245, 158, 11, 0.3); margin-bottom:8px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-yellow); margin-bottom:4px;">☀️ Ketua Kelas</div>
                     <select id="modal-wa-id-ketua" class="form-control sel-compact" onchange="sinkronNomorPengurus('ketua')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-ketua" class="form-control sel-compact" placeholder="No. WA Ketua (cth: 08123456789)">
                 </div>
 
                 <!-- SEKRETARIS -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:8px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(59, 130, 246, 0.3); margin-bottom:8px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-blue); margin-bottom:4px;">🌙 Sekretaris</div>
                     <select id="modal-wa-id-sekretaris" class="form-control sel-compact" onchange="sinkronNomorPengurus('sekretaris')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-sekretaris" class="form-control sel-compact" placeholder="No. WA Sekretaris (cth: 08123456789)">
                 </div>
 
                 <!-- BENDAHARA -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.3); margin-bottom:12px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-red); margin-bottom:4px;">⭕ Bendahara</div>
                     <select id="modal-wa-id-bendahara" class="form-control sel-compact" onchange="sinkronNomorPengurus('bendahara')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-bendahara" class="form-control sel-compact" placeholder="No. WA Bendahara (cth: 08123456789)">

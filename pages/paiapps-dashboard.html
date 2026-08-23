@@ -1,49 +1,68 @@
 <!-- pages/paiapps-dashboard.html -->
 <style>
     /* =========================================================
-       DASHBOARD PAI-APPS PREMIUM DARK NEON THEME
+       DASHBOARD PAI-APPS PREMIUM DARK NEON THEME (MOBILE FIX)
        ========================================================= */
-    .dashboard-container { animation: fadeIn 0.4s ease-out; }
+    :root {
+        --border-blue-subtle: rgba(59, 130, 246, 0.3);
+        --border-green-subtle: rgba(5, 213, 138, 0.3);
+        --border-yellow-subtle: rgba(245, 158, 11, 0.3);
+        --border-purple-subtle: rgba(168, 85, 247, 0.3);
+        --border-red-subtle: rgba(239, 68, 68, 0.3);
+    }
+
+    .dashboard-container { 
+        animation: fadeIn 0.4s ease-out; 
+        max-width: 100%; 
+        overflow-x: hidden; /* Mencegah layar bergeser ke samping */
+    }
 
     /* GRID METRIK ATAS */
     .grid-metrik-utama {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
         margin-bottom: 15px;
     }
     .card-metrik {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 16px;
+        border-radius: 12px;
+        padding: 12px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        gap: 8px; /* Gap dikurangi agar tidak overflow */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
     }
+    .card-metrik.border-blue { border: 1px solid var(--border-blue-subtle); }
+    .card-metrik.border-green { border: 1px solid var(--border-green-subtle); }
+
     .icon-metrik {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 18px;
+        font-size: 14px;
         flex-shrink: 0;
     }
     .val-metrik {
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 800;
         color: var(--text-putih);
         line-height: 1.2;
     }
     .lbl-metrik {
-        font-size: 10px;
+        font-size: 9px;
         color: var(--text-abu);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0px; /* Menghindari teks terlalu lebar */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* KARTU PENGINGAT (ACTIONABLE ALERTS) */
@@ -51,127 +70,221 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
     .alert-card {
-        padding: 12px 16px;
-        border-radius: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
         border: 1px solid transparent;
+        line-height: 1.4;
+        word-wrap: break-word; /* Teks otomatis turun ke baris baru */
     }
     .alert-card:hover { transform: translateY(-2px); }
-    .alert-warning {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--neon-red);
-        border-color: rgba(239, 68, 68, 0.3);
-    }
-    .alert-info {
-        background: rgba(245, 158, 11, 0.1);
-        color: var(--neon-yellow);
-        border-color: rgba(245, 158, 11, 0.3);
-    }
-    .alert-success {
-        background: rgba(5, 213, 138, 0.1);
-        color: var(--neon-green);
-        border-color: rgba(5, 213, 138, 0.3);
-    }
+    .alert-warning { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid var(--border-red-subtle); }
+    .alert-info { background: rgba(245, 158, 11, 0.1); color: var(--neon-yellow); border: 1px solid var(--border-yellow-subtle); }
+    .alert-success { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid var(--border-green-subtle); }
 
-    /* KARTU KONTEN UTAMA */
+    /* KARTU KONTEN UTAMA (RESPONSIF PADAT) */
     .card-data { 
         background: var(--bg-card); 
-        border-radius: 16px; 
-        padding: 20px; 
+        border-radius: 12px; 
+        padding: 12px; /* Diperkecil untuk Mobile */
         border: 1px solid var(--border-color); 
-        margin-bottom: 20px; 
+        margin-bottom: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        max-width: 100%;
+        overflow: hidden; /* Penting untuk mencegah konten keluar kartu */
     }
+    .card-data.border-yellow { border: 1px solid var(--border-yellow-subtle); }
+    .card-data.border-green { border: 1px solid var(--border-green-subtle); }
+    .card-data.border-blue { border: 1px solid var(--border-blue-subtle); }
+    .card-data.border-purple { border: 1px solid var(--border-purple-subtle); }
+
     .card-header { 
         display: flex; 
         justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 15px; 
-        padding-bottom: 10px; 
+        align-items: flex-start; /* Ubah ke flex-start agar saat wrap tetap rapi */
+        margin-bottom: 12px; 
+        padding-bottom: 8px; 
         border-bottom: 1px dashed var(--border-color); 
+        gap: 8px;
+        flex-wrap: wrap; /* WAJIB! Agar tombol pindah ke bawah jika layar sempit */
     }
     .card-header h3 { 
-        font-size: 13px; 
+        font-size: 11.5px; 
         font-weight: 700; 
         color: var(--text-putih); 
         margin: 0; 
         display: flex; 
         align-items: center; 
-        gap: 8px; 
+        gap: 6px; 
+        flex: 1; /* Biarkan judul mengisi sisa ruang */
+        word-break: break-word; /* Teks turun baris otomatis */
+        white-space: normal; /* Hapus nowrap secara eksplisit */
     }
 
-    /* KISI PINTASAN CEPAT (QUICK ACTIONS) */
+    /* ================= KISI PINTASAN CEPAT (RESPONSIF 2 KOLOM) ================= */
     .grid-quick-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
+
     .quick-btn {
         background: var(--bg-main);
-        border: 1px solid var(--border-color);
         border-radius: 12px;
-        padding: 14px 10px;
+        padding: 12px 5px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         text-align: center;
+        position: relative;
+        overflow: hidden;
     }
     .quick-btn:hover {
-        border-color: var(--neon-green);
-        transform: translateY(-3px);
-        background: var(--bg-card-hover, #1b2534);
+        transform: translateY(-2px);
     }
-    .quick-btn i { font-size: 20px; }
-    .quick-btn span { font-size: 11px; font-weight: 600; color: var(--text-putih); }
 
-    /* LIST JADWAL HARI INI */
+    /* Halo Spotlight Lingkaran */
+    .icon-halo-spotlight {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+    .quick-btn:hover .icon-halo-spotlight {
+        transform: scale(1.08);
+    }
+    .icon-halo-spotlight i {
+        font-size: 16px;
+        z-index: 2;
+    }
+
+    /* 1. Presensi */
+    .btn-spot-green { border: 1px solid rgba(5, 213, 138, 0.3); background: linear-gradient(180deg, rgba(5, 213, 138, 0.04) 0%, var(--bg-main) 100%); }
+    .btn-spot-green .icon-halo-spotlight { background: radial-gradient(circle, rgba(5, 213, 138, 0.35) 0%, rgba(5, 213, 138, 0.05) 65%, transparent 70%); color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.2); }
+    
+    /* 2. Jurnal Mengajar */
+    .btn-spot-blue { border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59, 130, 246, 0.04) 0%, var(--bg-main) 100%); }
+    .btn-spot-blue .icon-halo-spotlight { background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(59, 130, 246, 0.05) 65%, transparent 70%); color: var(--neon-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+    
+    /* 3. Input Nilai */
+    .btn-spot-purple { border: 1px solid rgba(168, 85, 247, 0.3); background: linear-gradient(180deg, rgba(168, 85, 247, 0.04) 0%, var(--bg-main) 100%); }
+    .btn-spot-purple .icon-halo-spotlight { background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(168, 85, 247, 0.05) 65%, transparent 70%); color: var(--neon-purple); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+    
+    /* 4. Jurnal Sikap */
+    .btn-spot-yellow { border: 1px solid rgba(245, 158, 11, 0.3); background: linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, var(--bg-main) 100%); }
+    .btn-spot-yellow .icon-halo-spotlight { background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.05) 65%, transparent 70%); color: var(--neon-yellow); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+
+    .quick-btn span { 
+        font-size: 10px; 
+        font-weight: 700; 
+        color: var(--text-putih); 
+        white-space: nowrap; /* Teks terlalu panjang agar tidak tumpah */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    /* LIST JADWAL */
     .jadwal-list { list-style: none; padding: 0; margin: 0; }
     .jadwal-item {
         background: var(--bg-main);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 12px 15px;
-        margin-bottom: 10px;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 8px;
         display: flex;
+        flex-wrap: wrap; /* Izinkan teks melipat */
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        gap: 6px;
+        transition: all 0.3s ease;
     }
     .jadwal-item:last-child { margin-bottom: 0; }
+
+    /* HIGHLIGHT JADWAL SEDANG BERLANGSUNG */
+    .jadwal-item-aktif {
+        background: linear-gradient(135deg, rgba(5, 213, 138, 0.12) 0%, rgba(30, 58, 138, 0.25) 100%) !important;
+        border: 1.5px solid var(--neon-green) !important;
+        box-shadow: 0 0 15px rgba(5, 213, 138, 0.35) !important;
+        animation: pulseAktif 2s infinite ease-in-out;
+        position: relative;
+    }
+
+    @keyframes pulseAktif {
+        0%, 100% { box-shadow: 0 0 10px rgba(5, 213, 138, 0.25); border-color: var(--neon-green); }
+        50% { box-shadow: 0 0 20px rgba(5, 213, 138, 0.55); border-color: #38bdf8; }
+    }
+
+    .badge-live-kbm {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--neon-green);
+        color: #0b121e;
+        font-size: 8px;
+        font-weight: 800;
+        padding: 2px 5px;
+        border-radius: 4px;
+        margin-top: 4px;
+        letter-spacing: 0.5px;
+        word-break: break-all;
+    }
 
     /* WADAH GRAFIK AL-QURAN */
     .chart-wrapper {
         position: relative;
         width: 100%;
-        min-height: 280px;
-        max-height: 360px;
+        max-width: 100%;
+        min-height: 220px; /* Sedikit direndahkan untuk mobile */
+        max-height: 300px;
     }
 
     /* PROGRESS BAR ANALITIK */
     .progress-bar-wrap {
         background: var(--bg-main);
-        border-radius: 8px;
-        height: 8px;
+        border-radius: 6px;
+        height: 6px;
         width: 100%;
         overflow: hidden;
-        margin-top: 6px;
+        margin-top: 5px;
         border: 1px solid var(--border-color);
     }
     .progress-bar-fill {
         height: 100%;
         width: 0%;
         transition: width 0.6s ease;
-        border-radius: 8px;
+        border-radius: 6px;
+    }
+
+    /* TAMPILAN DESKTOP (>768px) */
+    @media (min-width: 768px) {
+        .card-data { padding: 20px; border-radius: 16px; margin-bottom: 20px; }
+        .card-header h3 { font-size: 13px; }
+        .grid-metrik-utama { gap: 15px; }
+        .card-metrik { padding: 16px; border-radius: 14px; }
+        .grid-quick-actions { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .quick-btn { padding: 16px 10px; }
+        .icon-halo-spotlight { width: 46px; height: 46px; }
+        .icon-halo-spotlight i { font-size: 20px; }
+        .quick-btn span { font-size: 11px; }
+        .jadwal-item { flex-wrap: nowrap; align-items: center; } /* Kembali normal ke 1 baris */
+        .chart-wrapper { min-height: 280px; max-height: 360px; }
     }
 </style>
 
@@ -179,20 +292,20 @@
 
     <!-- 1. METRIK UTAMA -->
     <div class="grid-metrik-utama">
-        <div class="card-metrik">
+        <div class="card-metrik border-blue">
             <div class="icon-metrik" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue);">
                 <i class="fa-solid fa-users"></i>
             </div>
-            <div>
+            <div style="min-width: 0; overflow:hidden;">
                 <div class="val-metrik" id="dash-jml-siswa">-</div>
                 <div class="lbl-metrik">Total Siswa</div>
             </div>
         </div>
-        <div class="card-metrik">
+        <div class="card-metrik border-green">
             <div class="icon-metrik" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green);">
                 <i class="fa-solid fa-chalkboard"></i>
             </div>
-            <div>
+            <div style="min-width: 0; overflow:hidden;">
                 <div class="val-metrik" id="dash-jml-kelas">-</div>
                 <div class="lbl-metrik">Kelas Aktif</div>
             </div>
@@ -202,90 +315,94 @@
     <!-- 2. KARTU PENGINGAT (ACTIONABLE ALERTS) -->
     <div class="alert-container" id="dash-alert-container">
         <div class="alert-card alert-info" style="display:flex; justify-content:center;">
-            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memeriksa pengingat tugas & jurnal...
+            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memeriksa pengingat...
         </div>
     </div>
 
-    <!-- 3. TOMBOL PINTASAN CEPAT (QUICK ACTIONS) -->
-    <div class="card-data">
+    <!-- 3. TOMBOL PINTASAN CEPAT -->
+    <div class="card-data border-yellow">
         <div class="card-header">
             <h3><i class="fa-solid fa-bolt" style="color: var(--neon-yellow);"></i> Pintasan Cepat</h3>
         </div>
         <div class="grid-quick-actions">
-            <div class="quick-btn" onclick="loadPage('presensi', 'Presensi Siswa')">
-                <i class="fa-solid fa-clipboard-user" style="color: var(--neon-green);"></i>
+            <div class="quick-btn btn-spot-green" onclick="loadPage('presensi', 'Presensi Siswa')">
+                <div class="icon-halo-spotlight"><i class="fa-solid fa-clipboard-user"></i></div>
                 <span>Presensi Kelas</span>
             </div>
-            <div class="quick-btn" onclick="loadPage('jurnal', 'Jurnal Guru')">
-                <i class="fa-solid fa-book" style="color: var(--neon-blue);"></i>
+            <div class="quick-btn btn-spot-blue" onclick="loadPage('jurnal', 'Jurnal Guru')">
+                <div class="icon-halo-spotlight"><i class="fa-solid fa-book"></i></div>
                 <span>Jurnal Mengajar</span>
             </div>
-            <div class="quick-btn" onclick="loadPage('penilaian', 'Penilaian')">
-                <i class="fa-solid fa-clipboard-check" style="color: var(--neon-purple);"></i>
+            <div class="quick-btn btn-spot-purple" onclick="loadPage('penilaian', 'Penilaian')">
+                <div class="icon-halo-spotlight"><i class="fa-solid fa-clipboard-check"></i></div>
                 <span>Input Nilai</span>
             </div>
-            <div class="quick-btn" onclick="pintasanJurnalSikap()">
-                <i class="fa-solid fa-user-check" style="color: var(--neon-yellow);"></i>
+            <div class="quick-btn btn-spot-yellow" onclick="pintasanJurnalSikap()">
+                <div class="icon-halo-spotlight"><i class="fa-solid fa-user-check"></i></div>
                 <span>Jurnal Sikap</span>
             </div>
         </div>
     </div>
 
-    <!-- 4. PENGINGAT JADWAL MENGAJAR HARI INI -->
-    <div class="card-data">
+    <!-- 4. PENGINGAT JADWAL MENGAJAR -->
+    <div class="card-data border-green">
         <div class="card-header">
-            <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal Mengajar Hari Ini (<span id="dash-nama-hari">-</span>)</h3>
-            <button onclick="loadPage('master', 'Data Master')" class="btn-action" style="font-size:10px; padding:4px 8px; color:var(--text-abu);">
-                <i class="fa-solid fa-gear"></i> Kelola
-            </button>
+            <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal (<span id="dash-nama-hari">-</span>)</h3>
+            <div>
+                <select id="pilih-hari-jadwal" class="form-control" onchange="gantiHariJadwal(this.value)" style="padding: 3px 6px; font-size: 10px; height: 26px; width: auto; border-radius: 6px; border: 1px solid var(--border-green-subtle); color: var(--neon-green); font-weight: 700; background: var(--bg-main); cursor: pointer;">
+                    <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
+                    <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
+                    <option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
+                    <option value="Minggu">Minggu</option>
+                </select>
+            </div>
         </div>
         <ul class="jadwal-list" id="dash-list-jadwal-hari-ini">
-            <li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;">
-                <i class="fa-solid fa-spinner fa-spin"></i> Memuat jadwal hari ini...
+            <li style="text-align:center; padding:12px; color:var(--text-abu); font-size:11px;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Memuat jadwal...
             </li>
         </ul>
     </div>
 
-    <!-- 5. GRAFIK KEMAMPUAN MEMBACA AL-QUR'AN PER KELAS -->
-    <div class="card-data">
+    <!-- 5. GRAFIK KEMAMPUAN MEMBACA AL-QUR'AN -->
+    <div class="card-data border-green">
         <div class="card-header">
-            <h3><i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i> Grafik Kemampuan Membaca Al-Qur'an Per Kelas</h3>
-            <span style="font-size:10px; color:var(--text-abu);"><i class="fa-solid fa-chart-column"></i> Batang Ke Atas</span>
+            <h3><i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i> Grafik Kelancaran Membaca</h3>
         </div>
         <div class="chart-wrapper">
             <canvas id="chart-quran-dashboard"></canvas>
         </div>
-        <div id="chart-quran-kosong" style="display:none; text-align:center; padding:20px; color:var(--text-abu); font-size:12px;">
-            Belum ada data penilaian membaca Al-Qur'an pada kelas aktif.
+        <div id="chart-quran-kosong" style="display:none; text-align:center; padding:15px; color:var(--text-abu); font-size:11px;">
+            Belum ada data penilaian membaca.
         </div>
     </div>
 
-    <!-- 6. ANALITIK: PERSENTASE KEHADIRAN PER KELAS -->
-    <div class="card-data">
+    <!-- 6. ANALITIK: PERSENTASE KEHADIRAN -->
+    <div class="card-data border-blue">
         <div class="card-header">
-            <h3><i class="fa-solid fa-chart-pie" style="color: var(--neon-blue);"></i> Persentase Kehadiran Per Kelas</h3>
+            <h3><i class="fa-solid fa-chart-pie" style="color: var(--neon-blue);"></i> Persentase Kehadiran</h3>
         </div>
-        <div id="dash-list-analitik-kehadiran" style="display:flex; flex-direction:column; gap:12px;">
-            <div style="text-align:center; padding:10px; color:var(--text-abu); font-size:12px;">Memuat analitik kehadiran...</div>
+        <div id="dash-list-analitik-kehadiran" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="text-align:center; padding:8px; color:var(--text-abu); font-size:11px;">Memuat analitik...</div>
         </div>
     </div>
 
-    <!-- 7. ANALITIK: KETUNTASAN PENILAIAN TUGAS PER KELAS -->
-    <div class="card-data">
+    <!-- 7. ANALITIK: KETUNTASAN PENILAIAN TUGAS -->
+    <div class="card-data border-purple">
         <div class="card-header">
             <h3><i class="fa-solid fa-list-check" style="color: var(--neon-purple);"></i> Ketuntasan Penilaian Tugas</h3>
         </div>
-        <div id="dash-list-analitik-tugas" style="display:flex; flex-direction:column; gap:12px;">
-            <div style="text-align:center; padding:10px; color:var(--text-abu); font-size:12px;">Memuat analitik tugas...</div>
+        <div id="dash-list-analitik-tugas" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="text-align:center; padding:8px; color:var(--text-abu); font-size:11px;">Memuat analitik...</div>
         </div>
     </div>
 
-    <!-- 8. INFORMASI SISTEM & TENTANG APLIKASI -->
-    <div class="card-data" style="border: 1px dashed var(--border-color); background: transparent;">
+    <!-- 8. IDENTITAS ADMINISTRASI -->
+    <div class="card-data border-green" style="background: rgba(5, 213, 138, 0.02);">
         <div class="card-header">
             <h3><i class="fa-solid fa-circle-info" style="color: var(--neon-green);"></i> Identitas Administrasi</h3>
         </div>
-        <div id="dash-info-sistem" style="font-size: 11px; color: var(--text-abu); line-height: 1.7;">
+        <div id="dash-info-sistem" style="font-size: 11px; color: var(--text-abu); line-height: 1.6;">
             Memuat informasi profil...
         </div>
     </div>

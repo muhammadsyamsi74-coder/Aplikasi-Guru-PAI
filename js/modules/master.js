@@ -63,6 +63,7 @@ window.loadDataKelas = async function() {
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <button onclick="editKelas('${item.id}')" class="btn-action btn-edit" title="Edit Kelas"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="hapusKelas('${item.id}', '${item.nama_kelas}')" class="btn-action btn-delete" title="Hapus Kelas"><i class="fa-solid fa-trash"></i></button>
                         <i class="fa-solid fa-chevron-right" style="color: var(--text-abu); font-size: 12px; margin-left: 4px; cursor: pointer;" onclick="bukaDetailKelas('${item.id}', '${item.nama_kelas}')"></i>
                     </div>
                 </li>
@@ -89,6 +90,66 @@ window.editKelas = function(idKelas) {
     document.getElementById('btn-simpan-kelas').innerHTML = '<i class="fa-solid fa-save"></i> Perbarui';
     document.getElementById('wrapper-form-kelas').style.display = 'block';
     document.getElementById('wrapper-form-kelas').scrollIntoView({ behavior: 'smooth' });
+};
+
+// ================= FITUR HAPUS KELAS BESERTA SELURUH DATA SISWA =================
+window.hapusKelas = async function(idKelas, namaKelas) {
+    const konfirmasi1 = confirm(
+        `PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS Kelas "${namaKelas}"?\nSemua data siswa, nilai, presensi, jurnal, dan tugas di kelas ini akan DIHAPUS PERMANEN.`
+    );
+    if (!konfirmasi1) return;
+
+    const konfirmasi2 = prompt(`Ketik nama kelas "${namaKelas}" untuk mengonfirmasi penghapusan:`);
+    if (konfirmasi2 !== namaKelas) {
+        alert("Nama kelas yang Anda ketik tidak cocok. Penghapusan dibatalkan.");
+        return;
+    }
+
+    try {
+        const { data: anggota, error: errAnggota } = await supabase
+            .from('anggota_kelas')
+            .select('id_siswa')
+            .eq('id_kelas', idKelas);
+        if (errAnggota) throw errAnggota;
+
+        const siswaIds = (anggota || []).map(a => a.id_siswa).filter(Boolean);
+
+        const { data: listTugas } = await supabase
+            .from('namatugas')
+            .select('id')
+            .eq('id_kelas', idKelas);
+        const tugasIds = (listTugas || []).map(t => t.id).filter(Boolean);
+
+        if (tugasIds.length > 0) {
+            await supabase.from('penilaiantugas').delete().in('id_tugas', tugasIds);
+        }
+
+        await Promise.all([
+            supabase.from('namatugas').delete().eq('id_kelas', idKelas),
+            supabase.from('absenkelas').delete().eq('id_kelas', idKelas),
+            supabase.from('penilaianmembaca').delete().eq('id_kelas', idKelas),
+            supabase.from('penilaianmenulis').delete().eq('id_kelas', idKelas),
+            supabase.from('penilaianhafalansholat').delete().eq('id_kelas', idKelas),
+            supabase.from('hafalansurah').delete().eq('id_kelas', idKelas),
+            supabase.from('jurnalmengajar').delete().eq('id_kelas', idKelas),
+            supabase.from('jadwalmengajar').delete().eq('id_kelas', idKelas),
+            supabase.from('anggota_kelas').delete().eq('id_kelas', idKelas)
+        ]);
+
+        if (siswaIds.length > 0) {
+            await supabase.from('siswa').delete().in('id', siswaIds);
+        }
+
+        const { error: errDelKelas } = await supabase.from('kelas').delete().eq('id', idKelas);
+        if (errDelKelas) throw errDelKelas;
+
+        alert(`Kelas "${namaKelas}" beserta seluruh data di dalamnya berhasil dihapus.`);
+        window.loadDataKelas();
+
+    } catch (e) {
+        console.error("Gagal hapus kelas:", e);
+        alert("Gagal menghapus kelas: " + e.message);
+    }
 };
 
 window.simpanDataKelas = async function(event) {
@@ -205,29 +266,43 @@ window.loadDataSiswa = async function() {
             return;
         }
 
-        data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        // 1. URUTKAN BERDASARKAN NOMOR ABSEN, JIKA ABSEN SAMA URUTKAN BERDASARKAN NAMA
+        data.sort((a, b) => {
+            const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 9999;
+            const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 9999;
+            
+            if (noA !== noB) {
+                return noA - noB;
+            }
+            const namaA = (a.siswa && a.siswa.nama_siswa) ? a.siswa.nama_siswa : '';
+            const namaB = (b.siswa && b.siswa.nama_siswa) ? b.siswa.nama_siswa : '';
+            return namaA.localeCompare(namaB);
+        });
+
         currentDataSiswa = data; 
 
         let htmlContent = '';
         data.forEach(item => {
-            const dSiswa = item.siswa;
+            const dSiswa = item.siswa || {};
+            const namaTampil = dSiswa.nama_siswa || 'Tanpa Nama';
             const ikonGender = dSiswa.jenis_kelamin === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
             const badgeJabatan = (item.jabatan_kelas && item.jabatan_kelas !== 'Anggota') 
                 ? `<span style="background:rgba(5,213,138,0.1); color:var(--neon-green); font-size:9px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">${item.jabatan_kelas}</span>` : '';
             const ikonFoto = dSiswa.foto_siswa ? '<i class="fa-solid fa-image" style="color:var(--neon-green); font-size:10px; margin-left:5px;" title="Foto Tersedia"></i>' : '';
 
+            // PERBAIKAN: Gunakan ID unik anggota_kelas untuk hapus agar kebal dari error karakter nama
             htmlContent += `
                 <li>
                     <div style="display: flex; align-items: center; gap: 10px; width:70%;">
-                        <span style="font-weight:600; color:var(--neon-green); width:20px;">${item.nomor_absen || '-'}</span>
+                        <span style="font-weight:600; color:var(--neon-green); width:24px; text-align:center;">${item.nomor_absen || '-'}</span>
                         <div>
-                            <div style="font-size:13px; font-weight:500; color:var(--text-putih);">${dSiswa.nama_siswa} ${ikonGender} ${badgeJabatan} ${ikonFoto}</div>
+                            <div style="font-size:13px; font-weight:500; color:var(--text-putih);">${namaTampil} ${ikonGender} ${badgeJabatan} ${ikonFoto}</div>
                             <div style="font-size:10px; color:var(--text-abu);">NISN: ${dSiswa.nisn_siswa || '-'}</div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="editSiswa('${item.id}', '${dSiswa.id}')" class="btn-action btn-edit" title="Edit"><i class="fa-solid fa-edit"></i></button>
-                        <button onclick="hapusSiswa('${item.id}', '${dSiswa.id}', '${dSiswa.nama_siswa}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="editSiswa('${item.id}')" class="btn-action btn-edit" title="Edit"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="hapusSiswa('${item.id}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </li>
             `;
@@ -238,21 +313,21 @@ window.loadDataSiswa = async function() {
     }
 };
 
-window.editSiswa = function(idAnggota, idSiswa) {
+window.editSiswa = function(idAnggota) {
     const dataRow = currentDataSiswa.find(row => row.id === idAnggota);
-    if(!dataRow) return;
+    if (!dataRow) return;
 
-    const s = dataRow.siswa;
+    const s = dataRow.siswa || {};
     
     document.getElementById('wrapper-form-massal').style.display = 'none';
     document.getElementById('wrapper-form-siswa').style.display = 'block';
-    document.getElementById('judul-form-siswa').innerText = `Edit Data: ${s.nama_siswa}`;
+    document.getElementById('judul-form-siswa').innerText = `Edit Data: ${s.nama_siswa || ''}`;
     
-    document.getElementById('input-nisn').value = s.nisn_siswa;
+    document.getElementById('input-nisn').value = s.nisn_siswa || '';
     document.getElementById('input-kode-siswa').value = s.kode_siswa || '';
-    document.getElementById('input-nama-siswa').value = s.nama_siswa;
+    document.getElementById('input-nama-siswa').value = s.nama_siswa || '';
     document.getElementById('input-no-absen').value = dataRow.nomor_absen || '';
-    document.getElementById('input-jk').value = s.jenis_kelamin;
+    document.getElementById('input-jk').value = s.jenis_kelamin || 'L';
     document.getElementById('input-jabatan').value = dataRow.jabatan_kelas || 'Anggota';
     document.getElementById('input-tempat-lahir').value = s.tempat_lahir || '';
     document.getElementById('input-tanggal-lahir').value = s.tanggal_lahir || '';
@@ -263,24 +338,44 @@ window.editSiswa = function(idAnggota, idSiswa) {
     document.getElementById('input-ig-siswa').value = s.instagram_siswa || '';
     document.getElementById('input-foto-siswa').value = '';
 
-    editingSiswaId = idSiswa;
+    editingSiswaId = s.id;
     editingAnggotaKelasId = idAnggota;
     
     document.getElementById('btn-simpan-siswa').innerHTML = '<i class="fa-solid fa-save"></i> Perbarui Data Siswa';
-    document.getElementById('wrapper-form-siswa').scrollIntoView({behavior: "smooth"});
+    document.getElementById('wrapper-form-siswa').scrollIntoView({ behavior: "smooth" });
 };
 
-window.hapusSiswa = async function(idAnggota, idSiswa, namaSiswa) {
-    if(!confirm(`Yakin ingin MENGHAPUS data siswa "${namaSiswa}"?\nData tidak dapat dikembalikan.`)) return;
+// ================= PERBAIKAN: HAPUS SISWA BEBAS BUG DATA GANDA =================
+window.hapusSiswa = async function(idAnggota) {
+    const dataRow = currentDataSiswa.find(row => row.id === idAnggota);
+    if (!dataRow) {
+        alert("Data siswa tidak ditemukan.");
+        return;
+    }
+
+    const s = dataRow.siswa || {};
+    const namaSiswa = s.nama_siswa || 'Siswa ini';
+    const idSiswa = s.id;
+
+    if (!confirm(`Yakin ingin MENGHAPUS data "${namaSiswa}" dari kelas ini?\nData tidak dapat dikembalikan.`)) return;
 
     try {
-        const { error: err1 } = await supabase.from('anggota_kelas').delete().eq('id', idAnggota);
-        if(err1) throw err1;
+        // 1. Hapus relasi keanggotaan kelas
+        const { error: errAnggota } = await supabase.from('anggota_kelas').delete().eq('id', idAnggota);
+        if (errAnggota) throw errAnggota;
 
-        await supabase.from('siswa').delete().eq('id', idSiswa);
-        alert(`Siswa ${namaSiswa} berhasil dihapus dari kelas.`);
+        // 2. Hapus data pada tabel siswa jika ada
+        if (idSiswa) {
+            // Cek apakah siswa masih terdaftar di kelas lain
+            const { data: checkLain } = await supabase.from('anggota_kelas').select('id').eq('id_siswa', idSiswa);
+            if (!checkLain || checkLain.length === 0) {
+                await supabase.from('siswa').delete().eq('id', idSiswa);
+            }
+        }
+
+        alert(`Siswa "${namaSiswa}" berhasil dihapus.`);
         loadDataSiswa();
-    } catch(err) {
+    } catch (err) {
         alert("Gagal menghapus data: " + err.message);
     }
 };
@@ -338,7 +433,7 @@ window.simpanDataSiswa = async function(event) {
             if (errSiswa) throw errSiswa;
 
             const { error: errAnggota } = await supabase.from('anggota_kelas').update({
-                nomor_absen: iNoAbsen || null, jabatan_kelas: iJabatan
+                nomor_absen: iNoAbsen ? parseInt(iNoAbsen) : null, jabatan_kelas: iJabatan
             }).eq('id', editingAnggotaKelasId);
             if (errAnggota) throw errAnggota;
 
@@ -349,7 +444,7 @@ window.simpanDataSiswa = async function(event) {
             
             const newSiswaId = dataSiswa[0].id;
             const { error: errAnggota } = await supabase.from('anggota_kelas').insert([{ 
-                id_kelas: currentKelasId, id_siswa: newSiswaId, nomor_absen: iNoAbsen || null, jabatan_kelas: iJabatan
+                id_kelas: currentKelasId, id_siswa: newSiswaId, nomor_absen: iNoAbsen ? parseInt(iNoAbsen) : null, jabatan_kelas: iJabatan
             }]);
             if (errAnggota) throw errAnggota;
 
@@ -367,7 +462,7 @@ window.simpanDataSiswa = async function(event) {
     }
 };
 
-// ================= FUNGSI SISWA GURU WALI (BARU) =================
+// ================= FUNGSI SISWA GURU WALI =================
 let editingSiswaWaliId = null;
 let currentDataSiswaWali = [];
 
@@ -434,7 +529,7 @@ window.loadDataSiswaWali = async function() {
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button onclick="editSiswaWali('${item.id}')" class="btn-action btn-edit" title="Edit"><i class="fa-solid fa-edit"></i></button>
-                        <button onclick="hapusSiswaWali('${item.id}', '${item.nama_siswa}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="hapusSiswaWali('${item.id}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </li>
             `;
@@ -469,7 +564,9 @@ window.editSiswaWali = function(id) {
     document.getElementById('wrapper-form-siswa-wali').scrollIntoView({ behavior: 'smooth' });
 };
 
-window.hapusSiswaWali = async function(id, nama) {
+window.hapusSiswaWali = async function(id) {
+    const s = currentDataSiswaWali.find(item => item.id === id);
+    const nama = s ? s.nama_siswa : 'siswa ini';
     if (!confirm(`Yakin ingin MENGHAPUS data siswa wali "${nama}"?`)) return;
 
     try {
@@ -600,7 +697,7 @@ window.downloadSiswaWaliExcel = async function() {
     }
 };
 
-// ================= FUNGSI JADWAL MENGAJAR (BARU) =================
+// ================= FUNGSI JADWAL MENGAJAR =================
 let editingJadwalId = null;
 let currentDataJadwal = [];
 
@@ -968,10 +1065,11 @@ window.downloadSemuaSiswaExcel = async function() {
             listKelas.forEach(kls => {
                 let anggotaKelas = listSiswa.filter(s => s.id_kelas === kls.id && s.siswa);
                 
+                // Urutkan berdasarkan nomor absen, lalu nama
                 anggotaKelas.sort((a, b) => {
-                    const noA = a.nomor_absen || 999;
-                    const noB = b.nomor_absen || 999;
-                    if(noA !== noB) return noA - noB;
+                    const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 9999;
+                    const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 9999;
+                    if (noA !== noB) return noA - noB;
                     return a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa);
                 });
 

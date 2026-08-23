@@ -18,7 +18,6 @@
 
     .presensi-container { animation: fadeIn 0.4s ease-out; }
     
-    /* Hilangkan background putih dari wadah utama */
     .card-data { 
         background: transparent; border: none; padding: 0; 
         margin-bottom: 20px; box-shadow: none; 
@@ -59,6 +58,39 @@
     .sum-text { font-size: 9px; font-weight: 600; color: var(--text-abu); text-transform: capitalize; margin-top: 4px;}
     .sum-val { font-size: 18px; margin-right: 2px; }
 
+    /* GRID TOMBOL JAM 1 SAMPAI 9 */
+    .jam-btn-grid {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 4px;
+        background: var(--bg-card);
+        padding: 6px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .btn-jam-num {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+        color: var(--text-abu);
+        border-radius: 8px;
+        padding: 8px 0;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    .btn-jam-num:hover {
+        border-color: var(--neon-green);
+        color: var(--text-putih);
+    }
+    .btn-jam-num.active {
+        background: rgba(5, 213, 138, 0.2);
+        color: var(--neon-green);
+        border-color: var(--neon-green);
+        box-shadow: 0 0 10px rgba(5, 213, 138, 0.3);
+    }
+
     /* =========================================================
        SISTEM TABEL ABSENSI (DARK NEON CARDS)
        ========================================================= */
@@ -71,7 +103,7 @@
         border-bottom: 1px solid var(--border-color); text-transform: capitalize;
     }
 
-    /* KARTU SISWA (Gaya FinTech Gelap) */
+    /* KARTU SISWA */
     .absen-card {
         display: flex !important; flex-direction: row !important; align-items: center !important; 
         justify-content: flex-start !important; flex-wrap: nowrap !important; padding: 10px 12px !important;
@@ -79,7 +111,6 @@
         border-radius: 12px !important; margin-bottom: 10px !important; width: 100% !important;
     }
 
-    /* AREA KIRI: NO & NAMA SISWA */
     .absen-info { display: flex !important; flex-direction: row !important; align-items: center !important; flex: 1 !important; min-width: 0 !important; }
     .absen-no { 
         width: 22px !important; height: 22px !important; flex-shrink: 0 !important; margin-right: 10px !important;
@@ -92,26 +123,21 @@
         display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; white-space: normal !important; line-height: 1.3 !important;
     }
 
-    /* AREA KANAN: WADAH TOMBOL DIKUNCI MATI LEBARNYA */
     .opsi-row { flex-shrink: 0 !important; display: flex !important; }
     .opsi-row > div { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 0 !important; }
     .opsi-row span { display: none !important; }
     .opsi-group { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 4px !important; flex-shrink: 0 !important; }
 
-    /* -- Kunci Kolom Kehadiran Mengajar (Fixed: 4btn x 22px + 3gap x 4px = 100px) -- */
     .hdr-kehadiran-kelas, #tempat-list-absen-kelas .opsi-row > div > div:nth-child(1), #tempat-list-absen-kelas .absen-card > .opsi-group:nth-of-type(1) {
         width: 100px !important; display: flex !important; justify-content: center !important; flex-shrink: 0 !important; text-align: center !important;
     }
-    /* -- Kunci Kolom Qur'an Mengajar (Fixed: 3btn x 22px + 2gap x 4px = 74px) -- */
     .hdr-quran-kelas, #tempat-list-absen-kelas .opsi-row > div > div:nth-child(2), #tempat-list-absen-kelas .absen-card > .opsi-group:nth-of-type(2) {
         width: 74px !important; display: flex !important; justify-content: center !important; margin-left: 8px !important; flex-shrink: 0 !important; text-align: center !important;
     }
-    /* -- Kunci Kolom Kehadiran Sholat (Fixed: 7btn x 22px + 6gap x 4px = 178px) -- */
     .hdr-kehadiran-sholat, #tempat-list-absen-sholat .opsi-row > div, #tempat-list-absen-sholat .absen-card > div:last-child { 
         width: 178px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 4px !important; flex-wrap: nowrap !important; flex-shrink: 0 !important; text-align: center !important;
     }
 
-    /* DESAIN TOMBOL KOTAK NEON (22px, Radius 6px) */
     .btn-opsi {
         width: 22px !important; height: 22px !important; font-size: 9px !important;
         border-radius: 6px !important; font-weight: 700 !important; border: 1px solid var(--border-color) !important;
@@ -120,7 +146,6 @@
         cursor: pointer; transition: all 0.2s; box-shadow: none !important; flex-shrink: 0 !important;
     }
 
-    /* Pewarnaan Indikator Aktif (Neon Glow) */
     .btn-hadir.active, .btn-sh.active { background: var(--neon-green) !important; color: var(--bg-main) !important; border-color: var(--neon-green) !important; box-shadow: 0 0 10px rgba(5,213,138,0.4) !important;}
     .btn-sakit.active { background: var(--neon-yellow) !important; color: var(--bg-main) !important; border-color: var(--neon-yellow) !important; box-shadow: 0 0 10px rgba(245,158,11,0.4) !important;}
     .btn-izin.active { background: var(--neon-blue) !important; color: #fff !important; border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(59,130,246,0.4) !important;}
@@ -139,9 +164,6 @@
     .btn-primary:active { transform: scale(0.98); }
     .icon-circle { background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
 
-    /* ==========================================================
-       PERBAIKAN: RIWAYAT LIST & ACTION BTN (SLIM CERAH & GELAP)
-       ========================================================== */
     #area-riwayat-kelas, #area-rekap-kelas, #area-riwayat-sholat, #area-rekap-sholat { background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border-color); }
     .list-data { list-style: none; padding: 0; }
     .list-data li { 
@@ -168,8 +190,7 @@
     .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
     .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
 
-    /* DESAIN LAYOUT DESKTOP 1 BARIS */
-    .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
+    .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
 </style>
 
@@ -199,6 +220,26 @@
                     </div>
                 </div>
 
+                <!-- PILIHAN TOMBOL JAM KE- (1-9, MAKS 2) -->
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin:0;">Jam Ke- (Pilih 1 atau 2 Angka):</label>
+                        <span id="label-terpilih-jam-absen" style="font-size:11px; color:var(--neon-green); font-weight:700;">-</span>
+                    </div>
+                    <input type="hidden" id="input-jam-absen-kelas">
+                    <div class="jam-btn-grid" id="grid-jam-absen">
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(1)">1</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(2)">2</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(3)">3</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(4)">4</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(5)">5</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(6)">6</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(7)">7</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(8)">8</button>
+                        <button type="button" class="btn-jam-num" onclick="pilihAngkaJamAbsen(9)">9</button>
+                    </div>
+                </div>
+
                 <!-- KOTAK RINGKASAN MENGAJAR EKSKLUSIF -->
                 <div class="summary-box" id="summary-mengajar">
                     <div class="summary-item"><div class="sum-top" style="color:var(--neon-green);"><i class="fa-solid fa-circle-check"></i> <span class="sum-val" id="sum-m-h">-</span></div><div class="sum-text">Hadir</div></div>
@@ -217,10 +258,9 @@
                     </button>
                 </div>
 
-                <!-- TABEL BISA DI GESER (SCROLL) -->
+                <!-- TABEL ABSENSI -->
                 <div class="table-scroll">
                     <div class="table-inner">
-                        <!-- HEADER TABEL STATIS -->
                         <div class="header-tabel-presensi">
                             <div style="width: 22px; text-align:center; flex-shrink: 0;">No</div>
                             <div style="flex: 1; padding-left:10px; min-width: 0;">Nama Siswa</div>
@@ -311,10 +351,8 @@
                     <div class="summary-item"><div class="sum-top" style="color:var(--neon-red);"><i class="fa-regular fa-circle-xmark"></i> <span class="sum-val" id="sum-s-ts">-</span></div><div class="sum-text">Tidak Sholat</div></div>
                 </div>
 
-                <!-- TABEL BISA DI GESER (SCROLL) -->
                 <div class="table-scroll">
                     <div class="table-inner">
-                        <!-- HEADER TABEL STATIS SHOLAT -->
                         <div class="header-tabel-presensi">
                             <div style="width: 22px; text-align:center; flex-shrink: 0;">No</div>
                             <div style="flex: 1; padding-left:10px; min-width: 0;">Nama Siswa</div>

@@ -5,6 +5,7 @@ let dataSiswaAbsenKelas = [];
 let dataSiswaAbsenSholat = [];
 let editModeKelas = null;   
 let editModeSholat = null;  
+let selectedJamAbsen = []; // Menyimpan jam ke yang dipilih pada presensi
 
 window.gantiTabPresensi = function(tabName) {
     document.getElementById('btn-tab-kelas').classList.remove('active');
@@ -24,7 +25,6 @@ window.loadKelasUntukPresensi = async function() {
     if (selSholat) selSholat.innerHTML = loadingText;
 
     try {
-        // HANYA MENGAMBIL KELAS DENGAN STATUS AKTIF (status_kelas = true)
         const { data, error } = await supabase
             .from('kelas')
             .select('id, tingkat, nama_kelas')
@@ -44,6 +44,74 @@ window.loadKelasUntukPresensi = async function() {
         if (selSholat) selSholat.innerHTML = '<option value="">Gagal memuat kelas</option>';
     }
 };
+
+// ================= FUNGSI PILIH JAM KE- PADA PRESENSI (1-9, MAKS 2) =================
+window.pilihAngkaJamAbsen = function(angka) {
+    angka = parseInt(angka);
+    
+    if (selectedJamAbsen.includes(angka)) {
+        selectedJamAbsen = selectedJamAbsen.filter(n => n !== angka);
+    } else {
+        if (selectedJamAbsen.length >= 2) {
+            selectedJamAbsen = [angka];
+        } else {
+            selectedJamAbsen.push(angka);
+        }
+    }
+    
+    selectedJamAbsen.sort((a, b) => a - b);
+    renderPilihanJamAbsen();
+};
+
+function renderPilihanJamAbsen() {
+    const inputVal = document.getElementById('input-jam-absen-kelas');
+    const labelTampil = document.getElementById('label-terpilih-jam-absen');
+    const gridBtns = document.querySelectorAll('#grid-jam-absen .btn-jam-num');
+
+    gridBtns.forEach(btn => {
+        const val = parseInt(btn.innerText);
+        if (selectedJamAbsen.includes(val)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const strVal = selectedJamAbsen.join('-');
+    if (inputVal) inputVal.value = strVal;
+    if (labelTampil) labelTampil.innerText = strVal ? `Jam ${strVal}` : '-';
+}
+
+window.setNilaiJamAbsenEksplisit = function(valStr) {
+    selectedJamAbsen = [];
+    if (valStr) {
+        const parts = String(valStr).split('-');
+        parts.forEach(p => {
+            const num = parseInt(p.trim());
+            if (!isNaN(num) && num >= 1 && num <= 9) {
+                selectedJamAbsen.push(num);
+            }
+        });
+        selectedJamAbsen.sort((a, b) => a - b);
+    }
+    renderPilihanJamAbsen();
+};
+
+// ================= FUNGSI SORTING STANDAR (ABSEN LALU NAMA) =================
+function sortSiswaAbsen(listData) {
+    return listData.sort((a, b) => {
+        const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 99999;
+        const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 99999;
+
+        if (noA !== noB) {
+            return noA - noB;
+        }
+
+        const namaA = (a.siswa && a.siswa.nama_siswa) ? a.siswa.nama_siswa : '';
+        const namaB = (b.siswa && b.siswa.nama_siswa) ? b.siswa.nama_siswa : '';
+        return namaA.localeCompare(namaB);
+    });
+}
 
 // ================= FUNGSI HITUNG REKAP (SUMMARY) =================
 function hitungRekapKelas() {
@@ -91,6 +159,7 @@ window.bukaFormAbsenKelas = async function() {
     editModeKelas = null;
     document.getElementById('btn-simpan-absen-kelas').innerHTML = '<span style="flex:1; text-align:left;">Simpan Presensi</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
     document.getElementById('input-tgl-absen-kelas').valueAsDate = new Date(); 
+    window.setNilaiJamAbsenEksplisit('');
 
     document.getElementById('area-rekap-kelas').style.display = 'block';
     const elMulaiK = document.getElementById('rekap-kelas-mulai');
@@ -113,7 +182,7 @@ window.bukaFormAbsenKelas = async function() {
         }
         document.getElementById('input-pertemuan-ke').value = nextPertemuan;
 
-        const { data, error } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        const { data, error } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas);
         if (error) throw error;
 
         if (data.length === 0) {
@@ -121,7 +190,7 @@ window.bukaFormAbsenKelas = async function() {
             return;
         }
 
-        data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        sortSiswaAbsen(data);
         dataSiswaAbsenKelas = data.map(item => ({ id_siswa: item.id_siswa, kehadiran: 'Hadir', quran: 'Kosong' }));
 
         let htmlContent = '';
@@ -242,6 +311,7 @@ window.simpanPresensiKelas = async function() {
     if (dataSiswaAbsenKelas.length === 0) return;
     const tgl = document.getElementById('input-tgl-absen-kelas').value;
     const pert = document.getElementById('input-pertemuan-ke').value;
+    const jamVal = document.getElementById('input-jam-absen-kelas').value || null;
     const idKelas = document.getElementById('pilih-kelas-absen-kelas').value;
     
     if (!tgl || !pert) { alert("Tanggal dan Pertemuan Ke harus diisi!"); return; }
@@ -253,7 +323,7 @@ window.simpanPresensiKelas = async function() {
         btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
         btn.disabled = true;
 
-        // 1. SINKRONISASI KE JURNAL MENGAJAR TERLEBIH DAHULU (Mendapatkan id_jurnal)
+        // 1. SINKRONISASI KE JURNAL MENGAJAR (Menyertakan jam_ke secara otomatis)
         let idJurnalTarget = null;
         const { data: jurnalAda, error: errCekJurnal } = await supabase
             .from('jurnalmengajar')
@@ -267,6 +337,10 @@ window.simpanPresensiKelas = async function() {
 
         if (jurnalAda) {
             idJurnalTarget = jurnalAda.id;
+            // Update jam_ke pada jurnal jika disetel
+            if (jamVal) {
+                await supabase.from('jurnalmengajar').update({ jam_ke: jamVal }).eq('id', idJurnalTarget);
+            }
         } else {
             const isSemuaDispensasi = dataSiswaAbsenKelas.every(s => s.kehadiran === 'Dispensasi');
             const judulMateriAuto = isSemuaDispensasi ? 'Penugasan Mandiri (Guru Berhalangan)' : '[Draft] Belum Mengisi Materi';
@@ -278,6 +352,7 @@ window.simpanPresensiKelas = async function() {
                     id_kelas: idKelas,
                     tanggal: tgl,
                     pertemuan_ke: pert,
+                    jam_ke: jamVal,
                     judul_materi: judulMateriAuto,
                     deskripsi_materi: deskripsiAuto
                 }])
@@ -340,7 +415,11 @@ window.loadRiwayatKelas = async function(idKelas) {
     const namaKelas = selKelas.options[selKelas.selectedIndex].text;
 
     try {
-        const { data, error } = await supabase.from('absenkelas').select('tanggal, pertemuan_ke, kehadiran').eq('id_kelas', idKelas);
+        const { data, error } = await supabase
+            .from('absenkelas')
+            .select('tanggal, pertemuan_ke, kehadiran, id_jurnal, jurnalmengajar(jam_ke)')
+            .eq('id_kelas', idKelas);
+            
         if (error) throw error;
 
         if (data.length === 0) {
@@ -351,8 +430,10 @@ window.loadRiwayatKelas = async function(idKelas) {
         const grouped = {};
         data.forEach(item => {
             const key = `${item.tanggal}|${item.pertemuan_ke}`;
-            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, pertemuan: item.pertemuan_ke, Hadir:0, Sakit:0, Izin:0, Alpa:0, Dispensasi:0 };
+            const jamStr = item.jurnalmengajar ? item.jurnalmengajar.jam_ke : null;
+            if(!grouped[key]) grouped[key] = { tanggal: item.tanggal, pertemuan: item.pertemuan_ke, jam_ke: jamStr, Hadir:0, Sakit:0, Izin:0, Alpa:0, Dispensasi:0 };
             if(grouped[key][item.kehadiran] !== undefined) grouped[key][item.kehadiran]++;
+            if(!grouped[key].jam_ke && jamStr) grouped[key].jam_ke = jamStr;
         });
 
         const sortedKeys = Object.keys(grouped).sort((a,b) => new Date(grouped[b].tanggal) - new Date(grouped[a].tanggal));
@@ -361,10 +442,12 @@ window.loadRiwayatKelas = async function(idKelas) {
         sortedKeys.forEach(k => {
             const g = grouped[k];
             const badgeTugas = g.Dispensasi > 0 ? `<span style="color:#8b5cf6;">D(Tugas):${g.Dispensasi}</span>` : '';
+            const badgeJam = g.jam_ke ? `<span style="font-size:10px; color:var(--neon-green); margin-left:6px; font-weight:700;">(Jam ${g.jam_ke})</span>` : '';
+
             html += `
             <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan})</b>
+                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan}) ${badgeJam}</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
@@ -396,9 +479,14 @@ window.editRiwayatKelas = async function(tanggal, pertemuan) {
     document.getElementById('input-pertemuan-ke').value = pertemuan;
     
     try {
-        const { data, error } = await supabase.from('absenkelas').select('*').eq('id_kelas', idKelas).eq('tanggal', tanggal).eq('pertemuan_ke', pertemuan);
-        if(error) throw error;
+        const [resAbsen, resJurnal] = await Promise.all([
+            supabase.from('absenkelas').select('*').eq('id_kelas', idKelas).eq('tanggal', tanggal).eq('pertemuan_ke', pertemuan),
+            supabase.from('jurnalmengajar').select('jam_ke').eq('id_kelas', idKelas).eq('tanggal', tanggal).eq('pertemuan_ke', pertemuan).maybeSingle()
+        ]);
+
+        if (resAbsen.error) throw resAbsen.error;
         
+        const data = resAbsen.data || [];
         data.forEach(dbItem => {
             const index = dataSiswaAbsenKelas.findIndex(s => s.id_siswa === dbItem.id_siswa);
             if(index !== -1) {
@@ -409,6 +497,9 @@ window.editRiwayatKelas = async function(tanggal, pertemuan) {
             }
         });
         
+        const jamTersimpan = (resJurnal.data && resJurnal.data.jam_ke) ? resJurnal.data.jam_ke : '';
+        window.setNilaiJamAbsenEksplisit(jamTersimpan);
+
         editModeKelas = { tanggal, pertemuan_ke: pertemuan };
         document.getElementById('btn-simpan-absen-kelas').innerHTML = '<span style="flex:1; text-align:left;">Perbarui Data Presensi</span><div class="icon-circle"><i class="fa-solid fa-cloud-arrow-up"></i></div>';
         document.getElementById('area-absen-kelas').scrollIntoView({ behavior: 'smooth' });
@@ -453,7 +544,7 @@ window.bukaFormAbsenSholat = async function() {
     document.getElementById('area-absen-sholat').style.display = 'block';
 
     try {
-        const { data, error } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        const { data, error } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas);
         if (error) throw error;
         
         if (data.length === 0) {
@@ -461,7 +552,7 @@ window.bukaFormAbsenSholat = async function() {
             return;
         }
 
-        data.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        sortSiswaAbsen(data);
         dataSiswaAbsenSholat = data.map(item => ({ id_siswa: item.id_siswa, kehadiran: 'SH' }));
 
         let htmlContent = '';
@@ -722,13 +813,13 @@ window.downloadRekapKelas = async function(format) {
         alert("Sedang menyusun rekap kelas, mohon tunggu...");
         await window.loadExportLibs();
         
-        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas);
         if (errSiswa) throw errSiswa;
         
         const { data: absenData, error: errAbsen } = await supabase.from('absenkelas').select('*').eq('id_kelas', idKelas).gte('tanggal', tglAwal).lte('tanggal', tglAkhir).order('tanggal');
         if (errAbsen) throw errAbsen;
 
-        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        sortSiswaAbsen(siswaData);
 
         const dateSet = new Set();
         absenData.forEach(a => dateSet.add(`${a.tanggal} (P.${a.pertemuan_ke})`));
@@ -809,13 +900,13 @@ window.downloadRekapSholat = async function(format) {
         alert("Sedang menyusun rekap sholat, mohon tunggu...");
         await window.loadExportLibs();
         
-        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas).order('nomor_absen', { ascending: true });
+        const { data: siswaData, error: errSiswa } = await supabase.from('anggota_kelas').select(`id_siswa, nomor_absen, siswa ( nama_siswa, jenis_kelamin )`).eq('id_kelas', idKelas);
         if (errSiswa) throw errSiswa;
         
         const { data: absenData, error: errAbsen } = await supabase.from('absensholat').select('*').eq('id_kelas', idKelas).gte('tanggal', tglAwal).lte('tanggal', tglAkhir).order('tanggal');
         if (errAbsen) throw errAbsen;
 
-        siswaData.sort((a, b) => a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa));
+        sortSiswaAbsen(siswaData);
 
         const dateSet = new Set();
         absenData.forEach(a => dateSet.add(`${a.tanggal} (${a.nama_sholat})`));

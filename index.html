@@ -18,10 +18,16 @@
             --text-putih: #ffffff;
             --text-abu: #8494a8;      
             --neon-green: #05d58a;    
-            --neon-green-dim: rgba(5, 213, 138, 0.15);
-            --neon-blue: #2563eb;
+            --neon-blue: #3b82f6;
+            --neon-purple: #a855f7;
+            --neon-cyan: #38bdf8;
             --neon-red: #f43f5e;
             --neon-yellow: #f59e0b;
+
+            /* PALET GLASSMORPHISM DARK INDIGO */
+            --glass-bg: rgba(14, 22, 38, 0.88);
+            --glass-border: rgba(99, 102, 241, 0.25);
+            --gradient-accent: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
             --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
         }
 
@@ -38,23 +44,28 @@
             overflow-x: hidden;
         }
 
-        /* HEADER GLOBAL (CLEAN DARK) */
+        /* HEADER GLOBAL (GLASS DARK DENGAN BORDER GRADASI ELEGAN) */
         .app-header {
-            background-color: var(--bg-main);
-            padding: 20px 20px 10px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 18px 20px 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky; 
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.35);
         }
 
         .header-info h1 {
             font-size: 18px; 
             font-weight: 700;
-            color: var(--text-putih);
+            background: linear-gradient(135deg, #ffffff 30%, var(--neon-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: 0.5px;
             margin-bottom: 2px;
         }
@@ -69,14 +80,14 @@
             width: 40px; height: 40px; 
             border-radius: 50%;
             background-color: var(--bg-card);
-            color: var(--neon-green);
+            color: var(--neon-cyan);
             display: flex; justify-content: center; align-items: center;
             font-weight: 800; font-size: 16px;
-            box-shadow: 0 0 10px rgba(5, 213, 138, 0.2);
-            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+            border: 2px solid var(--neon-cyan);
             cursor: pointer;
             overflow: hidden; 
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .header-profile:active { transform: scale(0.9); }
 
@@ -89,34 +100,46 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* NAVIGASI BAWAH (MOBILE) */
+        /* NAVIGASI BAWAH (MOBILE: GLASSMORPHISM + SUDUT TUMPUL + GLOW LEMBUT) */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background-color: var(--bg-card);
-            border-top: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
             display: flex; justify-content: space-around;
-            padding: 12px 0 15px 0;
+            padding: 10px 8px 12px 8px;
             z-index: 1000;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6);
         }
 
         /* Default Mobile: Sembunyikan Sidebar Brand */
         .sidebar-brand { display: none; }
 
         .nav-item {
-            text-decoration: none; color: var(--text-abu);
+            text-decoration: none; 
+            color: var(--text-abu);
             display: flex; flex-direction: column; align-items: center;
             font-size: 10px; font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            position: relative;
         }
-        .nav-item i { font-size: 20px; margin-bottom: 5px; transition: transform 0.3s ease; }
+        .nav-item i { font-size: 19px; margin-bottom: 4px; transition: all 0.3s ease; }
 
-        /* Indikator Menu Aktif */
-        .nav-item.active { color: var(--neon-green); }
+        /* Indikator Menu Aktif Mobile */
+        .nav-item.active { 
+            color: #ffffff; 
+            background: var(--gradient-accent);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+        }
         .nav-item.active i {
-            transform: translateY(-4px);
-            color: var(--neon-green);
-            text-shadow: 0 0 12px var(--neon-green);
+            transform: translateY(-2px);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
         }
 
         /* ================= FORM & MODAL PROFIL ================= */
@@ -124,13 +147,13 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(11, 18, 30, 0.85); z-index: 2000; display: none;
             justify-content: center; align-items: center; padding: 20px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: var(--bg-card); border: 1px solid var(--neon-blue);
+            background: var(--bg-card); border: 1px solid var(--glass-border);
             border-radius: 16px; width: 100%; max-width: 500px; max-height: 85vh;
             overflow-y: auto; padding: 25px; position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             animation: fadeIn 0.3s ease-out;
         }
         .modal-content::-webkit-scrollbar { width: 5px; }
@@ -148,55 +171,89 @@
             width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; 
             font-size: 12px; color: var(--text-putih); background: var(--bg-main); outline: none; transition: 0.3s;
         }
-        .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 3px rgba(5, 213, 138, 0.1); }
+        .form-control:focus { border-color: var(--neon-cyan); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
         .btn-primary { 
             background: var(--gradient-primary); border: none; border-radius: 12px; color: white; 
             font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s; display:flex; justify-content:center; align-items:center;
         }
         .btn-primary:active { transform: scale(0.97); }
 
-        /* SIDEBAR (DESKTOP) */
+        /* ================= SIDEBAR & HEADER (DESKTOP) ================= */
         @media (min-width: 768px) {
             body { padding-bottom: 0; padding-left: 260px; }
             
             .header-profile { display: none !important; }
             
-            .app-header { padding: 20px 30px; max-width: 1200px; margin: 0 auto; }
-            #main-content { padding: 30px; margin: 0 auto; max-width: 1200px; }
+            /* Header Desktop */
+            .app-header { 
+                padding: 22px 35px; 
+                max-width: 1200px; 
+                margin: 0 auto; 
+                background: transparent;
+                border-bottom: 1px solid var(--border-color);
+                box-shadow: none;
+            }
+            .header-info h1 {
+                font-size: 22px;
+            }
+
+            #main-content { padding: 30px 35px; margin: 0 auto; max-width: 1200px; }
             
+            /* Sidebar Desktop */
             .bottom-nav {
                 flex-direction: column; justify-content: flex-start;
-                top: 0; left: 0; width: 260px; height: 100vh; padding-top: 30px;
-                border-top: none; border-right: 1px solid var(--border-color);
+                top: 0; left: 0; width: 260px; height: 100vh; padding: 25px 12px 20px 12px;
+                border-top: none; 
+                border-top-left-radius: 0; 
+                border-top-right-radius: 0;
+                border-right: 1px solid var(--glass-border);
+                background: var(--glass-bg);
+                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
             }
             
             .sidebar-brand {
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
-                padding: 0 15px 20px 15px; margin-bottom: 15px; cursor: pointer;
-                border-bottom: 1px solid var(--border-color); text-align: center;
+                padding: 0 10px 20px 10px; margin-bottom: 20px; cursor: pointer;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08); text-align: center;
                 transition: transform 0.2s;
             }
-            .sidebar-brand:active { transform: scale(0.95); }
+            .sidebar-brand:active { transform: scale(0.96); }
             
             .sidebar-brand img {
-                width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+                width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
                 object-position: top;
-                border: 3px solid var(--neon-green); margin-bottom: 10px;
-                box-shadow: 0 0 15px rgba(5, 213, 138, 0.2);
+                border: 2px solid var(--neon-cyan); margin-bottom: 12px;
+                box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
             }
             .sidebar-brand .default-icon {
-                width: 80px; height: 80px; border-radius: 50%; background: var(--bg-card); 
+                width: 76px; height: 76px; border-radius: 50%; background: var(--bg-card); 
                 display: flex; justify-content: center; align-items: center; 
-                border: 3px solid var(--neon-green); margin-bottom: 10px;
+                border: 2px solid var(--neon-cyan); margin-bottom: 12px;
+                box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
             }
             .sidebar-brand h3 { font-size: 14px; font-weight: 700; color: var(--text-putih); margin-bottom: 4px; line-height: 1.2; }
-            .sidebar-brand p { font-size: 10px; font-weight: 500; color: var(--text-abu); line-height: 1.2; margin: 0; }
+            .sidebar-brand p { font-size: 11px; font-weight: 500; color: var(--text-abu); line-height: 1.2; margin: 0; }
 
-            .nav-item { flex-direction: row; padding: 14px 25px; font-size: 13px; gap: 15px; margin: 0 15px 5px 15px; border-radius: 12px; }
-            .nav-item i { margin-bottom: 0; width: 25px; font-size: 16px; text-align: center; }
-            .nav-item:hover { background-color: var(--bg-card-hover); color: var(--text-putih); }
-            .nav-item.active { background-color: var(--neon-green-dim); color: var(--neon-green); }
-            .nav-item.active i { transform: none; text-shadow: none; }
+            .nav-item { 
+                flex-direction: row; padding: 13px 18px; font-size: 13px; gap: 14px; 
+                margin-bottom: 6px; border-radius: 12px; color: var(--text-abu); 
+            }
+            .nav-item i { margin-bottom: 0; width: 22px; font-size: 16px; text-align: center; }
+            .nav-item:hover { 
+                background-color: rgba(255, 255, 255, 0.04); 
+                color: var(--text-putih); 
+            }
+            .nav-item.active { 
+                background: var(--gradient-accent); 
+                color: #ffffff;
+                border: 1px solid rgba(168, 85, 247, 0.35);
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+            }
+            .nav-item.active i { 
+                transform: none; 
+                color: var(--neon-cyan); 
+                text-shadow: 0 0 10px rgba(56, 189, 248, 0.8); 
+            }
         }
     </style>
 </head>
@@ -207,7 +264,7 @@
             <h1 id="page-title">Presensi Siswa</h1>
             <p id="header-subtitle">Tahun Ajaran Aktif - Memuat...</p>
         </div>
-        <!-- Pemicu Modal Mobile: Klik 5x di logo ini -->
+        <!-- Pemicu Modal Mobile: Klik di profil -->
         <div class="header-profile" id="profile-btn" onclick="handleProfileClick()">
             <i class="fa-solid fa-user"></i>
         </div>
@@ -270,9 +327,9 @@
     </div>
 
     <nav class="bottom-nav">
-        <!-- Pemicu Modal Desktop: Klik 5x di area profil sidebar ini -->
+        <!-- Pemicu Modal Desktop: Klik di area profil sidebar -->
         <div class="sidebar-brand" id="sidebar-brand" onclick="handleProfileClick()">
-            <div class="default-icon"><i class="fa-solid fa-user" style="font-size:30px; color:var(--neon-green);"></i></div>
+            <div class="default-icon"><i class="fa-solid fa-user" style="font-size:28px; color:var(--neon-cyan);"></i></div>
             <h3>Memuat Profil...</h3>
             <p>Sistem Administrasi</p>
         </div>
