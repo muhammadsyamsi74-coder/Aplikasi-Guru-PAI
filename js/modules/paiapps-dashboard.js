@@ -64,7 +64,6 @@ async function loadRingkasanMetrikDanAlert() {
         const listKelasAktif = resKelasAktif.data || [];
         const setKelasAktifId = new Set(listKelasAktif.map(k => k.id));
 
-        // 1. Hitung Total Siswa Unik yang ada di Kelas Aktif
         const anggotaKelasAktif = (resAnggota.data || []).filter(a => setKelasAktifId.has(a.id_kelas));
         const setSiswaAktif = new Set(anggotaKelasAktif.map(a => a.id_siswa));
 
@@ -73,7 +72,6 @@ async function loadRingkasanMetrikDanAlert() {
 
         let alertsHtml = '';
 
-        // 2. Deteksi Jurnal Draft hanya dari Kelas Aktif
         const listDraftAktif = (resJurnalDraft.data || []).filter(j => setKelasAktifId.has(j.id_kelas));
         if (listDraftAktif.length > 0) {
             alertsHtml += `
@@ -84,7 +82,6 @@ async function loadRingkasanMetrikDanAlert() {
             `;
         }
 
-        // 3. Deteksi Tugas Belum Dinilai hanya dari Kelas Aktif
         const tugasKelasAktif = (resTugas.data || []).filter(t => setKelasAktifId.has(t.id_kelas));
         const allNilai = resNilai.data || [];
         let tugasBelumSelesai = 0;
@@ -118,7 +115,7 @@ async function loadRingkasanMetrikDanAlert() {
     }
 }
 
-// ================= 2. PENGINGAT JADWAL MENGAJAR (DENGAN REAL-TIME HIGHLIGHT) =================
+// ================= 2. PENGINGAT JADWAL MENGAJAR =================
 async function loadJadwalHariIni(hari) {
     const container = document.getElementById('dash-list-jadwal-hari-ini');
     if (!container) return;
@@ -142,7 +139,6 @@ async function loadJadwalHariIni(hari) {
         const listKelasAktif = resKelasAktif.data || [];
         const mapKelasAktif = new Map(listKelasAktif.map(k => [k.id, k]));
 
-        // Filter jadwal hanya untuk kelas yang aktif
         const jadwalAktif = (resJadwal.data || []).filter(j => mapKelasAktif.has(j.id_kelas));
 
         if (jadwalAktif.length === 0) {
@@ -157,13 +153,12 @@ async function loadJadwalHariIni(hari) {
 
         jadwalAktif.sort((a, b) => String(a.jam_ke).localeCompare(String(b.jam_ke)));
 
-        // AMBIL WAKTU REAL-TIME SEKARANG
         const now = new Date();
         const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const hariAsliSekarang = hariList[now.getDay()];
         const nowJam = String(now.getHours()).padStart(2, '0');
         const nowMenit = String(now.getMinutes()).padStart(2, '0');
-        const currentTimeStr = `${nowJam}:${nowMenit}`; // Format "HH:mm"
+        const currentTimeStr = `${nowJam}:${nowMenit}`;
 
         let html = '';
         jadwalAktif.forEach(item => {
@@ -174,7 +169,6 @@ async function loadJadwalHariIni(hari) {
             const jamStr = (jM && jS) ? `${jM} - ${jS}` : 'Waktu Fleksibel';
             const ketStr = item.keterangan ? ` | ${item.keterangan}` : '';
 
-            // CEK APAKAH JADWAL INI SEDANG BERLANGSUNG
             let isCurrentLive = false;
             if (hari === hariAsliSekarang && jM && jS) {
                 if (currentTimeStr >= jM && currentTimeStr <= jS) {
@@ -213,7 +207,7 @@ async function loadJadwalHariIni(hari) {
     }
 }
 
-// ================= 3. GRAFIK KELANCARAN MEMBACA (HANYA KELAS AKTIF) =================
+// ================= 3. GRAFIK KELANCARAN MEMBACA =================
 async function loadGrafikMembacaQuran() {
     const canvas = document.getElementById('chart-quran-dashboard');
     const msgKosong = document.getElementById('chart-quran-kosong');
@@ -313,30 +307,10 @@ async function loadGrafikMembacaQuran() {
             data: {
                 labels: labelsKelas,
                 datasets: [
-                    {
-                        label: 'Belum Dinilai',
-                        data: persenBelum,
-                        backgroundColor: '#64748b',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Belum Bisa & Terbata-bata',
-                        data: persenTerbata,
-                        backgroundColor: '#ef4444',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Cepat (Banyak/Sedikit Salah)',
-                        data: persenCepat,
-                        backgroundColor: '#f59e0b',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Lancar & Mahir',
-                        data: persenLancarMahir,
-                        backgroundColor: '#05d58a',
-                        borderRadius: 6
-                    }
+                    { label: 'Belum Dinilai', data: persenBelum, backgroundColor: '#64748b', borderRadius: 6 },
+                    { label: 'Belum Bisa & Terbata-bata', data: persenTerbata, backgroundColor: '#ef4444', borderRadius: 6 },
+                    { label: 'Cepat (Banyak/Sedikit Salah)', data: persenCepat, backgroundColor: '#f59e0b', borderRadius: 6 },
+                    { label: 'Lancar & Mahir', data: persenLancarMahir, backgroundColor: '#05d58a', borderRadius: 6 }
                 ]
             },
             options: {
@@ -345,17 +319,11 @@ async function loadGrafikMembacaQuran() {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: {
-                            color: '#8494a8',
-                            boxWidth: 12,
-                            font: { size: 10, family: 'Poppins' }
-                        }
+                        labels: { color: '#8494a8', boxWidth: 12, font: { size: 10, family: 'Poppins' } }
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
-                                return ` ${context.dataset.label}: ${context.raw}%`;
-                            }
+                            label: function(context) { return ` ${context.dataset.label}: ${context.raw}%`; }
                         }
                     }
                 },
@@ -371,9 +339,7 @@ async function loadGrafikMembacaQuran() {
                         ticks: {
                             color: '#8494a8',
                             stepSize: 20,
-                            callback: function(value) {
-                                return value + '%';
-                            },
+                            callback: function(value) { return value + '%'; },
                             font: { family: 'Poppins', size: 10 }
                         }
                     }
@@ -386,19 +352,19 @@ async function loadGrafikMembacaQuran() {
     }
 }
 
-// ================= 4. ANALITIK KEHADIRAN (HANYA KELAS AKTIF & BEBAS PENGURANG DISPENSASI) =================
+// ================= 4. ANALITIK KEHADIRAN (MENGGUNAKAN POSTGRESQL VIEW) =================
 async function loadAnalitikKehadiranPerKelas() {
     const container = document.getElementById('dash-list-analitik-kehadiran');
     if (!container) return;
 
     try {
-        const [resKelas, resAbsen] = await Promise.all([
-            supabase.from('kelas').select('id, nama_kelas, tingkat').eq('status_kelas', true).order('tingkat').order('nama_kelas'),
-            supabase.from('absenkelas').select('id_kelas, kehadiran')
-        ]);
+        const { data, error } = await supabase
+            .from('view_analitik_kehadiran')
+            .select('*');
 
-        const listKelas = resKelas.data || [];
-        const listAbsen = resAbsen.data || [];
+        if (error) throw error;
+
+        const listKelas = data || [];
 
         if (listKelas.length === 0) {
             container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>';
@@ -407,13 +373,12 @@ async function loadAnalitikKehadiranPerKelas() {
 
         let html = '';
         listKelas.forEach(kls => {
-            // Filter hanya absensi kelas yang bukan dispensasi / tugas guru
-            const absenValid = listAbsen.filter(a => a.id_kelas === kls.id && a.kehadiran !== 'Dispensasi');
-            
+            const jmlHadir = parseInt(kls.total_hadir) || 0;
+            const jmlValid = parseInt(kls.total_valid) || 0;
+
             let persen = 0;
-            if (absenValid.length > 0) {
-                const jmlHadir = absenValid.filter(a => a.kehadiran === 'Hadir').length;
-                persen = Math.round((jmlHadir / absenValid.length) * 100);
+            if (jmlValid > 0) {
+                persen = Math.round((jmlHadir / jmlValid) * 100);
             }
 
             let clr = 'var(--neon-green)';
@@ -424,7 +389,7 @@ async function loadAnalitikKehadiranPerKelas() {
                 <div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
                         <span style="color:var(--text-putih);">${kls.nama_kelas}</span>
-                        <span style="color:${clr}; font-weight:700;">${persen}% Hadir (${absenValid.length} data)</span>
+                        <span style="color:${clr}; font-weight:700;">${persen}% Hadir (${jmlValid} data)</span>
                     </div>
                     <div class="progress-bar-wrap">
                         <div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div>
@@ -435,27 +400,24 @@ async function loadAnalitikKehadiranPerKelas() {
         container.innerHTML = html;
 
     } catch (e) {
-        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat data kehadiran.</div>`;
+        console.error("Gagal memuat view kehadiran:", e);
+        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat data kehadiran: ${e.message}</div>`;
     }
 }
 
-// ================= 5. ANALITIK KETUNTASAN TUGAS (HANYA KELAS AKTIF) =================
+// ================= 5. ANALITIK KETUNTASAN TUGAS (PERSENTASE SISWA TUNTAS / T) =================
 async function loadAnalitikKetuntasanTugas() {
     const container = document.getElementById('dash-list-analitik-tugas');
     if (!container) return;
 
     try {
-        const [resKelas, resTugas, resNilai, resAnggota] = await Promise.all([
-            supabase.from('kelas').select('id, nama_kelas, tingkat').eq('status_kelas', true).order('tingkat').order('nama_kelas'),
-            supabase.from('namatugas').select('id, id_kelas'),
-            supabase.from('penilaiantugas').select('id, id_tugas'),
-            supabase.from('anggota_kelas').select('id_kelas, id_siswa')
-        ]);
+        const { data, error } = await supabase
+            .from('view_analitik_tugas')
+            .select('*');
 
-        const listKelas = resKelas.data || [];
-        const listTugas = resTugas.data || [];
-        const listNilai = resNilai.data || [];
-        const listAnggota = resAnggota.data || [];
+        if (error) throw error;
+
+        const listKelas = data || [];
 
         if (listKelas.length === 0) {
             container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>';
@@ -464,29 +426,26 @@ async function loadAnalitikKetuntasanTugas() {
 
         let html = '';
         listKelas.forEach(kls => {
-            const tugasKls = listTugas.filter(t => t.id_kelas === kls.id);
-            const jmlSiswaKls = listAnggota.filter(a => a.id_kelas === kls.id).length;
+            const totalSlot = parseInt(kls.total_slot) || 0;
+            const totalTuntas = parseInt(kls.total_tuntas) || 0;
+            const totalTugas = parseInt(kls.total_tugas) || 0;
 
-            let totalSlotNilai = tugasKls.length * jmlSiswaKls;
-            let totalNilaiTerisi = 0;
-
-            tugasKls.forEach(t => {
-                totalNilaiTerisi += listNilai.filter(n => n.id_tugas === t.id).length;
-            });
-
+            // Hitung persentase siswa tuntas (T) terhadap total slot tugas
             let persen = 0;
-            if (totalSlotNilai > 0) {
-                persen = Math.round((totalNilaiTerisi / totalSlotNilai) * 100);
+            if (totalSlot > 0) {
+                persen = Math.round((totalTuntas / totalSlot) * 100);
             }
 
             let clr = 'var(--neon-purple)';
-            if (persen === 100) clr = 'var(--neon-green)';
+            if (persen < 70) clr = 'var(--neon-red)';
+            else if (persen < 85) clr = 'var(--neon-yellow)';
+            else if (persen === 100) clr = 'var(--neon-green)';
 
             html += `
                 <div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
-                        <span style="color:var(--text-putih);">${kls.nama_kelas} (${tugasKls.length} Tugas)</span>
-                        <span style="color:${clr}; font-weight:700;">${persen}% Dinilai</span>
+                        <span style="color:var(--text-putih);">${kls.nama_kelas} (${totalTugas} Tugas)</span>
+                        <span style="color:${clr}; font-weight:700;">${persen}% Tuntas (${totalTuntas}/${totalSlot} data)</span>
                     </div>
                     <div class="progress-bar-wrap">
                         <div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div>
@@ -497,7 +456,8 @@ async function loadAnalitikKetuntasanTugas() {
         container.innerHTML = html;
 
     } catch (e) {
-        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat ketuntasan tugas.</div>`;
+        console.error("Gagal memuat view tugas:", e);
+        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat ketuntasan tugas: ${e.message}</div>`;
     }
 }
 
