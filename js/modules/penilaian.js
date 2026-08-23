@@ -58,12 +58,10 @@ window.updateSelectColor = function(el) {
     const darkGreens = ['Lancar', 'Mahir tanpa kesalahan', 'Tajwid lanjutan', 'Mahir', 'Jelas', 'Sangat jelas', 'Sudah tepat', 'Rapi', 'Lagu tilawah', 'Hafal'];
 
     if (darkGreens.includes(val)) {
-        // Hijau Tua
         el.style.color = '#059669';
         el.style.backgroundColor = 'rgba(5, 150, 105, 0.15)';
         el.style.borderColor = 'rgba(5, 150, 105, 0.4)';
     } else if (lightGreens.includes(val)) {
-        // Hijau Muda
         el.style.color = 'var(--neon-green)';
         el.style.backgroundColor = 'rgba(5, 213, 138, 0.15)';
         el.style.borderColor = 'rgba(5, 213, 138, 0.4)';
@@ -165,7 +163,6 @@ window.loadKelasUntukPenilaian = async function() {
     }
 };
 
-// Load daftar tugas khusus berdasarkan id_kelas yang dipilih
 window.loadDaftarTugas = async function(idKelas) {
     const dd = document.getElementById('input-nama-tugas-dropdown');
     if (!dd) return;
@@ -201,7 +198,6 @@ window.loadNilaiTugas = async function() {
     
     document.querySelectorAll('.input-nilai-tugas').forEach(el => { el.value = ''; el.removeAttribute('data-recordid'); });
     
-    // Kembalikan ke default TS jika form direset / tugas baru
     document.querySelectorAll('.val-ketuntasan').forEach(el => el.value = 'TS');
     document.querySelectorAll('.btn-tuntas').forEach(el => el.classList.remove('active', 't', 'ts'));
     document.querySelectorAll('.btn-tuntas[data-val="TS"]').forEach(el => el.classList.add('active', 'ts'));
@@ -229,7 +225,6 @@ window.loadNilaiTugas = async function() {
     } catch(e) { console.error("Gagal load nilai tugas", e); }
 };
 
-// ================= FITUR HAPUS TUGAS BESERTA NILAI =================
 window.hapusTugasAktif = async function() {
     const dd = document.getElementById('input-nama-tugas-dropdown');
     const idTugas = dd.value;
@@ -293,11 +288,9 @@ window.bukaFormPenilaian = async function(tipe) {
             return;
         }
 
-        // Pengurutan nomor absen 1-seterusnya, jika sama berdasarkan nama, tanpa absen di belakang
         sortSiswaPenilaian(dataSiswa);
         dataSiswaPenilaian = dataSiswa;
 
-        // Tarik Data Riwayat 
         let exBaca = [], exTulis = [], exSholat = [], exSurah = [];
         if (tipe === 'baca') {
             const {data} = await supabase.from('penilaianmembaca').select('*').eq('id_kelas', idKelas);
@@ -319,7 +312,7 @@ window.bukaFormPenilaian = async function(tipe) {
             let inputUI = '';
             let badgeHTML = '';
             
-            // 1. TUGAS
+            // 1. TUGAS (MENDUKUNG KELAS .absen-card-tugas UNTUK 1 BARIS DESKTOP)
             if(tipe === 'tugas') {
                 inputUI = `
                 <div class="wrap-tugas">
@@ -333,14 +326,14 @@ window.bukaFormPenilaian = async function(tipe) {
                 </div>`;
                 
                 htmlContent += `
-                    <div class="absen-card">
+                    <div class="absen-card absen-card-tugas">
                         <div class="absen-info-header">
                             <div class="absen-identity">
                                 <span class="absen-no">${item.nomor_absen || '-'}</span>
                                 <span class="absen-nama">${item.siswa.nama_siswa} ${ikonGender}</span>
                             </div>
                         </div>
-                        <div style="width:100%; margin-top:6px;">${inputUI}</div>
+                        <div class="wrap-tugas-container" style="width:100%; margin-top:6px;">${inputUI}</div>
                     </div>
                 `;
             } 
@@ -662,7 +655,6 @@ window.downloadRekapPenilaian = async function(tipe, format) {
             .eq('id_kelas', idKelas);
         if (errSiswa) throw errSiswa;
 
-        // Pengurutan nomor absen lalu nama
         sortSiswaPenilaian(siswaData);
 
         let headers = [];

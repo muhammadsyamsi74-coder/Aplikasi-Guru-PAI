@@ -51,7 +51,7 @@
     .absen-info-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .absen-identity { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
     
-    /* Nomor & Nama - Diperkecil */
+    /* Nomor & Nama */
     .absen-no { 
         width: 20px; height: 20px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; 
         border-radius: 50%; background: rgba(5, 213, 138, 0.1); color: var(--neon-green); font-weight: 700; font-size: 9px; padding: 0; border: 1px solid rgba(5, 213, 138, 0.2);
@@ -60,23 +60,23 @@
         font-size: 11px; font-weight: 600; color: var(--text-putih); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 5px;
     }
     
-    /* Tombol Isi/Edit - Diperkecil */
+    /* Tombol Isi/Edit */
     .btn-toggle-input { background: var(--bg-main); color: var(--text-abu); border: 1px solid var(--border-color); padding: 5px 8px; font-size: 9px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
     .btn-toggle-input:hover { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border-color: var(--neon-green); }
 
-    /* STATUS BADGE - Diperkecil */
+    /* STATUS BADGE */
     .badge-status { font-size: 7px; padding: 2px 4px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; flex-shrink: 0; text-transform: uppercase;}
     .bg-belum { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.2); }
     .bg-sebagian { background: rgba(245, 158, 11, 0.1); color: var(--neon-yellow); border: 1px solid rgba(245, 158, 11, 0.2); }
     .bg-sudah { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.2); }
 
-    /* LAYOUT TUGAS T/TS - Rapat */
+    /* LAYOUT TUGAS T/TS */
     .wrap-tugas { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; width: 100%; margin-top: 6px;}
     .btn-tuntas { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-abu); font-weight: 700; font-size: 10px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display:flex; justify-content:center; align-items:center; padding:0; }
     .btn-tuntas.active.t { background: var(--neon-green); color: var(--bg-main); border-color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.4); }
     .btn-tuntas.active.ts { background: var(--neon-red); color: #fff; border-color: var(--neon-red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
 
-    /* LAYOUT KOMPONEN BANYAK (GRID) - Merapat */
+    /* LAYOUT KOMPONEN BANYAK (GRID) */
     .grid-input-nilai { display: grid; grid-template-columns: 1fr; gap: 6px; width: 100%; margin-bottom: 6px; }
     .hafalan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--bg-main); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); }
     .hafalan-item { display: flex; flex-direction: column; gap: 2px; }
@@ -92,23 +92,45 @@
     .btn-primary:active { transform: scale(0.98); }
     .icon-circle { background: rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; }
 
-    /* DESAIN LAYOUT DESKTOP 1 BARIS */
+    /* =========================================================
+       KHUSUS DESKTOP (> 768px): 1 BARIS PENUH UNTUK TUGAS
+       ========================================================= */
     @media (min-width: 768px) {
         .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
         .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
         .grid-input-nilai { grid-template-columns: repeat(2, 1fr); }
         .hafalan-grid { grid-template-columns: repeat(4, 1fr); }
+
+        /* KARTU TUGAS 1 BARIS DESKTOP */
+        .absen-card-tugas {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 15px !important;
+            padding: 10px 15px !important;
+        }
+        .absen-card-tugas .absen-info-header {
+            width: 35% !important;
+            flex-shrink: 0 !important;
+        }
+        .absen-card-tugas .wrap-tugas-container {
+            width: 65% !important;
+            margin-top: 0 !important;
+        }
+        .absen-card-tugas .wrap-tugas {
+            margin-top: 0 !important;
+        }
     }
 </style>
 
 <div class="penilaian-container">
     
     <div class="tab-container">
-        <button class="tab-btn active" id="btn-tab-tugas" onclick="gantiTabPenilaian('tugas')">penialian Tugas</button>
+        <button class="tab-btn active" id="btn-tab-tugas" onclick="gantiTabPenilaian('tugas')">Penilaian Tugas</button>
         <button class="tab-btn" id="btn-tab-baca" onclick="gantiTabPenilaian('baca')">Baca Qur'an</button>
         <button class="tab-btn" id="btn-tab-tulis" onclick="gantiTabPenilaian('tulis')">Tulis Qur'an</button>
-        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPenilaian('sholat')">hafalan Sholat</button>
-        <button class="tab-btn" id="btn-tab-surah" onclick="gantiTabPenilaian('surah')">hafalan Surah</button>
+        <button class="tab-btn" id="btn-tab-sholat" onclick="gantiTabPenilaian('sholat')">Hafalan Sholat</button>
+        <button class="tab-btn" id="btn-tab-surah" onclick="gantiTabPenilaian('surah')">Hafalan Surah</button>
     </div>
 
     <!-- ================= TAB 1: PENILAIAN TUGAS ================= -->
@@ -167,8 +189,6 @@
                 <select id="pilih-kelas-baca" class="form-control" onchange="bukaFormPenilaian('baca')"></select>
             </div>
             <div id="area-baca" style="display: none; padding-top: 5px;">
-                
-                <!-- BOX REKAP BACA -->
                 <div id="area-rekap-baca" style="display: none; margin-bottom: 15px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
                     <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Baca Qur'an</div>
                     <div style="display: flex; gap: 8px;">
@@ -194,8 +214,6 @@
                 <select id="pilih-kelas-tulis" class="form-control" onchange="bukaFormPenilaian('tulis')"></select>
             </div>
             <div id="area-tulis" style="display: none; padding-top: 5px;">
-
-                <!-- BOX REKAP TULIS -->
                 <div id="area-rekap-tulis" style="display: none; margin-bottom: 15px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
                     <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Tulis Qur'an</div>
                     <div style="display: flex; gap: 8px;">
@@ -221,8 +239,6 @@
                 <select id="pilih-kelas-sholat" class="form-control" onchange="bukaFormPenilaian('sholat')"></select>
             </div>
             <div id="area-sholat" style="display: none; padding-top: 5px;">
-
-                <!-- BOX REKAP SHOLAT -->
                 <div id="area-rekap-sholat" style="display: none; margin-bottom: 15px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
                     <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Sholat</div>
                     <div style="display: flex; gap: 8px;">
@@ -248,8 +264,6 @@
                 <select id="pilih-kelas-surah" class="form-control" onchange="bukaFormPenilaian('surah')"></select>
             </div>
             <div id="area-surah" style="display: none; padding-top: 5px;">
-
-                <!-- BOX REKAP SURAH -->
                 <div id="area-rekap-surah" style="display: none; margin-bottom: 15px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
                     <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Surah</div>
                     <div style="display: flex; gap: 8px;">
