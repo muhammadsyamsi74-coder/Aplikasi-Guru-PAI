@@ -225,11 +225,25 @@ async function loadGrafikMembacaQuran() {
 
                     if (!val) {
                         countBelum++;
-                    } else if (val === 'Tidak bisa baca' || val === 'Terbata-bata') {
+                    } else if (
+                        val === 'Tidak bisa baca' || 
+                        val === 'Terbata-bata ada salah' || 
+                        val === 'Terbata-bata bacaan benar' ||
+                        val === 'Terbata-bata' // Kompatibilitas data lama
+                    ) {
                         countTerbata++;
-                    } else if (val === 'cepat namun banyak salah' || val === 'Cepat dengan sedikit salah') {
+                    } else if (
+                        val === 'Cepat namun banyak salah' || 
+                        val === 'cepat namun banyak salah' || 
+                        val === 'Cepat dengan sedikit salah' ||
+                        val === 'cepat dengan sedikit salah'
+                    ) {
                         countCepat++;
-                    } else if (val === 'Lancar' || val === 'Mahir tanpa kesalahan') {
+                    } else if (
+                        val === 'Lancar' || 
+                        val === 'lancar' || 
+                        val === 'Mahir tanpa kesalahan'
+                    ) {
                         countLancarMahir++;
                     } else {
                         countBelum++;
@@ -269,13 +283,13 @@ async function loadGrafikMembacaQuran() {
                         borderRadius: 6
                     },
                     {
-                        label: 'Terbata-bata & Belum Bisa',
+                        label: 'Belum Bisa & Terbata-bata',
                         data: persenTerbata,
                         backgroundColor: '#ef4444',
                         borderRadius: 6
                     },
                     {
-                        label: 'Cepat (Salah Sedikit/Banyak)',
+                        label: 'Cepat (Banyak/Sedikit Salah)',
                         data: persenCepat,
                         backgroundColor: '#f59e0b',
                         borderRadius: 6

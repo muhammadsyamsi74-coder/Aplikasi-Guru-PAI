@@ -37,10 +37,17 @@ const mapSurah = [
 window.updateSelectColor = function(el) {
     const val = el.value;
     const reds = ['Tidak bisa baca', 'Tanpa tajwid', 'Tidak mengenal huruf', 'Banyak salah', 'Tanpa lagu', 'Tidak rapi', 'Belum hafal'];
-    const yellows = ['Terbata-bata', 'Cepat namun banyak salah', 'Cepat dengan sedikit salah', 'Panjang-pendek', 'Tajwid dasar', 'Salah sedikit', 'Kurang jelas', 'Kurang rapi', 'Cukup', 'Nada stabil', 'Tidak lancar'];
-    const greens = ['Lancar', 'Mahir tanpa kesalahan', 'Tajwid lanjutan', 'Mahir', 'Jelas', 'Sangat jelas', 'Sudah tepat', 'Rapi', 'Lagu tilawah', 'Hafal'];
+    const yellows = ['Terbata-bata ada salah', 'Terbata-bata bacaan benar', 'Cepat namun banyak salah', 'Panjang-pendek', 'Tajwid dasar', 'Salah sedikit', 'Kurang jelas', 'Kurang rapi', 'Cukup', 'Nada stabil', 'Tidak lancar'];
+    const lightGreens = ['Cepat dengan sedikit salah'];
+    const darkGreens = ['Lancar', 'Mahir tanpa kesalahan', 'Tajwid lanjutan', 'Mahir', 'Jelas', 'Sangat jelas', 'Sudah tepat', 'Rapi', 'Lagu tilawah', 'Hafal'];
 
-    if (greens.includes(val)) {
+    if (darkGreens.includes(val)) {
+        // Hijau Tua
+        el.style.color = '#059669';
+        el.style.backgroundColor = 'rgba(5, 150, 105, 0.15)';
+        el.style.borderColor = 'rgba(5, 150, 105, 0.4)';
+    } else if (lightGreens.includes(val)) {
+        // Hijau Muda
         el.style.color = 'var(--neon-green)';
         el.style.backgroundColor = 'rgba(5, 213, 138, 0.15)';
         el.style.borderColor = 'rgba(5, 213, 138, 0.4)';
@@ -333,7 +340,18 @@ window.bukaFormPenilaian = async function(tipe) {
 
                     inputUI = `
                     <div class="grid-input-nilai">
-                        <div class="form-group" style="margin-bottom:0;"><label>Kelancaran</label><select class="form-control input-kelancaran sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca</option><option value="Terbata-bata" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata')}>Terbata-bata</option><option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah</option><option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah</option><option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar</option><option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Kelancaran</label>
+                            <select class="form-control input-kelancaran sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)">
+                                <option value="">-Pilih-</option>
+                                <option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca</option>
+                                <option value="Terbata-bata ada salah" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata ada salah')}>Terbata-bata ada salah</option>
+                                <option value="Terbata-bata bacaan benar" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata bacaan benar')}>Terbata-bata bacaan benar</option>
+                                <option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah</option>
+                                <option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah</option>
+                                <option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar</option>
+                                <option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan</option>
+                            </select>
+                        </div>
                         <div class="form-group" style="margin-bottom:0;"><label>Tajwid</label><select class="form-control input-tajwid sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa tajwid" ${mkSel(ex.tajwid_bacaan, 'Tanpa tajwid')}>Tanpa tajwid</option><option value="Panjang-pendek" ${mkSel(ex.tajwid_bacaan, 'Panjang-pendek')}>Panjang-pendek</option><option value="Tajwid dasar" ${mkSel(ex.tajwid_bacaan, 'Tajwid dasar')}>Tajwid dasar</option><option value="Tajwid lanjutan" ${mkSel(ex.tajwid_bacaan, 'Tajwid lanjutan')}>Tajwid lanjutan</option><option value="Mahir" ${mkSel(ex.tajwid_bacaan, 'Mahir')}>Mahir</option></select></div>
                         <div class="form-group" style="margin-bottom:0;"><label>Makhraj</label><select class="form-control input-makraj sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak mengenal huruf" ${mkSel(ex.makraj_huruf, 'Tidak mengenal huruf')}>Tidak mengenal huruf</option><option value="Banyak salah" ${mkSel(ex.makraj_huruf, 'Banyak salah')}>Banyak salah</option><option value="Salah sedikit" ${mkSel(ex.makraj_huruf, 'Salah sedikit')}>Salah sedikit</option><option value="Kurang jelas" ${mkSel(ex.makraj_huruf, 'Kurang jelas')}>Kurang jelas</option><option value="Jelas" ${mkSel(ex.makraj_huruf, 'Jelas')}>Jelas</option><option value="Sangat jelas" ${mkSel(ex.makraj_huruf, 'Sangat jelas')}>Sangat jelas</option></select></div>
                         <div class="form-group" style="margin-bottom:0;"><label>Nada/Suara</label><select class="form-control input-nada sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa lagu" ${mkSel(ex.nada_suara, 'Tanpa lagu')}>Tanpa lagu</option><option value="Nada stabil" ${mkSel(ex.nada_suara, 'Nada stabil')}>Nada stabil</option><option value="Lagu tilawah" ${mkSel(ex.nada_suara, 'Lagu tilawah')}>Lagu tilawah</option></select></div>
@@ -437,7 +455,7 @@ window.simpanPenilaian = async function(tipe) {
 
         let payloadInsert = [];
 
-        // PERBAIKAN: Menggunakan parameter tabel dinamis (bukan string 'tabel')
+        // Penanganan tabel dinamis
         const pushToDatabase = async (tabel, payload) => {
             const toInsert = payload.filter(p => !p.id); 
             const toUpdate = payload.filter(p => p.id);  
