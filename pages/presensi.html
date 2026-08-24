@@ -204,22 +204,24 @@
     <!-- ================= TAB 1: PRESENSI KELAS ================= -->
     <div id="tab-presensi-kelas" style="display: block;">
         <div class="card-data">
-            <div class="form-group">
-                <select id="pilih-kelas-absen-kelas" class="form-control" onchange="bukaFormAbsenKelas()"></select>
+            
+            <!-- BARIS 1: PILIH KELAS, TANGGAL, PERTEMUAN KE (1 BARIS PENUH) -->
+            <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; width: 100%;">
+                <div class="form-group" style="flex: 1.5; margin-bottom: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kelas</label>
+                    <select id="pilih-kelas-absen-kelas" class="form-control" onchange="bukaFormAbsenKelas()" style="padding: 10px 6px; font-size: 11px;"></select>
+                </div>
+                <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tanggal</label>
+                    <input type="date" id="input-tgl-absen-kelas" class="form-control" required style="padding: 10px 4px; font-size: 11px;">
+                </div>
+                <div class="form-group" style="flex: 0.8; margin-bottom: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pertemuan</label>
+                    <input type="number" id="input-pertemuan-ke" class="form-control" placeholder="Ke-" required style="padding: 10px 6px; font-size: 11px; text-align: center;">
+                </div>
             </div>
             
             <div id="area-absen-kelas" style="display: none; padding-top: 5px;">
-                <div class="desktop-row">
-                    <div class="form-group">
-                        <label>Tanggal</label>
-                        <input type="date" id="input-tgl-absen-kelas" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Pertemuan Ke</label>
-                        <input type="number" id="input-pertemuan-ke" class="form-control" placeholder="04" required>
-                    </div>
-                </div>
-
                 <!-- PILIHAN TOMBOL JAM KE- (1-9, MAKS 2) -->
                 <div class="form-group">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -313,19 +315,24 @@
     <!-- ================= TAB 2: PRESENSI SHOLAT ================= -->
     <div id="tab-presensi-sholat" style="display: none;">
         <div class="card-data">
-            <div class="form-group">
+            
+            <!-- BARIS 1: KELAS -->
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>Pilih Kelas</label>
                 <select id="pilih-kelas-absen-sholat" class="form-control" onchange="bukaFormAbsenSholat()"></select>
             </div>
             
             <div id="area-absen-sholat" style="display: none; padding-top: 5px;">
-                <div class="desktop-row">
-                    <div class="form-group" style="flex: 1.5;">
-                        <label>Tanggal</label>
-                        <input type="date" id="input-tgl-absen-sholat" class="form-control" required>
+                
+                <!-- BARIS 2: TANGGAL, NAMA SHOLAT, FILTER L/P -->
+                <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; width: 100%;">
+                    <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tanggal</label>
+                        <input type="date" id="input-tgl-absen-sholat" class="form-control" required style="padding: 10px 4px; font-size: 11px;">
                     </div>
-                    <div class="form-group" style="flex: 1.5;">
-                        <label>Nama Sholat</label>
-                        <select id="input-nama-sholat" class="form-control">
+                    <div class="form-group" style="flex: 1.5; margin-bottom: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nama Sholat</label>
+                        <select id="input-nama-sholat" class="form-control" style="padding: 10px 6px; font-size: 11px;">
                             <option value="Dzuhur" selected>Dzuhur</option>
                             <option value="Ashar">Ashar</option>
                             <option value="Subuh">Subuh</option>
@@ -335,12 +342,12 @@
                             <option value="Sunnah">Sunnah</option>
                         </select>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Filter Tampilan</label>
-                        <select id="filter-gender-sholat" class="form-control" onchange="terapkanFilterSholat()">
-                            <option value="Semua">Semua Siswa</option>
-                            <option value="L">Laki-laki Saja</option>
-                            <option value="P">Perempuan Saja</option>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Filter</label>
+                        <select id="filter-gender-sholat" class="form-control" onchange="terapkanFilterSholat()" style="padding: 10px 6px; font-size: 11px;">
+                            <option value="Semua">Semua</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
                         </select>
                     </div>
                 </div>

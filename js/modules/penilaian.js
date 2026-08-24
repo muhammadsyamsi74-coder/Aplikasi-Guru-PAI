@@ -115,13 +115,15 @@ window.toggleTugasBaru = function() {
 
 window.setKetuntasan = function(idSiswa, status) {
     const parent = document.getElementById(`grp-tuntas-${idSiswa}`);
+    if (!parent) return;
     const btns = parent.getElementsByTagName('button');
     for(let b of btns) b.classList.remove('active', 't', 'ts');
     
     const targetBtn = document.querySelector(`.btn-tuntas[data-idsiswa="${idSiswa}"][data-val="${status}"]`);
     if(targetBtn) targetBtn.classList.add('active', status.toLowerCase());
     
-    document.getElementById(`val-tuntas-${idSiswa}`).value = status;
+    const inputVal = document.getElementById(`val-tuntas-${idSiswa}`);
+    if (inputVal) inputVal.value = status;
 };
 
 // FITUR: Auto Ketuntasan (>= 70 = T, < 70 atau kosong = TS)
@@ -135,6 +137,14 @@ window.autoKetuntasan = function(idSiswa, nilai) {
         } else {
             window.setKetuntasan(idSiswa, 'TS');
         }
+    }
+};
+
+// FITUR: Buka/Tutup Opsi Lanjutan
+window.toggleOpsiLanjutan = function(tipe) {
+    const el = document.getElementById(`opsi-lanjutan-${tipe}`);
+    if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 };
 
@@ -274,8 +284,10 @@ window.bukaFormPenilaian = async function(tipe) {
     }
 
     document.getElementById(`area-${tipe}`).style.display = 'block';
-    const elRekap = document.getElementById(`area-rekap-${tipe}`);
-    if(elRekap) elRekap.style.display = 'block';
+    
+    // Sembunyikan opsi lanjutan/rekap setiap ganti kelas
+    const elOpsi = document.getElementById(`opsi-lanjutan-${tipe}`);
+    if(elOpsi) elOpsi.style.display = 'none';
     
     const container = document.getElementById(`tempat-list-${tipe}`);
     container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
@@ -312,7 +324,7 @@ window.bukaFormPenilaian = async function(tipe) {
             let inputUI = '';
             let badgeHTML = '';
             
-            // 1. TUGAS (MENDUKUNG KELAS .absen-card-tugas UNTUK 1 BARIS DESKTOP)
+            // 1. TUGAS
             if(tipe === 'tugas') {
                 inputUI = `
                 <div class="wrap-tugas">
@@ -616,6 +628,177 @@ window.simpanPenilaian = async function(tipe) {
     } finally {
         btn.innerHTML = teksAsli;
         btn.disabled = false;
+    }
+};
+
+// ================= FITUR DOWNLOAD & UPLOAD FORMAT EXCEL TUGAS =================
+window.downloadTemplateNilaiTugas = async function() {
+    const idKelas = document.getElementById('pilih-kelas-tugas').value;
+    const ddTugas = document.getElementById('input-nama-tugas-dropdown');
+    const idTugas = ddTugas.value;
+    const namaTugas = ddTugas.options[ddTugas.selectedIndex]?.text || '';
+
+    if (!idKelas) {
+        alert("Pilih kelas terlebih dahulu!");
+        return;
+    }
+    if (!idTugas) {
+        alert("Pilih tugas terlebih dahulu dari dropdown sebelum mengunduh format!");
+        return;
+    }
+    if (!dataSiswaPenilaian || dataSiswaPenilaian.length === 0) {
+        alert("Data siswa di kelas ini belum termuat.");
+        return;
+    }
+
+    try {
+        const { data: nilaiExisting, error } = await supabase
+            .from('penilaiantugas')
+            .select('id_siswa, nilai_tugas, ketuntasan, refleksi')
+            .eq('id_tugas', idTugas);
+
+        if (error) throw error;
+
+        const mapNilai = {};
+        if (nilaiExisting) {
+            nilaiExisting.forEach(n => {
+                mapNilai[n.id_siswa] = n;
+            });
+        }
+
+        await window.loadExportLibsPenilaian();
+
+        const headers = [
+            ["ID_TUGAS", "ID_SISWA", "No Absen", "Nama Siswa", "Nilai", "Ketuntasan (T/TS)", "Catatan/Refleksi"]
+        ];
+
+        const rows = dataSiswaPenilaian.map(item => {
+            const existing = mapNilai[item.id_siswa];
+            
+            return [
+                idTugas,
+                item.id_siswa,
+                item.nomor_absen || '',
+                item.siswa && item.siswa.nama_siswa ? item.siswa.nama_siswa : '',
+                existing && existing.nilai_tugas !== null ? existing.nilai_tugas : '',
+                existing && existing.ketuntasan ? existing.ketuntasan : 'TS',
+                existing && existing.refleksi ? existing.refleksi : ''
+            ];
+        });
+
+        const ws = window.XLSX.utils.aoa_to_sheet([...headers, ...rows]);
+        
+        ws['!cols'] = [
+            { wch: 15 }, // ID_TUGAS
+            { wch: 15 }, // ID_SISWA
+            { wch: 10 }, // No Absen
+            { wch: 28 }, // Nama Siswa
+            { wch: 12 }, // Nilai
+            { wch: 18 }, // Ketuntasan
+            { wch: 30 }  // Catatan
+        ];
+
+        const wb = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
+
+        const cleanNama = namaTugas.replace(/[^a-zA-Z0-9_-]/g, '_');
+        window.XLSX.writeFile(wb, `Format_Nilai_${cleanNama}.xlsx`);
+    } catch (err) {
+        alert("Gagal mengunduh format: " + err.message);
+    }
+};
+
+window.handleUploadNilaiTugas = async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const idTugasAktif = document.getElementById('input-nama-tugas-dropdown').value;
+    if (!idTugasAktif) {
+        alert("Pilih tugas aktif terlebih dahulu sebelum mengunggah file nilai!");
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        await window.loadExportLibsPenilaian();
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = window.XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rawData = window.XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (!rawData || rawData.length <= 1) {
+                    alert("File Excel kosong atau tidak memiliki baris data.");
+                    return;
+                }
+
+                let matchCount = 0;
+                let mismatchTugas = 0;
+
+                for (let i = 1; i < rawData.length; i++) {
+                    const row = rawData[i];
+                    if (!row || row.length === 0) continue;
+
+                    const rowIdTugas = row[0] !== undefined && row[0] !== null ? String(row[0]).trim() : '';
+                    const rowIdSiswa = row[1] !== undefined && row[1] !== null ? String(row[1]).trim() : '';
+                    const rawNilai = row[4];
+                    const rawTuntas = row[5] !== undefined && row[5] !== null ? String(row[5]).trim().toUpperCase() : '';
+                    const rawRefleksi = row[6] !== undefined && row[6] !== null ? String(row[6]).trim() : '';
+
+                    if (rowIdTugas && rowIdTugas !== String(idTugasAktif).trim()) {
+                        mismatchTugas++;
+                        continue;
+                    }
+
+                    if (!rowIdSiswa) continue;
+
+                    const inpNilai = document.querySelector(`.input-nilai-tugas[data-idsiswa="${rowIdSiswa}"]`);
+                    const inpRefleksi = document.querySelector(`.input-refleksi[data-idsiswa="${rowIdSiswa}"]`);
+
+                    if (inpNilai) {
+                        if (rawNilai !== undefined && rawNilai !== null && rawNilai !== '') {
+                            const valNum = parseFloat(rawNilai);
+                            inpNilai.value = isNaN(valNum) ? '' : valNum;
+
+                            if (rawTuntas === 'T' || rawTuntas === 'TS') {
+                                window.setKetuntasan(rowIdSiswa, rawTuntas);
+                            } else {
+                                window.autoKetuntasan(rowIdSiswa, inpNilai.value);
+                            }
+                        }
+
+                        if (inpRefleksi && rawRefleksi) {
+                            inpRefleksi.value = rawRefleksi;
+                        }
+
+                        matchCount++;
+                    }
+                }
+
+                if (mismatchTugas > 0) {
+                    alert(`Peringatan: ${mismatchTugas} baris dilewati karena ID Tugas pada file tidak cocok dengan tugas aktif.`);
+                }
+
+                if (matchCount > 0) {
+                    alert(`Berhasil membaca nilai ${matchCount} siswa. Klik tombol "Simpan Nilai Tugas" untuk menyimpan permanen.`);
+                } else {
+                    alert("Tidak ada ID Siswa yang cocok dengan kelas ini.");
+                }
+
+            } catch (errParse) {
+                alert("Gagal membaca file Excel: " + errParse.message);
+            } finally {
+                event.target.value = '';
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    } catch (err) {
+        alert("Gagal memproses file: " + err.message);
+        event.target.value = '';
     }
 };
 
