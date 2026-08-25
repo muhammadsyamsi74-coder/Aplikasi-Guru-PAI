@@ -16,6 +16,13 @@ window.gantiTabPresensi = function(tabName) {
     document.getElementById('tab-presensi-sholat').style.display = (tabName === 'sholat') ? 'block' : 'none';
 };
 
+window.toggleOpsiRekapPresensi = function(tipe) {
+    const el = document.getElementById(`area-rekap-${tipe}`);
+    if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+};
+
 window.loadKelasUntukPresensi = async function() {
     const selKelas = document.getElementById('pilih-kelas-absen-kelas');
     const selSholat = document.getElementById('pilih-kelas-absen-sholat');
@@ -161,7 +168,7 @@ window.bukaFormAbsenKelas = async function() {
     document.getElementById('input-tgl-absen-kelas').valueAsDate = new Date(); 
     window.setNilaiJamAbsenEksplisit('');
 
-    document.getElementById('area-rekap-kelas').style.display = 'block';
+    document.getElementById('area-rekap-kelas').style.display = 'none';
     const elMulaiK = document.getElementById('rekap-kelas-mulai');
     const elAkhirK = document.getElementById('rekap-kelas-akhir');
     if(elMulaiK && !elMulaiK.value) elMulaiK.valueAsDate = new Date();
@@ -337,7 +344,6 @@ window.simpanPresensiKelas = async function() {
 
         if (jurnalAda) {
             idJurnalTarget = jurnalAda.id;
-            // Update jam_ke pada jurnal jika disetel
             if (jamVal) {
                 await supabase.from('jurnalmengajar').update({ jam_ke: jamVal }).eq('id', idJurnalTarget);
             }
@@ -530,7 +536,7 @@ window.bukaFormAbsenSholat = async function() {
     document.getElementById('btn-simpan-absen-sholat').innerHTML = '<span style="flex:1; text-align:left;">Simpan Presensi Sholat</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
     document.getElementById('input-tgl-absen-sholat').valueAsDate = new Date(); 
     
-    document.getElementById('area-rekap-sholat').style.display = 'block';
+    document.getElementById('area-rekap-sholat').style.display = 'none';
     const elMulai = document.getElementById('rekap-sholat-mulai');
     const elAkhir = document.getElementById('rekap-sholat-akhir');
     if(elMulai && !elMulai.value) elMulai.valueAsDate = new Date();

@@ -19,6 +19,7 @@
         --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
         --gradient-yellow: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+        --gradient-red: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
     }
 
     .master-container { animation: fadeIn 0.4s ease-out; }
@@ -57,6 +58,7 @@
     .btn-blue { background: var(--gradient-blue); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2); }
     .btn-purple { background: var(--gradient-purple); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.2); }
     .btn-yellow { background: var(--gradient-yellow); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2); }
+    .btn-red { background: var(--gradient-red); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2); }
 
     /* DESAIN LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
@@ -100,6 +102,9 @@
                 </button>
                 <button onclick="bukaPanelWali()" class="btn-primary btn-purple" style="flex: 1; min-width: 140px;">
                     <i class="fa-solid fa-user-shield"></i> Siswa Guru Wali
+                </button>
+                <button onclick="bukaPanelPengingat()" class="btn-primary btn-red" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-bell"></i> Pengingat Kegiatan
                 </button>
                 <button onclick="downloadSemuaSiswaExcel()" id="btn-download-semua-siswa" class="btn-primary btn-blue" style="flex: 1; min-width: 140px;">
                     <i class="fa-solid fa-file-excel"></i> Download Excel
@@ -482,6 +487,70 @@
                 <button class="btn-action" onclick="loadDataJadwal()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
             </div>
             <ul class="list-data" id="tempat-data-jadwal"></ul>
+        </div>
+    </div>
+
+    <!-- ================= PANEL 5: PENGINGAT KEGIATAN ================= -->
+    <div id="panel-pengingat" style="display: none;">
+        <button onclick="tutupPanelPengingat()" style="background:none; border:none; color:var(--neon-green); font-size:13px; font-weight:600; margin-bottom:15px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Master Kelas
+        </button>
+
+        <h2 class="section-title"><i class="fa-solid fa-bell" style="color: var(--neon-red);"></i> Master Pengingat Kegiatan</h2>
+
+        <div class="card-data">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button onclick="toggleFormPengingat()" class="btn-primary btn-red" style="flex: 1; min-width: 140px;">
+                    <i class="fa-solid fa-plus"></i> Tambah Pengingat
+                </button>
+            </div>
+        </div>
+
+        <div class="card-data" id="wrapper-form-pengingat" style="display: none; border: 1px solid var(--neon-red);">
+            <div class="card-header" style="border-bottom-color: var(--neon-red);">
+                <h3 id="judul-form-pengingat" style="color: var(--neon-red);">Isi Data Pengingat Kegiatan</h3>
+                <button onclick="toggleFormPengingat()" style="background:none; border:none; color:var(--text-abu); cursor:pointer; font-weight:600;"><i class="fa-solid fa-times"></i> Tutup</button>
+            </div>
+            <form id="form-tambah-pengingat" onsubmit="simpanDataPengingat(event)">
+                <div class="desktop-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Judul Kegiatan / Agenda</label>
+                        <input type="text" id="pengingat-judul" class="form-control" placeholder="Cth: Batas Akhir Input Nilai PTS" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Siklus Pengulangan</label>
+                        <select id="pengingat-siklus" class="form-control" onchange="ubahFormSiklus()" required>
+                            <option value="1 Kali">1 Kali</option>
+                            <option value="Mingguan">Mingguan</option>
+                            <option value="Bulanan">Bulanan</option>
+                            <option value="Tahunan">Tahunan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="desktop-row">
+                    <!-- KOTAK WAKTU YANG DI RENDER OTOMATIS OLEH JS SESUAI SIKLUS -->
+                    <div class="form-group" style="flex: 1.5;" id="wadah-input-waktu"></div>
+                    
+                    <div class="form-group" style="flex: 1;">
+                        <label>Ingatkan H- Berapa? (Angka)</label>
+                        <input type="number" id="pengingat-hmin" class="form-control" value="1" min="0" required>
+                    </div>
+                    <div class="form-group" style="flex: 1.2;">
+                        <button type="submit" id="btn-simpan-pengingat" class="btn-primary btn-red" style="width: 100%;">
+                            <i class="fa-solid fa-save"></i> Simpan Pengingat
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-data">
+            <div class="card-header">
+                <h3>Daftar Seluruh Pengingat Kegiatan</h3>
+                <button class="btn-action" onclick="loadDataPengingat()" style="color:var(--text-putih);"><i class="fa-solid fa-sync"></i> Refresh</button>
+            </div>
+            <ul class="list-data" id="tempat-data-pengingat"></ul>
         </div>
     </div>
 

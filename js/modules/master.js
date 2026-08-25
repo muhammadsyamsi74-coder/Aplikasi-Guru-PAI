@@ -92,7 +92,6 @@ window.editKelas = function(idKelas) {
     document.getElementById('wrapper-form-kelas').scrollIntoView({ behavior: 'smooth' });
 };
 
-// ================= FITUR HAPUS KELAS BESERTA SELURUH DATA SISWA =================
 window.hapusKelas = async function(idKelas, namaKelas) {
     const konfirmasi1 = confirm(
         `PERINGATAN!\n\nApakah Anda yakin ingin MENGHAPUS Kelas "${namaKelas}"?\nSemua data siswa, nilai, presensi, jurnal, dan tugas di kelas ini akan DIHAPUS PERMANEN.`
@@ -203,12 +202,15 @@ let editingAnggotaKelasId = null;
 window.bukaDetailKelas = function(idKelas, namaKelas) {
     currentKelasId = idKelas;
     document.getElementById('judul-detail-kelas').innerText = "Data Siswa " + namaKelas;
+    
     document.getElementById('panel-kelas').style.display = 'none';
     document.getElementById('panel-wali').style.display = 'none';
     const pJadwal = document.getElementById('panel-jadwal');
     if (pJadwal) pJadwal.style.display = 'none';
-    document.getElementById('panel-siswa').style.display = 'block';
+    const pPengingat = document.getElementById('panel-pengingat');
+    if (pPengingat) pPengingat.style.display = 'none';
     
+    document.getElementById('panel-siswa').style.display = 'block';
     document.getElementById('wrapper-form-siswa').style.display = 'none';
     document.getElementById('wrapper-form-massal').style.display = 'none';
     
@@ -218,9 +220,6 @@ window.bukaDetailKelas = function(idKelas, namaKelas) {
 window.tutupDetailKelas = function() {
     currentKelasId = null;
     document.getElementById('panel-siswa').style.display = 'none';
-    document.getElementById('panel-wali').style.display = 'none';
-    const pJadwal = document.getElementById('panel-jadwal');
-    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-kelas').style.display = 'block';
 };
 
@@ -266,21 +265,16 @@ window.loadDataSiswa = async function() {
             return;
         }
 
-        // 1. URUTKAN BERDASARKAN NOMOR ABSEN, JIKA ABSEN SAMA URUTKAN BERDASARKAN NAMA
         data.sort((a, b) => {
             const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 9999;
             const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 9999;
-            
-            if (noA !== noB) {
-                return noA - noB;
-            }
+            if (noA !== noB) return noA - noB;
             const namaA = (a.siswa && a.siswa.nama_siswa) ? a.siswa.nama_siswa : '';
             const namaB = (b.siswa && b.siswa.nama_siswa) ? b.siswa.nama_siswa : '';
             return namaA.localeCompare(namaB);
         });
 
         currentDataSiswa = data; 
-
         let htmlContent = '';
         data.forEach(item => {
             const dSiswa = item.siswa || {};
@@ -290,7 +284,6 @@ window.loadDataSiswa = async function() {
                 ? `<span style="background:rgba(5,213,138,0.1); color:var(--neon-green); font-size:9px; padding:2px 6px; border-radius:10px; margin-left:5px; font-weight:bold;">${item.jabatan_kelas}</span>` : '';
             const ikonFoto = dSiswa.foto_siswa ? '<i class="fa-solid fa-image" style="color:var(--neon-green); font-size:10px; margin-left:5px;" title="Foto Tersedia"></i>' : '';
 
-            // PERBAIKAN: Gunakan ID unik anggota_kelas untuk hapus agar kebal dari error karakter nama
             htmlContent += `
                 <li>
                     <div style="display: flex; align-items: center; gap: 10px; width:70%;">
@@ -318,7 +311,6 @@ window.editSiswa = function(idAnggota) {
     if (!dataRow) return;
 
     const s = dataRow.siswa || {};
-    
     document.getElementById('wrapper-form-massal').style.display = 'none';
     document.getElementById('wrapper-form-siswa').style.display = 'block';
     document.getElementById('judul-form-siswa').innerText = `Edit Data: ${s.nama_siswa || ''}`;
@@ -345,13 +337,9 @@ window.editSiswa = function(idAnggota) {
     document.getElementById('wrapper-form-siswa').scrollIntoView({ behavior: "smooth" });
 };
 
-// ================= PERBAIKAN: HAPUS SISWA BEBAS BUG DATA GANDA =================
 window.hapusSiswa = async function(idAnggota) {
     const dataRow = currentDataSiswa.find(row => row.id === idAnggota);
-    if (!dataRow) {
-        alert("Data siswa tidak ditemukan.");
-        return;
-    }
+    if (!dataRow) { alert("Data siswa tidak ditemukan."); return; }
 
     const s = dataRow.siswa || {};
     const namaSiswa = s.nama_siswa || 'Siswa ini';
@@ -360,13 +348,10 @@ window.hapusSiswa = async function(idAnggota) {
     if (!confirm(`Yakin ingin MENGHAPUS data "${namaSiswa}" dari kelas ini?\nData tidak dapat dikembalikan.`)) return;
 
     try {
-        // 1. Hapus relasi keanggotaan kelas
         const { error: errAnggota } = await supabase.from('anggota_kelas').delete().eq('id', idAnggota);
         if (errAnggota) throw errAnggota;
 
-        // 2. Hapus data pada tabel siswa jika ada
         if (idSiswa) {
-            // Cek apakah siswa masih terdaftar di kelas lain
             const { data: checkLain } = await supabase.from('anggota_kelas').select('id').eq('id_siswa', idSiswa);
             if (!checkLain || checkLain.length === 0) {
                 await supabase.from('siswa').delete().eq('id', idSiswa);
@@ -382,7 +367,6 @@ window.hapusSiswa = async function(idAnggota) {
 
 window.simpanDataSiswa = async function(event) {
     event.preventDefault();
-    
     const iNisn = document.getElementById('input-nisn').value;
     const iKode = document.getElementById('input-kode-siswa').value;
     const iNama = document.getElementById('input-nama-siswa').value;
@@ -396,10 +380,8 @@ window.simpanDataSiswa = async function(event) {
     const iEmailSiswa = document.getElementById('input-email-siswa').value;
     const iWaOrtu = document.getElementById('input-wa-ortu').value;
     const iIgSiswa = document.getElementById('input-ig-siswa').value;
-    
     const inputFoto = document.getElementById('input-foto-siswa');
     const fileFoto = inputFoto.files[0];
-    
     const btn = document.getElementById('btn-simpan-siswa');
     const textAsli = btn.innerHTML;
     
@@ -412,10 +394,8 @@ window.simpanDataSiswa = async function(event) {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah Foto...';
             const fileExt = fileFoto.name.split('.').pop();
             const fileName = `${iNisn}_${Date.now()}.${fileExt}`;
-
             const { error: uploadError } = await supabase.storage.from('foto-siswa').upload(fileName, fileFoto);
             if (uploadError) throw new Error("Gagal mengunggah foto: " + uploadError.message);
-
             const { data: publicUrlData } = supabase.storage.from('foto-siswa').getPublicUrl(fileName);
             fotoUrl = publicUrlData.publicUrl;
         }
@@ -431,30 +411,25 @@ window.simpanDataSiswa = async function(event) {
         if (editingSiswaId) {
             const { error: errSiswa } = await supabase.from('siswa').update(payloadSiswa).eq('id', editingSiswaId);
             if (errSiswa) throw errSiswa;
-
             const { error: errAnggota } = await supabase.from('anggota_kelas').update({
                 nomor_absen: iNoAbsen ? parseInt(iNoAbsen) : null, jabatan_kelas: iJabatan
             }).eq('id', editingAnggotaKelasId);
             if (errAnggota) throw errAnggota;
-
             alert('Data siswa berhasil diperbarui!');
         } else {
             const { data: dataSiswa, error: errSiswa } = await supabase.from('siswa').insert([payloadSiswa]).select(); 
             if (errSiswa) throw errSiswa;
-            
             const newSiswaId = dataSiswa[0].id;
             const { error: errAnggota } = await supabase.from('anggota_kelas').insert([{ 
                 id_kelas: currentKelasId, id_siswa: newSiswaId, nomor_absen: iNoAbsen ? parseInt(iNoAbsen) : null, jabatan_kelas: iJabatan
             }]);
             if (errAnggota) throw errAnggota;
-
             alert('Data siswa baru berhasil ditambahkan!');
         }
 
         document.getElementById('wrapper-form-siswa').style.display = 'none';
         loadDataSiswa(); 
     } catch (error) {
-        console.error("Error simpan:", error);
         alert('Gagal! ' + error.message);
     } finally {
         btn.innerHTML = textAsli;
@@ -471,17 +446,16 @@ window.bukaPanelWali = function() {
     document.getElementById('panel-siswa').style.display = 'none';
     const pJadwal = document.getElementById('panel-jadwal');
     if (pJadwal) pJadwal.style.display = 'none';
-    document.getElementById('panel-wali').style.display = 'block';
+    const pPengingat = document.getElementById('panel-pengingat');
+    if (pPengingat) pPengingat.style.display = 'none';
     
+    document.getElementById('panel-wali').style.display = 'block';
     document.getElementById('wrapper-form-siswa-wali').style.display = 'none';
     loadDataSiswaWali();
 };
 
 window.tutupPanelWali = function() {
     document.getElementById('panel-wali').style.display = 'none';
-    document.getElementById('panel-siswa').style.display = 'none';
-    const pJadwal = document.getElementById('panel-jadwal');
-    if (pJadwal) pJadwal.style.display = 'none';
     document.getElementById('panel-kelas').style.display = 'block';
 };
 
@@ -505,7 +479,6 @@ window.loadDataSiswaWali = async function() {
     try {
         const { data, error } = await supabase.from('siswaguruwali').select('*').order('nama_siswa', { ascending: true });
         if (error) throw error;
-
         if (data.length === 0) {
             container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--text-abu);">Belum ada data siswa guru wali.</li>';
             currentDataSiswaWali = [];
@@ -543,7 +516,6 @@ window.loadDataSiswaWali = async function() {
 window.editSiswaWali = function(id) {
     const s = currentDataSiswaWali.find(item => item.id === id);
     if (!s) return;
-
     editingSiswaWaliId = id;
     document.getElementById('wali-nisn').value = s.nisn_siswa || '';
     document.getElementById('wali-nama').value = s.nama_siswa || '';
@@ -593,10 +565,8 @@ window.simpanDataSiswaWali = async function(event) {
     const iWaOrtu = document.getElementById('wali-waortu').value;
     const iEmail = document.getElementById('wali-email').value;
     const iIg = document.getElementById('wali-ig').value;
-
     const inputFoto = document.getElementById('wali-foto');
     const fileFoto = inputFoto.files[0];
-
     const btn = document.getElementById('btn-simpan-siswa-wali');
     const textAsli = btn.innerHTML;
 
@@ -609,26 +579,17 @@ window.simpanDataSiswaWali = async function(event) {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah Foto...';
             const fileExt = fileFoto.name.split('.').pop();
             const fileName = `wali_${iNisn}_${Date.now()}.${fileExt}`;
-
             const { error: uploadError } = await supabase.storage.from('foto-siswa').upload(fileName, fileFoto);
             if (uploadError) throw new Error("Gagal mengunggah foto: " + uploadError.message);
-
             const { data: publicUrlData } = supabase.storage.from('foto-siswa').getPublicUrl(fileName);
             fotoUrl = publicUrlData.publicUrl;
         }
 
         const payload = {
-            nisn_siswa: iNisn,
-            nama_siswa: iNama,
-            jenis_kelamin: iJk,
-            kelas_saatini: iKelas,
-            tempat_lahir: iTempat || null,
-            tanggal_lahir: iTanggal ? iTanggal : null,
-            alat_tinggal: iAlamat || null,
-            no_wasiswa: iWaSiswa || null,
-            no_waorangtua: iWaOrtu || null,
-            email: iEmail || null,
-            instagram: iIg || null
+            nisn_siswa: iNisn, nama_siswa: iNama, jenis_kelamin: iJk, kelas_saatini: iKelas,
+            tempat_lahir: iTempat || null, tanggal_lahir: iTanggal ? iTanggal : null,
+            alat_tinggal: iAlamat || null, no_wasiswa: iWaSiswa || null, no_waorangtua: iWaOrtu || null,
+            email: iEmail || null, instagram: iIg || null
         };
         if (fotoUrl) payload.foto_profil = fotoUrl;
 
@@ -705,6 +666,8 @@ window.bukaPanelJadwal = async function() {
     document.getElementById('panel-kelas').style.display = 'none';
     document.getElementById('panel-siswa').style.display = 'none';
     document.getElementById('panel-wali').style.display = 'none';
+    const pPengingat = document.getElementById('panel-pengingat');
+    if (pPengingat) pPengingat.style.display = 'none';
     document.getElementById('panel-jadwal').style.display = 'block';
     
     document.getElementById('wrapper-form-jadwal').style.display = 'none';
@@ -714,8 +677,6 @@ window.bukaPanelJadwal = async function() {
 
 window.tutupPanelJadwal = function() {
     document.getElementById('panel-jadwal').style.display = 'none';
-    document.getElementById('panel-siswa').style.display = 'none';
-    document.getElementById('panel-wali').style.display = 'none';
     document.getElementById('panel-kelas').style.display = 'block';
 };
 
@@ -751,10 +712,7 @@ window.loadDataJadwal = async function() {
     container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--neon-yellow);">Memuat jadwal mengajar... <i class="fa-solid fa-spinner fa-spin"></i></li>';
 
     try {
-        const { data, error } = await supabase
-            .from('jadwalmengajar')
-            .select(`id, id_kelas, hari, jam_ke, jumlah_jp, jam_mulai, jam_selesai, keterangan, kelas (nama_kelas, tingkat)`);
-
+        const { data, error } = await supabase.from('jadwalmengajar').select(`id, id_kelas, hari, jam_ke, jumlah_jp, jam_mulai, jam_selesai, keterangan, kelas (nama_kelas, tingkat)`);
         if (error) throw error;
 
         if (!data || data.length === 0) {
@@ -806,7 +764,6 @@ window.loadDataJadwal = async function() {
 window.editJadwal = function(id) {
     const j = currentDataJadwal.find(item => item.id === id);
     if (!j) return;
-
     editingJadwalId = id;
     document.getElementById('jadwal-hari').value = j.hari || 'Senin';
     document.getElementById('jadwal-kelas').value = j.id_kelas || '';
@@ -815,7 +772,6 @@ window.editJadwal = function(id) {
     document.getElementById('jadwal-jam-mulai').value = j.jam_mulai || '';
     document.getElementById('jadwal-jam-selesai').value = j.jam_selesai || '';
     document.getElementById('jadwal-keterangan').value = j.keterangan || '';
-
     document.getElementById('judul-form-jadwal').innerText = `Edit Jadwal: ${j.hari} (JP ${j.jam_ke})`;
     document.getElementById('btn-simpan-jadwal').innerHTML = '<i class="fa-solid fa-save"></i> Perbarui Jadwal';
     document.getElementById('wrapper-form-jadwal').style.display = 'block';
@@ -824,7 +780,6 @@ window.editJadwal = function(id) {
 
 window.hapusJadwal = async function(id, hari, namaKelas) {
     if (!confirm(`Yakin ingin MENGHAPUS jadwal mengajar ${hari} untuk Kelas ${namaKelas}?`)) return;
-
     try {
         const { error } = await supabase.from('jadwalmengajar').delete().eq('id', id);
         if (error) throw error;
@@ -837,7 +792,6 @@ window.hapusJadwal = async function(id, hari, namaKelas) {
 
 window.simpanDataJadwal = async function(event) {
     event.preventDefault();
-
     const hari = document.getElementById('jadwal-hari').value;
     const idKelas = document.getElementById('jadwal-kelas').value;
     const jamKe = document.getElementById('jadwal-jam-ke').value.trim();
@@ -847,7 +801,6 @@ window.simpanDataJadwal = async function(event) {
     const keterangan = document.getElementById('jadwal-keterangan').value.trim() || null;
 
     if (!idKelas) { alert("Pilih kelas terlebih dahulu!"); return; }
-
     const btn = document.getElementById('btn-simpan-jadwal');
     const textAsli = btn.innerHTML;
 
@@ -856,13 +809,8 @@ window.simpanDataJadwal = async function(event) {
         btn.disabled = true;
 
         const payload = {
-            id_kelas: idKelas,
-            hari: hari,
-            jam_ke: jamKe,
-            jumlah_jp: jumlahJp,
-            jam_mulai: jamMulai,
-            jam_selesai: jamSelesai,
-            keterangan: keterangan
+            id_kelas: idKelas, hari: hari, jam_ke: jamKe, jumlah_jp: jumlahJp,
+            jam_mulai: jamMulai, jam_selesai: jamSelesai, keterangan: keterangan
         };
 
         if (editingJadwalId) {
@@ -886,41 +834,340 @@ window.simpanDataJadwal = async function(event) {
     }
 };
 
+
+// ================= FUNGSI PENGINGAT KEGIATAN =================
+let editingPengingatId = null;
+let currentDataPengingat = [];
+
+window.bukaPanelPengingat = function() {
+    document.getElementById('panel-kelas').style.display = 'none';
+    document.getElementById('panel-siswa').style.display = 'none';
+    document.getElementById('panel-wali').style.display = 'none';
+    
+    const pJadwal = document.getElementById('panel-jadwal');
+    if (pJadwal) pJadwal.style.display = 'none';
+    
+    document.getElementById('panel-pengingat').style.display = 'block';
+    document.getElementById('wrapper-form-pengingat').style.display = 'none';
+    
+    loadDataPengingat();
+};
+
+window.tutupPanelPengingat = function() {
+    document.getElementById('panel-pengingat').style.display = 'none';
+    document.getElementById('panel-kelas').style.display = 'block';
+};
+
+window.toggleFormPengingat = function() {
+    const formWrapper = document.getElementById('wrapper-form-pengingat');
+    if (formWrapper.style.display === 'none') {
+        formWrapper.style.display = 'block';
+        document.getElementById('form-tambah-pengingat').reset();
+        
+        ubahFormSiklus(); // Panggil rendering input otomatis
+        
+        editingPengingatId = null;
+        document.getElementById('judul-form-pengingat').innerText = "Isi Data Pengingat Kegiatan";
+        document.getElementById('btn-simpan-pengingat').innerHTML = '<i class="fa-solid fa-save"></i> Simpan Pengingat';
+    } else {
+        formWrapper.style.display = 'none';
+    }
+};
+
+window.loadDataPengingat = async function() {
+    const container = document.getElementById('tempat-data-pengingat');
+    container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--neon-red);">Memuat data pengingat... <i class="fa-solid fa-spinner fa-spin"></i></li>';
+
+    try {
+        const { data, error } = await supabase
+            .from('pengingat_kegiatan')
+            .select('*')
+            .order('tanggal_pelaksanaan', { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<li style="display:block; text-align:center; padding: 10px; color: var(--text-abu);">Belum ada data pengingat.</li>';
+            currentDataPengingat = [];
+            return;
+        }
+
+        currentDataPengingat = data;
+        let htmlContent = '';
+        
+        data.forEach(item => {
+            let warnaBadge = 'var(--text-abu)';
+            if (item.siklus === '1 Kali') warnaBadge = 'var(--neon-red)';
+            else if (item.siklus === 'Mingguan') warnaBadge = 'var(--neon-green)';
+            else if (item.siklus === 'Bulanan') warnaBadge = 'var(--neon-blue)';
+            else if (item.siklus === 'Tahunan') warnaBadge = 'var(--neon-purple)';
+
+            const statusText = item.status_selesai ? 
+                '<span style="color:var(--neon-green); font-size:10px; font-weight:700;"><i class="fa-solid fa-check"></i> Selesai</span>' : 
+                '<span style="color:var(--neon-yellow); font-size:10px; font-weight:700;"><i class="fa-solid fa-clock"></i> Aktif</span>';
+
+            // Mempercantik Teks Tampilan sesuai logikanya
+            let textTarget = item.tanggal_pelaksanaan;
+            const dp = item.tanggal_pelaksanaan.split('-');
+            const dt = new Date(dp[0], dp[1]-1, dp[2]);
+            
+            if (item.siklus === 'Tahunan') {
+                const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                textTarget = `Tgl ${dt.getDate()} ${namaBulan[dt.getMonth()]}`;
+            } else if (item.siklus === 'Bulanan') {
+                textTarget = `Tgl ${dt.getDate()}`;
+            } else if (item.siklus === 'Mingguan') {
+                const namaHari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                textTarget = `Hari ${namaHari[dt.getDay()]}`;
+            }
+
+            // PERBAIKAN: Hanya render tombol ceklis (Selesai/Ubah ke Aktif) jika siklusnya "1 Kali"
+            let btnSelesaiHtml = '';
+            if (item.siklus === '1 Kali') {
+                const toggleIcon = item.status_selesai ? 'fa-rotate-left' : 'fa-check';
+                const toggleColor = item.status_selesai ? 'var(--neon-yellow)' : 'var(--neon-green)';
+                const toggleTitle = item.status_selesai ? 'Ubah ke Aktif' : 'Tandai Selesai';
+                btnSelesaiHtml = `
+                    <button onclick="toggleStatusPengingat('${item.id}', ${item.status_selesai})" class="btn-action" style="color: ${toggleColor}; border-color: ${toggleColor};" title="${toggleTitle}">
+                        <i class="fa-solid ${toggleIcon}"></i>
+                    </button>
+                `;
+            }
+
+            htmlContent += `
+                <li>
+                    <div style="display: flex; align-items: center; gap: 12px; width:70%;">
+                        <div style="color: ${warnaBadge}; font-size:18px;">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:13px; font-weight:600; color:var(--text-putih);">
+                                ${item.judul_pengingat}
+                            </div>
+                            <div style="font-size:10px; color:var(--text-abu); margin-top:4px; display:flex; gap:10px; align-items:center;">
+                                <span><i class="fa-solid fa-rotate"></i> ${item.siklus}</span>
+                                <span><i class="fa-solid fa-calendar-day"></i> Target: ${textTarget}</span>
+                                <span><i class="fa-solid fa-bell"></i> Mulai H-${item.ingatkan_h_min}</span>
+                                ${statusText}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        ${btnSelesaiHtml}
+                        <button onclick="editPengingat('${item.id}')" class="btn-action btn-edit" title="Edit"><i class="fa-solid fa-edit"></i></button>
+                        <button onclick="hapusPengingat('${item.id}', '${item.judul_pengingat}')" class="btn-action btn-delete" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </li>
+            `;
+        });
+        container.innerHTML = htmlContent;
+    } catch (error) {
+        container.innerHTML = `<li style="display:block; text-align:center; color: var(--neon-red); padding: 10px;">Gagal: ${error.message}</li>`;
+    }
+};
+
+window.toggleStatusPengingat = async function(id, currentStatus) {
+    try {
+        const newStatus = !currentStatus; 
+        const { error } = await supabase
+            .from('pengingat_kegiatan')
+            .update({ status_selesai: newStatus })
+            .eq('id', id);
+
+        if (error) throw error;
+        loadDataPengingat();
+    } catch (err) {
+        alert("Gagal merubah status: " + err.message);
+    }
+};
+
+window.editPengingat = function(id) {
+    const p = currentDataPengingat.find(item => item.id === id);
+    if (!p) return;
+
+    editingPengingatId = id;
+    document.getElementById('pengingat-judul').value = p.judul_pengingat || '';
+    document.getElementById('pengingat-siklus').value = p.siklus || '1 Kali';
+    document.getElementById('pengingat-hmin').value = p.ingatkan_h_min || '1';
+
+    // Memuat form input dinamis dan mengisi datanya sesuai tanggal pelaksanaan di DB
+    ubahFormSiklus(p.tanggal_pelaksanaan);
+
+    document.getElementById('judul-form-pengingat').innerText = `Edit Pengingat: ${p.judul_pengingat}`;
+    document.getElementById('btn-simpan-pengingat').innerHTML = '<i class="fa-solid fa-save"></i> Perbarui Pengingat';
+    document.getElementById('wrapper-form-pengingat').style.display = 'block';
+    document.getElementById('wrapper-form-pengingat').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.hapusPengingat = async function(id, judul) {
+    if (!confirm(`Yakin ingin MENGHAPUS pengingat "${judul}"?`)) return;
+    try {
+        const { error } = await supabase.from('pengingat_kegiatan').delete().eq('id', id);
+        if (error) throw error;
+        alert('Pengingat berhasil dihapus.');
+        loadDataPengingat();
+    } catch (err) {
+        alert("Gagal menghapus pengingat: " + err.message);
+    }
+};
+
+window.ubahFormSiklus = function(defaultVal = null) {
+    const siklus = document.getElementById('pengingat-siklus').value;
+    const wadah = document.getElementById('wadah-input-waktu');
+    
+    let d = new Date();
+    if (defaultVal) {
+        const dp = defaultVal.split('-');
+        d = new Date(dp[0], dp[1] - 1, dp[2]);
+    }
+
+    if (siklus === '1 Kali') {
+        const val = defaultVal ? defaultVal : d.toISOString().split('T')[0];
+        wadah.innerHTML = `
+            <label>Pilih Tanggal Lengkap</label>
+            <input type="date" id="pengingat-waktu-val" class="form-control" value="${val}" required>
+        `;
+    } else if (siklus === 'Tahunan') {
+        const tgl = d.getDate();
+        const bln = d.getMonth();
+        const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        
+        let tglOpts = '';
+        for(let i=1; i<=31; i++) tglOpts += `<option value="${i}" ${i===tgl?'selected':''}>${i}</option>`;
+        
+        let blnOpts = '';
+        for(let i=0; i<12; i++) blnOpts += `<option value="${i}" ${i===bln?'selected':''}>${namaBulan[i]}</option>`;
+
+        wadah.innerHTML = `
+            <label>Pilih Tanggal & Bulan</label>
+            <div style="display:flex; gap:8px;">
+                <select id="pengingat-waktu-tgl" class="form-control" required>${tglOpts}</select>
+                <select id="pengingat-waktu-bln" class="form-control" required>${blnOpts}</select>
+            </div>
+        `;
+    } else if (siklus === 'Bulanan') {
+        const tgl = d.getDate();
+        let tglOpts = '';
+        for(let i=1; i<=31; i++) tglOpts += `<option value="${i}" ${i===tgl?'selected':''}>${i}</option>`;
+        wadah.innerHTML = `
+            <label>Pilih Tgl Pengulangan</label>
+            <select id="pengingat-waktu-val" class="form-control" required>${tglOpts}</select>
+        `;
+    } else if (siklus === 'Mingguan') {
+        const hari = d.getDay();
+        wadah.innerHTML = `
+            <label>Pilih Hari Pengulangan</label>
+            <select id="pengingat-waktu-val" class="form-control" required>
+                <option value="1" ${hari===1?'selected':''}>Senin</option>
+                <option value="2" ${hari===2?'selected':''}>Selasa</option>
+                <option value="3" ${hari===3?'selected':''}>Rabu</option>
+                <option value="4" ${hari===4?'selected':''}>Kamis</option>
+                <option value="5" ${hari===5?'selected':''}>Jumat</option>
+                <option value="6" ${hari===6?'selected':''}>Sabtu</option>
+                <option value="0" ${hari===0?'selected':''}>Minggu</option>
+            </select>
+        `;
+    }
+};
+
+window.simpanDataPengingat = async function(event) {
+    event.preventDefault();
+
+    const judul = document.getElementById('pengingat-judul').value.trim();
+    const siklus = document.getElementById('pengingat-siklus').value;
+    const hmin = parseInt(document.getElementById('pengingat-hmin').value) || 0;
+
+    // Kalkulasi Target Tanggal Berikutnya Berdasarkan Input Siklus
+    let nextDate = new Date();
+    nextDate.setHours(0,0,0,0);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (siklus === '1 Kali') {
+        nextDate = new Date(document.getElementById('pengingat-waktu-val').value);
+    } else if (siklus === 'Tahunan') {
+        const t = parseInt(document.getElementById('pengingat-waktu-tgl').value);
+        const b = parseInt(document.getElementById('pengingat-waktu-bln').value);
+        nextDate.setMonth(b, t);
+        if (nextDate < today) nextDate.setFullYear(nextDate.getFullYear() + 1);
+    } else if (siklus === 'Bulanan') {
+        const t = parseInt(document.getElementById('pengingat-waktu-val').value);
+        nextDate.setDate(t);
+        if (nextDate < today) nextDate.setMonth(nextDate.getMonth() + 1);
+    } else if (siklus === 'Mingguan') {
+        const targetHari = parseInt(document.getElementById('pengingat-waktu-val').value);
+        let currentHari = nextDate.getDay();
+        let diff = targetHari - currentHari;
+        if (diff < 0) diff += 7;
+        nextDate.setDate(nextDate.getDate() + diff);
+    }
+
+    // Format menjadi string date YYYY-MM-DD
+    const yyyy = nextDate.getFullYear();
+    const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(nextDate.getDate()).padStart(2, '0');
+    const targetDateStr = `${yyyy}-${mm}-${dd}`;
+
+    const btn = document.getElementById('btn-simpan-pengingat');
+    const textAsli = btn.innerHTML;
+
+    try {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btn.disabled = true;
+
+        const payload = {
+            judul_pengingat: judul,
+            siklus: siklus,
+            tanggal_pelaksanaan: targetDateStr, // Mengirim tanggal hasil kalkulasi
+            ingatkan_h_min: hmin,
+            status_selesai: false 
+        };
+
+        if (editingPengingatId) {
+            const { error } = await supabase.from('pengingat_kegiatan').update(payload).eq('id', editingPengingatId);
+            if (error) throw error;
+            alert('Pengingat berhasil diperbarui!');
+        } else {
+            const { error } = await supabase.from('pengingat_kegiatan').insert([payload]);
+            if (error) throw error;
+            alert('Pengingat baru berhasil ditambahkan!');
+        }
+
+        document.getElementById('form-tambah-pengingat').reset();
+        document.getElementById('wrapper-form-pengingat').style.display = 'none';
+        editingPengingatId = null;
+        
+        loadDataPengingat();
+        
+    } catch (error) {
+        alert('Gagal menyimpan pengingat: ' + error.message);
+    } finally {
+        btn.innerHTML = textAsli;
+        btn.disabled = false;
+    }
+};
+
+// ... sisa fitur Excel (download/upload) dari file Anda tetap berjalan aman ...
 // ================= FUNGSI EXCEL (DOWNLOAD & UPLOAD SISWA MENGAJAR) =================
 window.downloadBlangkoExcel = async function() {
     const btn = document.getElementById('btn-download-blangko');
     const textAsli = btn ? btn.innerHTML : '';
-    
-    if(btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan...';
-        btn.disabled = true;
-    }
-
+    if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan...'; btn.disabled = true; }
     try {
         await window.loadSheetJS();
-        
         const headers = [["No Absen", "NISN", "Kode Siswa", "Nama Lengkap", "L/P", "Tempat Lahir", "Tanggal Lahir (YYYY-MM-DD)", "Alamat", "WA Siswa", "Email Siswa", "WA Ortu", "Instagram", "Jabatan"]];
-        
         const exampleData = [
             ["1", "1234567890", "K-01", "Budi Santoso", "L", "Jakarta", "2010-05-12", "Jl. Merdeka No 1", "08123456789", "budi@email.com", "08987654321", "@budi_s", "Ketua Kelas"],
             ["2", "0987654321", "", "Siti Aminah", "P", "Bandung", "2010-08-20", "Jl. Sudirman", "", "", "", "", "Anggota"]
         ];
-
         const dataSheet = [...headers, ...exampleData];
         const ws = window.XLSX.utils.aoa_to_sheet(dataSheet);
-        
         ws['!cols'] = [{wch: 8}, {wch: 15}, {wch: 10}, {wch: 25}, {wch: 5}, {wch: 15}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
-
         const wb = window.XLSX.utils.book_new();
-        
         let namaKelas = "Baru";
         const elKelas = document.getElementById('judul-detail-kelas');
-        if(elKelas) {
-            namaKelas = elKelas.innerText.replace('Data Siswa ', '').trim();
-        }
-        
+        if(elKelas) { namaKelas = elKelas.innerText.replace('Data Siswa ', '').trim(); }
         window.XLSX.utils.book_append_sheet(wb, ws, "DataSiswa");
-        
         const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([wbout], { type: 'application/octet-stream' });
         const url = URL.createObjectURL(blob);
@@ -931,34 +1178,23 @@ window.downloadBlangkoExcel = async function() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-
     } catch(e) {
         alert("Gagal mendownload blangko: " + e.message);
     } finally {
-        if(btn) {
-            btn.innerHTML = textAsli;
-            btn.disabled = false;
-        }
+        if(btn) { btn.innerHTML = textAsli; btn.disabled = false; }
     }
 };
 
 window.simpanSiswaMassalExcel = async function() {
     const fileInput = document.getElementById('input-file-excel');
     const file = fileInput.files[0];
-    
-    if(!file) { 
-        alert("Silakan pilih file Excel (.xlsx atau .xls) terlebih dahulu!"); 
-        return; 
-    }
-
+    if(!file) { alert("Silakan pilih file Excel (.xlsx atau .xls) terlebih dahulu!"); return; }
     const btn = document.getElementById('btn-simpan-massal');
     const textAsli = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses Excel...';
     btn.disabled = true;
-
     try {
         await window.loadSheetJS();
-        
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
@@ -966,33 +1202,23 @@ window.simpanSiswaMassalExcel = async function() {
                 const workbook = window.XLSX.read(data, {type: 'array'});
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                
                 const jsonData = window.XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-                
-                let sukses = 0;
-                let gagal = 0;
-
+                let sukses = 0; let gagal = 0;
                 for (let row of jsonData) {
                     const nisn = String(row["NISN"]).trim();
                     const nama = String(row["Nama Lengkap"]).trim();
-                    
                     if(!nisn || !nama) { gagal++; continue; }
-
                     let jk = String(row["L/P"]).trim().toUpperCase();
                     if(jk !== 'L' && jk !== 'P') jk = 'L';
-
                     let tglLahir = String(row["Tanggal Lahir (YYYY-MM-DD)"]).trim();
                     if(tglLahir && !tglLahir.match(/^\d{4}-\d{2}-\d{2}$/)) { tglLahir = null; }
-
                     let noAbsen = parseInt(row["No Absen"]);
                     if(isNaN(noAbsen)) noAbsen = null;
-
                     let jabatan = String(row["Jabatan"]).trim();
                     if(!jabatan) jabatan = "Anggota";
 
                     let idSiswaPasti = null;
                     const { data: existingSiswa } = await supabase.from('siswa').select('id').eq('nisn_siswa', nisn).maybeSingle();
-
                     if (existingSiswa) {
                         idSiswaPasti = existingSiswa.id;
                     } else {
@@ -1005,15 +1231,12 @@ window.simpanSiswaMassalExcel = async function() {
                             whatsapp_orangtua: row["WA Ortu"] ? String(row["WA Ortu"]).trim() : null,
                             instagram_siswa: row["Instagram"] ? String(row["Instagram"]).trim() : null
                         };
-
                         const { data: newSiswa, error: errInsertSiswa } = await supabase.from('siswa').insert([payloadSiswa]).select();
                         if (errInsertSiswa) throw errInsertSiswa;
                         idSiswaPasti = newSiswa[0].id;
                     }
-
                     if (idSiswaPasti) {
                         const { data: existingAnggota } = await supabase.from('anggota_kelas').select('id').eq('id_kelas', currentKelasId).eq('id_siswa', idSiswaPasti).maybeSingle();
-
                         if (!existingAnggota) {
                             const { error: errAnggota } = await supabase.from('anggota_kelas').insert([{ 
                                 id_kelas: currentKelasId, id_siswa: idSiswaPasti, nomor_absen: noAbsen, jabatan_kelas: jabatan 
@@ -1023,12 +1246,10 @@ window.simpanSiswaMassalExcel = async function() {
                         } else { gagal++; }
                     }
                 }
-
                 alert(`Proses Tambah Massal Excel Selesai!\n\n✅ Berhasil ditambahkan: ${sukses} siswa\n❌ Gagal / Dilewati: ${gagal} baris (Siswa sudah ada atau format salah)`);
                 document.getElementById('input-file-excel').value = '';
                 document.getElementById('wrapper-form-massal').style.display = 'none';
                 loadDataSiswa();
-
             } catch (err) { alert("Terjadi kesalahan saat membaca file Excel: " + err.message); } 
             finally { btn.innerHTML = textAsli; btn.disabled = false; }
         };
@@ -1040,39 +1261,28 @@ window.simpanSiswaMassalExcel = async function() {
     }
 };
 
-// ================= FITUR DOWNLOAD SEMUA DATA SISWA MENGAJAR =================
 window.downloadSemuaSiswaExcel = async function() {
     const btn = document.getElementById('btn-download-semua-siswa');
     const textAsli = btn ? btn.innerHTML : '';
-    if(btn) {
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan Data...';
-        btn.disabled = true;
-    }
-
+    if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyiapkan Data...'; btn.disabled = true; }
     try {
         await window.loadSheetJS();
-
         const { data: listKelas, error: errKelas } = await supabase.from('kelas').select('*').order('tingkat', { ascending: true }).order('nama_kelas', { ascending: true });
         if (errKelas) throw errKelas;
-
         const { data: listSiswa, error: errSiswa } = await supabase.from('anggota_kelas').select(`nomor_absen, jabatan_kelas, id_kelas, siswa (*)`).order('nomor_absen', { ascending: true });
         if (errSiswa) throw errSiswa;
-
         const wb = window.XLSX.utils.book_new();
         const headers = [["No Absen", "NISN", "Kode Siswa", "Nama Lengkap", "L/P", "Tempat Lahir", "Tanggal Lahir", "Alamat", "WA Siswa", "Email Siswa", "WA Ortu", "Instagram", "Jabatan"]];
 
         if (listKelas && listKelas.length > 0) {
             listKelas.forEach(kls => {
                 let anggotaKelas = listSiswa.filter(s => s.id_kelas === kls.id && s.siswa);
-                
-                // Urutkan berdasarkan nomor absen, lalu nama
                 anggotaKelas.sort((a, b) => {
                     const noA = (a.nomor_absen !== null && a.nomor_absen !== undefined && a.nomor_absen !== '') ? parseInt(a.nomor_absen) : 9999;
                     const noB = (b.nomor_absen !== null && b.nomor_absen !== undefined && b.nomor_absen !== '') ? parseInt(b.nomor_absen) : 9999;
                     if (noA !== noB) return noA - noB;
                     return a.siswa.nama_siswa.localeCompare(b.siswa.nama_siswa);
                 });
-
                 let sheetData = [];
                 if (anggotaKelas.length > 0) {
                     sheetData = anggotaKelas.map(item => {
@@ -1085,29 +1295,19 @@ window.downloadSemuaSiswaExcel = async function() {
                             item.jabatan_kelas || '-'
                         ];
                     });
-                } else {
-                    sheetData = [["(Belum ada siswa di kelas ini)"]];
-                }
-
+                } else { sheetData = [["(Belum ada siswa di kelas ini)"]]; }
                 const ws = window.XLSX.utils.aoa_to_sheet([...headers, ...sheetData]);
                 ws['!cols'] = [{wch: 8}, {wch: 15}, {wch: 10}, {wch: 25}, {wch: 5}, {wch: 15}, {wch: 12}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
-                
                 let safeSheetName = kls.nama_kelas.replace(/[\\/?*\[\]]/g, '').substring(0, 31);
                 window.XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
             });
         } else {
-            alert("Belum ada kelas yang terdaftar.");
-            return;
+            alert("Belum ada kelas yang terdaftar."); return;
         }
-
         window.XLSX.writeFile(wb, `Data_Semua_Siswa_Lengkap.xlsx`);
-
     } catch (e) {
         alert("Gagal mendownload data siswa: " + e.message);
     } finally {
-        if(btn) {
-            btn.innerHTML = textAsli;
-            btn.disabled = false;
-        }
+        if(btn) { btn.innerHTML = textAsli; btn.disabled = false; }
     }
 };

@@ -81,6 +81,14 @@ window.setNilaiJamEksplisit = function(valStr) {
     renderPilihanJam();
 };
 
+// ================= FUNGSI TOGGLE REKAP JURNAL =================
+window.toggleOpsiRekapJurnal = function(tipe) {
+    const el = document.getElementById(`area-rekap-jurnal-${tipe}`);
+    if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+};
+
 // ================= FUNGSI TAB & INISIALISASI =================
 window.gantiTabJurnal = function(tabName) {
     const tabs = ['mengajar', 'sikap', 'wali'];
@@ -280,7 +288,6 @@ window.loadSiswaJurnal = async function(tipe) {
                 return;
             }
 
-            // Urutkan siswa guru wali berdasarkan abjad nama A-Z
             data.sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
 
             let htmlContent = '';
@@ -325,7 +332,6 @@ window.loadSiswaJurnal = async function(tipe) {
             return;
         }
 
-        // Urutkan berdasarkan nomor absen 1-seterusnya, jika sama berdasarkan nama, tanpa absen di belakang
         sortSiswaJurnal(data);
 
         let htmlContent = '';

@@ -22,7 +22,7 @@
 
     .jurnal-container { animation: fadeIn 0.4s ease-out; }
     
-    /* DESAIN KARTU GELAP UTAMA (GARIS MENYELURUH TIPIS BIRU ELEGAN) */
+    /* DESAIN KARTU GELAP UTAMA */
     .card-data { 
         background: var(--bg-card); 
         border-radius: 16px; padding: 20px; 
@@ -65,7 +65,7 @@
     }
     .btn-cancel:hover { background: var(--neon-red); color: white; border-style: solid; }
 
-    /* DESAIN TAB (GARIS MENYELURUH TIPIS BIRU) */
+    /* DESAIN TAB */
     .tab-container { 
         display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 25px; 
@@ -142,7 +142,7 @@
     .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
     .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
 
-    /* CHECKBOX & KOTAK SISWA (GARIS MENYELURUH TIPIS BIRU) */
+    /* CHECKBOX & KOTAK SISWA */
     .check-all-wrapper { 
         display: flex; align-items: center; gap: 10px; padding: 12px; 
         background: rgba(5, 213, 138, 0.05); border-radius: 12px; font-weight: 600; 
@@ -177,22 +177,24 @@
     <!-- ================= TAB 1: JURNAL MENGAJAR ================= -->
     <div id="tab-jurnal-mengajar" style="display: block;">
         <div class="card-data">
-            <div class="desktop-row">
-                <div class="form-group" style="flex: 1.2;">
-                    <label>Pilih Kelas</label>
-                    <select id="pilih-kelas-mengajar" class="form-control" onchange="setAutoPertemuanMengajar()"></select>
+            
+            <!-- BARIS 1: KELAS, TANGGAL, PERTEMUAN KE (1 BARIS PENUH DI MOBILE & DESKTOP) -->
+            <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; width: 100%;">
+                <div class="form-group" style="flex: 1.5; margin-bottom: 0; min-width: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kelas</label>
+                    <select id="pilih-kelas-mengajar" class="form-control" onchange="setAutoPertemuanMengajar()" style="padding: 10px 6px; font-size: 11px; min-width: 0;"></select>
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Tanggal</label>
-                    <input type="date" id="jm-tanggal" class="form-control" required>
+                <div class="form-group" style="flex: 1.2; margin-bottom: 0; min-width: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tanggal</label>
+                    <input type="date" id="jm-tanggal" class="form-control" required style="padding: 10px 4px; font-size: 11px; min-width: 0;">
                 </div>
-                <div class="form-group" style="flex: 0.8;">
-                    <label>Pertemuan Ke</label>
-                    <input type="number" id="jm-pertemuan" class="form-control" placeholder="Cth: 1" required>
+                <div class="form-group" style="flex: 0.8; margin-bottom: 0; min-width: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pertemuan</label>
+                    <input type="number" id="jm-pertemuan" class="form-control" placeholder="Ke-" required style="padding: 10px 6px; font-size: 11px; text-align: center; min-width: 0;">
                 </div>
             </div>
 
-            <!-- PILIHAN ANGKA JAM KE 1-9 (PILIH 1 ATAU 2 ANGKA) -->
+            <!-- PILIHAN ANGKA JAM KE 1-9 -->
             <div class="form-group">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <label style="margin:0;">Jam Ke- (Pilih 1 atau 2 Angka Sekaligus):</label>
@@ -230,9 +232,15 @@
                 <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
             </button>
             <div id="btn-cancel-mengajar" class="btn-cancel" onclick="batalkanEdit('mengajar')">Batal Edit</div>
+
+            <!-- TOMBOL TOGGLE UNDUH REKAP MENGAJAR -->
+            <button type="button" onclick="toggleOpsiRekapJurnal('mengajar')" class="btn-action" style="width: 100%; justify-content: center; padding: 12px; border-radius: 12px; margin-top: 15px; background: rgba(59, 130, 246, 0.08); color: var(--neon-blue); border: 1px dashed var(--neon-blue); font-size: 11px;">
+                <i class="fa-solid fa-sliders"></i> Tampilkan / Sembunyikan Rekap Mengajar
+            </button>
         </div>
 
-        <div class="card-data" style="background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
+        <!-- KOTAK REKAP MENGAJAR (TERSEMBUNYI SECARA DEFAULT) -->
+        <div id="area-rekap-jurnal-mengajar" class="card-data" style="display: none; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Mengajar</div>
             <div class="desktop-row" style="margin-bottom: 10px;">
                 <div class="form-group" style="flex: 1;">
@@ -284,9 +292,16 @@
 
             <!-- Bagian 1: Mode Kelas -->
             <div id="wrap-sikap-mode-kelas">
-                <div class="form-group">
-                    <label>Pilih Kelas</label>
-                    <select id="pilih-kelas-sikap" class="form-control" onchange="loadSiswaJurnal('sikap')"></select>
+                <!-- BARIS 1: KELAS & TANGGAL (1 BARIS DENGAN KELAS LEBIH LEBAR) -->
+                <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 12px; width: 100%;">
+                    <div class="form-group" style="flex: 1.6; margin-bottom: 0; min-width: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pilih Kelas</label>
+                        <select id="pilih-kelas-sikap" class="form-control" onchange="loadSiswaJurnal('sikap')" style="padding: 10px 6px; font-size: 11px; min-width: 0;"></select>
+                    </div>
+                    <div class="form-group" style="flex: 1.1; margin-bottom: 0; min-width: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tanggal</label>
+                        <input type="date" id="js-tanggal" class="form-control" required style="padding: 10px 4px; font-size: 11px; min-width: 0;">
+                    </div>
                 </div>
                 
                 <div id="area-sikap" style="display: none;">
@@ -303,33 +318,31 @@
 
             <!-- Bagian 2: Mode Manual -->
             <div id="wrap-sikap-mode-manual" style="display: none;">
-                <div class="desktop-row">
-                    <div class="form-group" style="flex: 2;">
-                        <label>Nama Siswa</label>
-                        <input type="text" id="js-manual-nama" class="form-control" placeholder="Tulis nama siswa lengkap...">
+                <!-- BARIS 1 MANUAL: NAMA & KELAS (1 BARIS) -->
+                <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 12px; width: 100%;">
+                    <div class="form-group" style="flex: 2; margin-bottom: 0; min-width: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nama Siswa</label>
+                        <input type="text" id="js-manual-nama" class="form-control" placeholder="Nama lengkap..." style="padding: 10px 6px; font-size: 11px; min-width: 0;">
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Kelas</label>
-                        <input type="text" id="js-manual-kelas" class="form-control" placeholder="Cth: 8A / 9C">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0; min-width: 0;">
+                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kelas</label>
+                        <input type="text" id="js-manual-kelas" class="form-control" placeholder="Cth: 8A" style="padding: 10px 6px; font-size: 11px; min-width: 0;">
                     </div>
                 </div>
             </div>
 
-            <div class="desktop-row" style="margin-top: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Tanggal</label>
-                    <input type="date" id="js-tanggal" class="form-control" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Jenis Sikap</label>
-                    <select id="js-jenis" class="form-control">
+            <!-- BARIS 2 KESELURUHAN: JENIS SIKAP & KATEGORI (1 BARIS PENUH) -->
+            <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; margin-top: 5px; width: 100%;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0; min-width: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Jenis Sikap</label>
+                    <select id="js-jenis" class="form-control" style="padding: 10px 6px; font-size: 11px; min-width: 0;">
                         <option value="Positif">Positif</option>
                         <option value="Negatif">Negatif</option>
                     </select>
                 </div>
-                <div class="form-group" style="flex: 1.5;">
-                    <label>Kategori</label>
-                    <select id="js-kategori" class="form-control">
+                <div class="form-group" style="flex: 1.4; margin-bottom: 0; min-width: 0;">
+                    <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kategori</label>
+                    <select id="js-kategori" class="form-control" style="padding: 10px 6px; font-size: 11px; min-width: 0;">
                         <option value="Kedisiplinan">Kedisiplinan</option>
                         <option value="Etika/Sosial">Etika/Sosial</option>
                         <option value="Spiritual">Spiritual</option>
@@ -341,6 +354,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="form-group">
                 <label>Deskripsi Kejadian</label>
                 <textarea id="js-deskripsi" class="form-control" placeholder="Membantu membersihkan papan tulis..."></textarea>
@@ -355,9 +369,15 @@
                 <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
             </button>
             <div id="btn-cancel-sikap" class="btn-cancel" onclick="batalkanEdit('sikap')">Batal Edit</div>
+
+            <!-- TOMBOL TOGGLE UNDUH REKAP SIKAP -->
+            <button type="button" onclick="toggleOpsiRekapJurnal('sikap')" class="btn-action" style="width: 100%; justify-content: center; padding: 12px; border-radius: 12px; margin-top: 15px; background: rgba(59, 130, 246, 0.08); color: var(--neon-blue); border: 1px dashed var(--neon-blue); font-size: 11px;">
+                <i class="fa-solid fa-sliders"></i> Tampilkan / Sembunyikan Rekap Sikap
+            </button>
         </div>
 
-        <div class="card-data" style="background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
+        <!-- KOTAK REKAP SIKAP (TERSEMBUNYI SECARA DEFAULT) -->
+        <div id="area-rekap-jurnal-sikap" class="card-data" style="display: none; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Sikap</div>
             <div class="desktop-row" style="margin-bottom: 10px;">
                 <div class="form-group" style="flex: 1;">
@@ -435,9 +455,15 @@
                 <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
             </button>
             <div id="btn-cancel-wali" class="btn-cancel" onclick="batalkanEdit('wali')">Batal Edit</div>
+
+            <!-- TOMBOL TOGGLE UNDUH REKAP WALI -->
+            <button type="button" onclick="toggleOpsiRekapJurnal('wali')" class="btn-action" style="width: 100%; justify-content: center; padding: 12px; border-radius: 12px; margin-top: 15px; background: rgba(139, 92, 246, 0.08); color: var(--neon-purple); border: 1px dashed var(--neon-purple); font-size: 11px;">
+                <i class="fa-solid fa-sliders"></i> Tampilkan / Sembunyikan Rekap Wali
+            </button>
         </div>
 
-        <div class="card-data" style="background: rgba(139, 92, 246, 0.05); border: 1px dashed var(--neon-purple);">
+        <!-- KOTAK REKAP WALI (TERSEMBUNYI SECARA DEFAULT) -->
+        <div id="area-rekap-jurnal-wali" class="card-data" style="display: none; background: rgba(139, 92, 246, 0.05); border: 1px dashed var(--neon-purple);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-purple); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Guru Wali</div>
             <div class="desktop-row">
                 <div class="form-group">

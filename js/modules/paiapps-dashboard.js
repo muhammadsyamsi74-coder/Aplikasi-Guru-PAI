@@ -20,7 +20,6 @@ window.loadDashboardPaiApps = async function() {
     const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const hariIni = hariList[new Date().getDay()];
 
-    // JIKA HARI INI MINGGU, SET JADWAL DEFAULT KE HARI SENIN
     const hariJadwalDefault = (hariIni === 'Minggu') ? 'Senin' : hariIni;
 
     const elNamaHari = document.getElementById('dash-nama-hari');
@@ -32,6 +31,7 @@ window.loadDashboardPaiApps = async function() {
     await Promise.all([
         loadRingkasanMetrikDanAlert(),
         loadJadwalHariIni(hariJadwalDefault),
+        loadPengingatKegiatan(), 
         loadGrafikMembacaQuran(),
         loadAnalitikKehadiranPerKelas(),
         loadAnalitikKetuntasanTugas(),
@@ -46,7 +46,7 @@ window.gantiHariJadwal = function(hariDipilih) {
     loadJadwalHariIni(hariDipilih);
 };
 
-// ================= 1. METRIK UTAMA & ACTIONABLE ALERTS (HANYA KELAS AKTIF) =================
+// ================= 1. METRIK UTAMA & ACTIONABLE ALERTS =================
 async function loadRingkasanMetrikDanAlert() {
     const elJmlSiswa = document.getElementById('dash-jml-siswa');
     const elJmlKelas = document.getElementById('dash-jml-kelas');
@@ -207,7 +207,171 @@ async function loadJadwalHariIni(hari) {
     }
 }
 
-// ================= 3. GRAFIK KELANCARAN MEMBACA =================
+// ================= 3. PENGINGAT KEGIATAN BERDASARKAN HARI INI =================
+async function loadPengingatKegiatan() {
+    const container = document.getElementById('dash-list-reminder');
+    const cardContainer = document.getElementById('dash-card-reminder');
+    if (!container || !cardContainer) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('pengingat_kegiatan')
+            .select('*')
+            .eq('status_selesai', false)
+            .order('tanggal_pelaksanaan', { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            cardContainer.style.display = 'none';
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let html = '';
+        let countVisible = 0;
+
+        data.forEach(item => {
+            let tglParts = item.tanggal_pelaksanaan.split('-');
+            const targetDate = new Date(tglParts[0], tglParts[1] - 1, tglParts[2]);
+            targetDate.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= item.ingatkan_h_min) {
+                countVisible++;
+                
+                let badgeClass = 'cycle-once';
+                if (item.siklus === 'Mingguan') badgeClass = 'cycle-weekly';
+                if (item.siklus === 'Bulanan') badgeClass = 'cycle-monthly';
+                if (item.siklus === 'Tahunan') badgeClass = 'cycle-yearly';
+
+                let statusWaktu = '';
+                let iconWaktu = '<i class="fa-regular fa-clock"></i>';
+                let warnaWaktu = 'color: var(--text-abu);';
+                
+                if (diffDays > 0) {
+                    statusWaktu = `H-${diffDays} (Tgl: ${item.tanggal_pelaksanaan})`;
+                    warnaWaktu = 'color: var(--neon-yellow); font-weight:700;';
+                } else if (diffDays === 0) {
+                    statusWaktu = `Hari Ini!`;
+                    iconWaktu = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    warnaWaktu = 'color: var(--neon-red); font-weight:700;';
+                } else {
+                    if (item.siklus === '1 Kali') {
+                        statusWaktu = `Terlewat ${Math.abs(diffDays)} Hari`;
+                        iconWaktu = '<i class="fa-solid fa-circle-exclamation"></i>';
+                        warnaWaktu = 'color: var(--neon-red); font-weight:700; text-decoration: underline;';
+                    } else {
+                        statusWaktu = `Tiba Waktunya (Rutin)`; 
+                        iconWaktu = '<i class="fa-solid fa-rotate"></i>';
+                        warnaWaktu = 'color: var(--neon-green); font-weight:700;';
+                    }
+                }
+
+                // LOGIKA TOMBOL SELESAI: Hanya muncul jika siklus adalah '1 Kali'
+                let actionButton = '';
+                if (item.siklus === '1 Kali') {
+                    actionButton = `
+                        <button class="reminder-action" onclick="selesaiPengingat(this, '${item.id}', '${item.judul_pengingat}', '${item.siklus}', '${item.tanggal_pelaksanaan}')" title="Tandai Selesai">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <li class="reminder-item" id="reminder-${item.id}">
+                        <div class="reminder-info">
+                            <span class="reminder-title">${item.judul_pengingat}</span>
+                            <div class="reminder-meta">
+                                <span class="badge-cycle ${badgeClass}">${item.siklus}</span>
+                                <span style="${warnaWaktu}">${iconWaktu} ${statusWaktu}</span>
+                            </div>
+                        </div>
+                        ${actionButton}
+                    </li>
+                `;
+            }
+        });
+
+        if (countVisible === 0) {
+            cardContainer.style.display = 'none';
+        } else {
+            cardContainer.style.display = 'block';
+            container.innerHTML = html;
+        }
+
+    } catch (e) {
+        console.error("Gagal memuat pengingat:", e);
+        cardContainer.style.display = 'block';
+        container.innerHTML = `<li style="color:var(--neon-red); text-align:center; font-size:11px; padding:10px;">Gagal memuat pengingat: ${e.message}</li>`;
+    }
+}
+
+window.selesaiPengingat = async function(btnElement, idPengingat, judul, siklus, currentTanggal) {
+    if (!confirm(`Tandai selesai untuk agenda "${judul}"?`)) {
+        return;
+    }
+
+    const originalHtml = btnElement.innerHTML;
+    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btnElement.disabled = true;
+
+    try {
+        if (siklus === '1 Kali') {
+            const { error } = await supabase
+                .from('pengingat_kegiatan')
+                .update({ status_selesai: true })
+                .eq('id', idPengingat);
+            if (error) throw error;
+        } else {
+            let tglParts = currentTanggal.split('-');
+            let nextDate = new Date(tglParts[0], tglParts[1] - 1, tglParts[2]);
+
+            if (siklus === 'Mingguan') {
+                nextDate.setDate(nextDate.getDate() + 7);
+            } else if (siklus === 'Bulanan') {
+                nextDate.setMonth(nextDate.getMonth() + 1);
+            } else if (siklus === 'Tahunan') {
+                nextDate.setFullYear(nextDate.getFullYear() + 1);
+            }
+
+            const yyyy = nextDate.getFullYear();
+            const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(nextDate.getDate()).padStart(2, '0');
+            const nextDateStr = `${yyyy}-${mm}-${dd}`;
+
+            const { error } = await supabase
+                .from('pengingat_kegiatan')
+                .update({ tanggal_pelaksanaan: nextDateStr })
+                .eq('id', idPengingat);
+            if (error) throw error;
+        }
+
+        const li = btnElement.closest('.reminder-item');
+        if (li) {
+            li.style.transition = 'all 0.3s ease';
+            li.style.transform = 'scale(0.95)';
+            li.style.opacity = '0';
+            
+            setTimeout(() => {
+                li.remove();
+                loadPengingatKegiatan(); 
+            }, 300);
+        }
+
+    } catch (e) {
+        console.error("Gagal menyelesaikan pengingat:", e);
+        alert("Gagal menyelesaikan pengingat: " + e.message);
+        btnElement.innerHTML = originalHtml;
+        btnElement.disabled = false;
+    }
+};
+
+// ================= 4. GRAFIK KELANCARAN MEMBACA =================
 async function loadGrafikMembacaQuran() {
     const canvas = document.getElementById('chart-quran-dashboard');
     const msgKosong = document.getElementById('chart-quran-kosong');
@@ -352,7 +516,7 @@ async function loadGrafikMembacaQuran() {
     }
 }
 
-// ================= 4. ANALITIK KEHADIRAN (MENGGUNAKAN POSTGRESQL VIEW) =================
+// ================= 5. ANALITIK KEHADIRAN (MENGGUNAKAN POSTGRESQL VIEW) =================
 async function loadAnalitikKehadiranPerKelas() {
     const container = document.getElementById('dash-list-analitik-kehadiran');
     if (!container) return;
@@ -405,7 +569,7 @@ async function loadAnalitikKehadiranPerKelas() {
     }
 }
 
-// ================= 5. ANALITIK KETUNTASAN TUGAS (PERSENTASE SISWA TUNTAS / T) =================
+// ================= 6. ANALITIK KETUNTASAN TUGAS (PERSENTASE SISWA TUNTAS / T) =================
 async function loadAnalitikKetuntasanTugas() {
     const container = document.getElementById('dash-list-analitik-tugas');
     if (!container) return;
@@ -430,7 +594,6 @@ async function loadAnalitikKetuntasanTugas() {
             const totalTuntas = parseInt(kls.total_tuntas) || 0;
             const totalTugas = parseInt(kls.total_tugas) || 0;
 
-            // Hitung persentase siswa tuntas (T) terhadap total slot tugas
             let persen = 0;
             if (totalSlot > 0) {
                 persen = Math.round((totalTuntas / totalSlot) * 100);
@@ -461,7 +624,7 @@ async function loadAnalitikKetuntasanTugas() {
     }
 }
 
-// ================= 6. INFORMASI SISTEM =================
+// ================= 7. INFORMASI SISTEM =================
 async function loadInfoSistem() {
     const el = document.getElementById('dash-info-sistem');
     if (!el) return;
@@ -482,13 +645,3 @@ async function loadInfoSistem() {
         el.innerHTML = 'Gagal memuat identitas sistem.';
     }
 }
-
-// ================= 7. PINTASAN PINTAR TAMBAHAN =================
-window.pintasanJurnalSikap = function() {
-    window.loadPage('jurnal', 'Jurnal Guru');
-    setTimeout(() => {
-        if (typeof window.gantiTabJurnal === 'function') {
-            window.gantiTabJurnal('sikap');
-        }
-    }, 150);
-};

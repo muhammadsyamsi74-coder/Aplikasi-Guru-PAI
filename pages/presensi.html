@@ -278,10 +278,15 @@
                     <span style="flex:1; text-align:left;">Simpan Presensi</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
+
+                <!-- TOMBOL TOGGLE UNDUH REKAP MENGAJAR -->
+                <button type="button" onclick="toggleOpsiRekapPresensi('kelas')" class="btn-action" style="width: 100%; justify-content: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(59, 130, 246, 0.08); color: var(--neon-blue); border: 1px dashed var(--neon-blue);">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Mengajar
+                </button>
             </div>
         </div>
 
-        <!-- KOTAK REKAPITULASI KELAS (MENGAJAR) -->
+        <!-- KOTAK REKAPITULASI KELAS (TERSEMBUNYI SECARA DEFAULT) -->
         <div id="area-rekap-kelas" style="display: none; margin-bottom: 20px;">
             <div style="font-size: 14px; font-weight: 700; color: var(--neon-green); border-bottom: 1px dashed var(--neon-green); padding-bottom: 10px; margin-bottom: 15px;">
                 <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Mengajar
@@ -374,10 +379,15 @@
                     <span style="flex:1; text-align:left;">Simpan Presensi Sholat</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
+
+                <!-- TOMBOL TOGGLE UNDUH REKAP SHOLAT -->
+                <button type="button" onclick="toggleOpsiRekapPresensi('sholat')" class="btn-action" style="width: 100%; justify-content: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(59, 130, 246, 0.08); color: var(--neon-blue); border: 1px dashed var(--neon-blue);">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Sholat
+                </button>
             </div>
         </div>
 
-        <!-- KOTAK REKAPITULASI SHOLAT -->
+        <!-- KOTAK REKAPITULASI SHOLAT (TERSEMBUNYI SECARA DEFAULT) -->
         <div id="area-rekap-sholat" style="display: none; margin-bottom: 20px;">
             <div style="font-size: 14px; font-weight: 700; color: var(--neon-blue); border-bottom: 1px dashed var(--neon-blue); padding-bottom: 10px; margin-bottom: 15px;">
                 <i class="fa-solid fa-file-export"></i> Unduh Rekap Presensi Sholat

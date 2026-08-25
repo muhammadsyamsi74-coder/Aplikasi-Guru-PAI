@@ -14,7 +14,7 @@
     .dashboard-container { 
         animation: fadeIn 0.4s ease-out; 
         max-width: 100%; 
-        overflow-x: hidden; /* Mencegah layar bergeser ke samping */
+        overflow-x: hidden; 
     }
 
     /* GRID METRIK ATAS */
@@ -31,7 +31,7 @@
         padding: 12px;
         display: flex;
         align-items: center;
-        gap: 8px; /* Gap dikurangi agar tidak overflow */
+        gap: 8px; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         overflow: hidden;
     }
@@ -59,7 +59,7 @@
         color: var(--text-abu);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0px; /* Menghindari teks terlalu lebar */
+        letter-spacing: 0px; 
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -84,7 +84,7 @@
         transition: all 0.2s;
         border: 1px solid transparent;
         line-height: 1.4;
-        word-wrap: break-word; /* Teks otomatis turun ke baris baru */
+        word-wrap: break-word; 
     }
     .alert-card:hover { transform: translateY(-2px); }
     .alert-warning { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid var(--border-red-subtle); }
@@ -95,27 +95,28 @@
     .card-data { 
         background: var(--bg-card); 
         border-radius: 12px; 
-        padding: 12px; /* Diperkecil untuk Mobile */
+        padding: 12px; 
         border: 1px solid var(--border-color); 
         margin-bottom: 15px; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         max-width: 100%;
-        overflow: hidden; /* Penting untuk mencegah konten keluar kartu */
+        overflow: hidden; 
     }
     .card-data.border-yellow { border: 1px solid var(--border-yellow-subtle); }
     .card-data.border-green { border: 1px solid var(--border-green-subtle); }
     .card-data.border-blue { border: 1px solid var(--border-blue-subtle); }
     .card-data.border-purple { border: 1px solid var(--border-purple-subtle); }
+    .card-data.border-red { border: 1px solid var(--border-red-subtle); }
 
     .card-header { 
         display: flex; 
         justify-content: space-between; 
-        align-items: flex-start; /* Ubah ke flex-start agar saat wrap tetap rapi */
+        align-items: flex-start; 
         margin-bottom: 12px; 
         padding-bottom: 8px; 
         border-bottom: 1px dashed var(--border-color); 
         gap: 8px;
-        flex-wrap: wrap; /* WAJIB! Agar tombol pindah ke bawah jika layar sempit */
+        flex-wrap: wrap; 
     }
     .card-header h3 { 
         font-size: 11.5px; 
@@ -125,80 +126,72 @@
         display: flex; 
         align-items: center; 
         gap: 6px; 
-        flex: 1; /* Biarkan judul mengisi sisa ruang */
-        word-break: break-word; /* Teks turun baris otomatis */
-        white-space: normal; /* Hapus nowrap secara eksplisit */
+        flex: 1; 
+        word-break: break-word; 
+        white-space: normal; 
     }
 
-    /* ================= KISI PINTASAN CEPAT (RESPONSIF 2 KOLOM) ================= */
-    .grid-quick-actions {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+    /* POLICE LINE BACKGROUND UNTUK HEADER PENGINGAT */
+    .police-line-header {
+        background: repeating-linear-gradient(
+            -45deg,
+            #000000,
+            #000000 15px,
+            var(--neon-yellow) 15px,
+            var(--neon-yellow) 30px
+        );
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: none !important; 
+        justify-content: center !important;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
+    .police-line-text {
+        background: var(--bg-card);
+        padding: 6px 16px;
+        border-radius: 6px;
+        border: 2px solid var(--neon-yellow);
+        color: var(--text-putih) !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .police-line-text i {
+        color: var(--neon-yellow);
     }
 
-    .quick-btn {
+    /* ================= PENGINGAT KEGIATAN PENTING ================= */
+    .reminder-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .reminder-item {
         background: var(--bg-main);
-        border-radius: 12px;
-        padding: 12px 5px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 10px 12px;
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         align-items: center;
-        gap: 6px;
-        cursor: pointer;
+        gap: 10px;
         transition: all 0.2s ease;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
     }
-    .quick-btn:hover {
-        transform: translateY(-2px);
-    }
+    .reminder-item:hover { transform: translateY(-2px); border-color: var(--border-yellow-subtle); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .reminder-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .reminder-title { font-size: 11px; font-weight: 700; color: var(--text-putih); word-break: break-word; line-height: 1.3; }
+    .reminder-meta { font-size: 9px; color: var(--text-abu); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
-    /* Halo Spotlight Lingkaran */
-    .icon-halo-spotlight {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        transition: transform 0.2s ease;
+    .badge-cycle {
+        font-size: 8px; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .quick-btn:hover .icon-halo-spotlight {
-        transform: scale(1.08);
-    }
-    .icon-halo-spotlight i {
-        font-size: 16px;
-        z-index: 2;
-    }
+    .cycle-once { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .cycle-weekly { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3); }
+    .cycle-monthly { background: rgba(59, 130, 246, 0.1); color: var(--neon-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .cycle-yearly { background: rgba(168, 85, 247, 0.1); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
 
-    /* 1. Presensi */
-    .btn-spot-green { border: 1px solid rgba(5, 213, 138, 0.3); background: linear-gradient(180deg, rgba(5, 213, 138, 0.04) 0%, var(--bg-main) 100%); }
-    .btn-spot-green .icon-halo-spotlight { background: radial-gradient(circle, rgba(5, 213, 138, 0.35) 0%, rgba(5, 213, 138, 0.05) 65%, transparent 70%); color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.2); }
-    
-    /* 2. Jurnal Mengajar */
-    .btn-spot-blue { border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59, 130, 246, 0.04) 0%, var(--bg-main) 100%); }
-    .btn-spot-blue .icon-halo-spotlight { background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(59, 130, 246, 0.05) 65%, transparent 70%); color: var(--neon-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
-    
-    /* 3. Input Nilai */
-    .btn-spot-purple { border: 1px solid rgba(168, 85, 247, 0.3); background: linear-gradient(180deg, rgba(168, 85, 247, 0.04) 0%, var(--bg-main) 100%); }
-    .btn-spot-purple .icon-halo-spotlight { background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(168, 85, 247, 0.05) 65%, transparent 70%); color: var(--neon-purple); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
-    
-    /* 4. Jurnal Sikap */
-    .btn-spot-yellow { border: 1px solid rgba(245, 158, 11, 0.3); background: linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, var(--bg-main) 100%); }
-    .btn-spot-yellow .icon-halo-spotlight { background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.05) 65%, transparent 70%); color: var(--neon-yellow); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
-
-    .quick-btn span { 
-        font-size: 10px; 
-        font-weight: 700; 
-        color: var(--text-putih); 
-        white-space: nowrap; /* Teks terlalu panjang agar tidak tumpah */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
+    .reminder-action {
+        width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color);
+        background: transparent; color: var(--text-abu); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
     }
+    .reminder-action:hover { background: rgba(5, 213, 138, 0.2); color: var(--neon-green); border-color: var(--neon-green); }
 
     /* LIST JADWAL */
     .jadwal-list { list-style: none; padding: 0; margin: 0; }
@@ -209,7 +202,7 @@
         padding: 10px;
         margin-bottom: 8px;
         display: flex;
-        flex-wrap: wrap; /* Izinkan teks melipat */
+        flex-wrap: wrap; 
         justify-content: space-between;
         align-items: flex-start;
         gap: 6px;
@@ -251,7 +244,7 @@
         position: relative;
         width: 100%;
         max-width: 100%;
-        min-height: 220px; /* Sedikit direndahkan untuk mobile */
+        min-height: 220px; 
         max-height: 300px;
     }
 
@@ -278,12 +271,9 @@
         .card-header h3 { font-size: 13px; }
         .grid-metrik-utama { gap: 15px; }
         .card-metrik { padding: 16px; border-radius: 14px; }
-        .grid-quick-actions { grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .quick-btn { padding: 16px 10px; }
-        .icon-halo-spotlight { width: 46px; height: 46px; }
-        .icon-halo-spotlight i { font-size: 20px; }
-        .quick-btn span { font-size: 11px; }
-        .jadwal-item { flex-wrap: nowrap; align-items: center; } /* Kembali normal ke 1 baris */
+        .reminder-title { font-size: 12px; }
+        .reminder-meta { font-size: 10px; }
+        .jadwal-item { flex-wrap: nowrap; align-items: center; } 
         .chart-wrapper { min-height: 280px; max-height: 360px; }
     }
 </style>
@@ -315,33 +305,20 @@
     <!-- 2. KARTU PENGINGAT (ACTIONABLE ALERTS) -->
     <div class="alert-container" id="dash-alert-container">
         <div class="alert-card alert-info" style="display:flex; justify-content:center;">
-            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memeriksa pengingat...
+            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memeriksa status sistem...
         </div>
     </div>
 
-    <!-- 3. TOMBOL PINTASAN CEPAT -->
-    <div class="card-data border-yellow">
-        <div class="card-header">
-            <h3><i class="fa-solid fa-bolt" style="color: var(--neon-yellow);"></i> Pintasan Cepat</h3>
+    <!-- 3. PENGINGAT KEGIATAN PENTING (DIAMBIL DARI DATABASE BERDASARKAN HARI INI) -->
+    <div class="card-data border-yellow" id="dash-card-reminder" style="display: none;">
+        <div class="card-header police-line-header">
+            <h3 class="police-line-text"><i class="fa-solid fa-triangle-exclamation"></i> Agenda & Pengingat</h3>
         </div>
-        <div class="grid-quick-actions">
-            <div class="quick-btn btn-spot-green" onclick="loadPage('presensi', 'Presensi Siswa')">
-                <div class="icon-halo-spotlight"><i class="fa-solid fa-clipboard-user"></i></div>
-                <span>Presensi Kelas</span>
-            </div>
-            <div class="quick-btn btn-spot-blue" onclick="loadPage('jurnal', 'Jurnal Guru')">
-                <div class="icon-halo-spotlight"><i class="fa-solid fa-book"></i></div>
-                <span>Jurnal Mengajar</span>
-            </div>
-            <div class="quick-btn btn-spot-purple" onclick="loadPage('penilaian', 'Penilaian')">
-                <div class="icon-halo-spotlight"><i class="fa-solid fa-clipboard-check"></i></div>
-                <span>Input Nilai</span>
-            </div>
-            <div class="quick-btn btn-spot-yellow" onclick="pintasanJurnalSikap()">
-                <div class="icon-halo-spotlight"><i class="fa-solid fa-user-check"></i></div>
-                <span>Jurnal Sikap</span>
-            </div>
-        </div>
+        <ul class="reminder-list" id="dash-list-reminder">
+            <li style="text-align:center; padding:12px; color:var(--text-abu); font-size:11px;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Memuat agenda aktif...
+            </li>
+        </ul>
     </div>
 
     <!-- 4. PENGINGAT JADWAL MENGAJAR -->
