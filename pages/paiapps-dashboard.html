@@ -161,38 +161,69 @@
         color: var(--neon-yellow);
     }
 
-    /* PENGINGAT KEGIATAN PENTING */
-    .reminder-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    /* PENGINGAT KEGIATAN PENTING (1 BARIS RINGKAS DESKTOP & MOBILE) */
+    .reminder-list { 
+        list-style: none; 
+        padding: 0; 
+        margin: 0; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 6px; 
+    }
     .reminder-item {
         background: var(--bg-main);
         border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 10px 12px;
+        border-radius: 8px;
+        padding: 8px 10px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        gap: 8px;
         transition: all 0.2s ease;
     }
-    .reminder-item:hover { transform: translateY(-2px); border-color: var(--border-yellow-subtle); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .reminder-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-    .reminder-title { font-size: 11px; font-weight: 700; color: var(--text-putih); word-break: break-word; line-height: 1.3; }
-    .reminder-meta { font-size: 9px; color: var(--text-abu); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
-    .badge-cycle {
-        font-size: 8px; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    .reminder-item:hover { 
+        border-color: var(--border-yellow-subtle); 
     }
-    .cycle-once { background: rgba(239, 68, 68, 0.1); color: var(--neon-red); border: 1px solid rgba(239, 68, 68, 0.3); }
-    .cycle-weekly { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3); }
-    .cycle-monthly { background: rgba(59, 130, 246, 0.1); color: var(--neon-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
-    .cycle-yearly { background: rgba(168, 85, 247, 0.1); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
-
+    .reminder-title { 
+        font-size: 11px; 
+        font-weight: 600; 
+        color: var(--text-putih); 
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+        flex: 1; 
+        min-width: 0; 
+    }
+    .reminder-meta-compact { 
+        display: flex; 
+        align-items: center; 
+        gap: 6px; 
+        flex-shrink: 0; 
+        font-size: 10px; 
+        white-space: nowrap; 
+    }
     .reminder-action {
-        width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color);
-        background: transparent; color: var(--text-abu); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+        width: 24px; 
+        height: 24px; 
+        border-radius: 6px; 
+        border: 1px solid var(--border-color);
+        background: transparent; 
+        color: var(--text-abu); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        flex-shrink: 0;
+        font-size: 10px;
     }
-    .reminder-action:hover { background: rgba(5, 213, 138, 0.2); color: var(--neon-green); border-color: var(--neon-green); }
+    .reminder-action:hover { 
+        background: rgba(5, 213, 138, 0.2); 
+        color: var(--neon-green); 
+        border-color: var(--neon-green); 
+    }
 
+    
     /* ================= WIDGET WAKTU SHOLAT ================= */
     .sholat-wrapper {
         background: var(--bg-main);

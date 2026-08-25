@@ -245,34 +245,28 @@ async function loadPengingatKegiatan() {
 
             if (diffDays <= item.ingatkan_h_min) {
                 countVisible++;
-                
-                let badgeClass = 'cycle-once';
-                if (item.siklus === 'Mingguan') badgeClass = 'cycle-weekly';
-                if (item.siklus === 'Bulanan') badgeClass = 'cycle-monthly';
-                if (item.siklus === 'Tahunan') badgeClass = 'cycle-yearly';
 
                 let statusWaktu = '';
-                let iconWaktu = '<i class="fa-regular fa-clock"></i>';
                 let warnaWaktu = 'color: var(--text-abu);';
                 
                 if (diffDays > 0) {
-                    statusWaktu = `H-${diffDays} (Tgl: ${item.tanggal_pelaksanaan})`;
+                    statusWaktu = `(H-${diffDays})`;
                     warnaWaktu = 'color: var(--neon-yellow); font-weight:700;';
                 } else if (diffDays === 0) {
-                    statusWaktu = `Hari Ini!`;
-                    iconWaktu = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    statusWaktu = `(Hari Ini!)`;
                     warnaWaktu = 'color: var(--neon-red); font-weight:700;';
                 } else {
                     if (item.siklus === '1 Kali') {
-                        statusWaktu = `Terlewat ${Math.abs(diffDays)} Hari`;
-                        iconWaktu = '<i class="fa-solid fa-circle-exclamation"></i>';
-                        warnaWaktu = 'color: var(--neon-red); font-weight:700; text-decoration: underline;';
+                        statusWaktu = `(Lewat ${Math.abs(diffDays)}hr)`;
+                        warnaWaktu = 'color: var(--neon-red); font-weight:700;';
                     } else {
-                        statusWaktu = `Tiba Waktunya (Rutin)`; 
-                        iconWaktu = '<i class="fa-solid fa-rotate"></i>';
+                        statusWaktu = `(Rutin)`; 
                         warnaWaktu = 'color: var(--neon-green); font-weight:700;';
                     }
                 }
+
+                // Format tampilan tanggal ringkas (DD/MM)
+                const tglDeadline = `${tglParts[2]}/${tglParts[1]}`;
 
                 let actionButton = '';
                 if (item.siklus === '1 Kali') {
@@ -285,12 +279,10 @@ async function loadPengingatKegiatan() {
 
                 html += `
                     <li class="reminder-item" id="reminder-${item.id}">
-                        <div class="reminder-info">
-                            <span class="reminder-title">${item.judul_pengingat}</span>
-                            <div class="reminder-meta">
-                                <span class="badge-cycle ${badgeClass}">${item.siklus}</span>
-                                <span style="${warnaWaktu}">${iconWaktu} ${statusWaktu}</span>
-                            </div>
+                        <span class="reminder-title" title="${item.judul_pengingat}">${item.judul_pengingat}</span>
+                        <div class="reminder-meta-compact">
+                            <span style="color: var(--text-abu);"><i class="fa-regular fa-calendar" style="margin-right:2px;"></i>${tglDeadline}</span>
+                            <span style="${warnaWaktu}">${statusWaktu}</span>
                         </div>
                         ${actionButton}
                     </li>
@@ -311,66 +303,6 @@ async function loadPengingatKegiatan() {
         container.innerHTML = `<li style="color:var(--neon-red); text-align:center; font-size:11px; padding:10px;">Gagal memuat pengingat: ${e.message}</li>`;
     }
 }
-
-window.selesaiPengingat = async function(btnElement, idPengingat, judul, siklus, currentTanggal) {
-    if (!confirm(`Tandai selesai untuk agenda "${judul}"?`)) {
-        return;
-    }
-
-    const originalHtml = btnElement.innerHTML;
-    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    btnElement.disabled = true;
-
-    try {
-        if (siklus === '1 Kali') {
-            const { error } = await supabase
-                .from('pengingat_kegiatan')
-                .update({ status_selesai: true })
-                .eq('id', idPengingat);
-            if (error) throw error;
-        } else {
-            let tglParts = currentTanggal.split('-');
-            let nextDate = new Date(tglParts[0], tglParts[1] - 1, tglParts[2]);
-
-            if (siklus === 'Mingguan') {
-                nextDate.setDate(nextDate.getDate() + 7);
-            } else if (siklus === 'Bulanan') {
-                nextDate.setMonth(nextDate.getMonth() + 1);
-            } else if (siklus === 'Tahunan') {
-                nextDate.setFullYear(nextDate.getFullYear() + 1);
-            }
-
-            const yyyy = nextDate.getFullYear();
-            const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(nextDate.getDate()).padStart(2, '0');
-            const nextDateStr = `${yyyy}-${mm}-${dd}`;
-
-            const { error } = await supabase
-                .from('pengingat_kegiatan')
-                .update({ tanggal_pelaksanaan: nextDateStr })
-                .eq('id', idPengingat);
-            if (error) throw error;
-        }
-
-        const li = btnElement.closest('.reminder-item');
-        if (li) {
-            li.style.transition = 'all 0.3s ease';
-            li.style.transform = 'scale(0.95)';
-            li.style.opacity = '0';
-            
-            setTimeout(() => {
-                li.remove();
-                loadPengingatKegiatan(); 
-            }, 300);
-        }
-
-    } catch (e) {
-        console.error("Gagal menyelesaikan pengingat:", e);
-        alert("Gagal menyelesaikan pengingat: " + e.message);
-        btnElement.innerHTML = originalHtml;
-        btnElement.disabled = false;
-    }
-};
 
 // ================= 4. WIDGET WAKTU SHOLAT & REAL-TIME COUNTDOWN =================
 async function loadWaktuSholatDanCountdown() {
@@ -408,6 +340,7 @@ async function loadWaktuSholatDanCountdown() {
 
         function updateCountdown() {
             const now = new Date();
+            let activeSholat = null; // Sholat yang sedang masuk waktunya (dalam rentang 10 menit)
             let nextSholat = null;
             let targetDate = null;
 
@@ -417,6 +350,33 @@ async function loadWaktuSholatDanCountdown() {
                 if (p) p.classList.remove('sholat-pill-active');
             });
 
+            // 1. Cek apakah saat ini sedang berada dalam rentang 10 menit setelah masuk waktu sholat
+            for (let s of sholatList) {
+                const [jam, mnt] = s.time.split(':').map(Number);
+                const sDate = new Date();
+                sDate.setHours(jam, mnt, 0, 0);
+
+                const diffMs = now - sDate; // Waktu sekarang dikurangi waktu sholat
+                const diffMnit = diffMs / (1000 * 60);
+
+                // Jika sudah masuk dan belum lewat dari 10 menit
+                if (diffMnit >= 0 && diffMnit <= 10) {
+                    activeSholat = s;
+                    break;
+                }
+            }
+
+            // 2. Jika sedang dalam rentang 10 menit waktu sholat
+            if (activeSholat) {
+                const activePill = document.getElementById(`pill-${activeSholat.id}`);
+                if (activePill) activePill.classList.add('sholat-pill-active');
+
+                elLabel.innerHTML = `<span style="color:var(--neon-green);"><i class="fa-solid fa-mosque"></i> Sedang Memasuki Waktu Sholat ${activeSholat.nama}...</span>`;
+                elTimer.innerText = "00:00:00";
+                return;
+            }
+
+            // 3. Jika tidak dalam rentang 10 menit, cari sholat berikutnya seperti biasa untuk hitung mundur
             for (let s of sholatList) {
                 const [jam, mnt] = s.time.split(':').map(Number);
                 const sDate = new Date();
@@ -444,12 +404,6 @@ async function loadWaktuSholatDanCountdown() {
 
             // Hitung selisih detik mundur
             const diffMs = targetDate - now;
-            if (diffMs <= 0) {
-                elLabel.innerHTML = `<span style="color:var(--neon-green);"><i class="fa-solid fa-bullhorn"></i> Waktu ${nextSholat.nama} Telah Tiba!</span>`;
-                elTimer.innerText = "00:00:00";
-                return;
-            }
-
             const diffSecTotal = Math.floor(diffMs / 1000);
             const hours = String(Math.floor(diffSecTotal / 3600)).padStart(2, '0');
             const minutes = String(Math.floor((diffSecTotal % 3600) / 60)).padStart(2, '0');

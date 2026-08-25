@@ -60,9 +60,30 @@
         font-size: 11px; font-weight: 600; color: var(--text-putih); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 5px;
     }
     
-    /* Tombol Isi/Edit */
+    /* Tombol Isi/Edit & Toggle Rekap */
     .btn-toggle-input { background: var(--bg-main); color: var(--text-abu); border: 1px solid var(--border-color); padding: 5px 8px; font-size: 9px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
     .btn-toggle-input:hover { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border-color: var(--neon-green); }
+
+    .btn-toggle-rekap {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--neon-blue);
+        border: 1px dashed var(--neon-blue);
+        padding: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-toggle-rekap:hover {
+        background: rgba(59, 130, 246, 0.2);
+    }
 
     /* STATUS BADGE */
     .badge-status { font-size: 7px; padding: 2px 4px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; flex-shrink: 0; text-transform: uppercase;}
@@ -163,7 +184,6 @@
                     </div>
                 </div>
 
-                <!-- DAFTAR INPUT NILAI SISWA (TABEL/LIST) -->
                 <div id="tempat-list-tugas" style="margin-top: 10px;"></div>
                 
                 <!-- TOMBOL SIMPAN -->
@@ -172,35 +192,17 @@
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
 
-                <!-- TOGGLE OPSI LANJUTAN -->
-                <button type="button" onclick="toggleOpsiLanjutan('tugas')" class="btn-toggle-input" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; text-align: center; border: 1px dashed var(--border-color); color: var(--text-abu); background: transparent;">
-                    <i class="fa-solid fa-sliders"></i> Tampilkan Opsi Lanjutan (Upload Massal & Rekap)
+                <!-- TOGGLE & BOX REKAP TUGAS DI BAGIAN BAWAH -->
+                <button type="button" onclick="toggleAreaRekap('tugas')" class="btn-toggle-rekap">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Nilai Tugas
                 </button>
-
-                <!-- WADAH OPSI LANJUTAN (TERSEMBUNYI SECARA DEFAULT) -->
-                <div id="opsi-lanjutan-tugas" style="display: none; margin-top: 15px;">
-                    <div class="form-group" style="background: var(--bg-card); padding: 12px; border-radius: 10px; border: 1px dashed rgba(5, 213, 138, 0.4); margin-bottom: 15px;">
-                        <label style="color:var(--neon-green); margin-bottom: 8px;"><i class="fa-solid fa-file-excel"></i> Upload Nilai Massal (Excel)</label>
-                        <div style="display: flex; gap: 8px;">
-                            <button type="button" onclick="downloadTemplateNilaiTugas()" class="btn-toggle-input" style="flex: 1; padding: 10px; font-size: 10px; border-radius: 8px; color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.4); text-align: center;">
-                                <i class="fa-solid fa-file-arrow-down"></i> Unduh Format
-                            </button>
-                            <button type="button" onclick="document.getElementById('file-upload-nilai-tugas').click()" class="btn-toggle-input" style="flex: 1; padding: 10px; font-size: 10px; border-radius: 8px; color: var(--neon-green); border-color: rgba(5, 213, 138, 0.4); text-align: center;">
-                                <i class="fa-solid fa-file-arrow-up"></i> Upload Nilai
-                            </button>
-                            <input type="file" id="file-upload-nilai-tugas" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleUploadNilaiTugas(event)">
-                        </div>
-                    </div>
-
-                    <div id="area-rekap-tugas" style="padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Tugas</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="downloadRekapPenilaian('tugas', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                            <button onclick="downloadRekapPenilaian('tugas', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                        </div>
+                <div id="area-rekap-tugas" style="display: none; margin-top: 10px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;">Pilih Format File:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="downloadRekapPenilaian('tugas', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button onclick="downloadRekapPenilaian('tugas', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -214,22 +216,21 @@
             <div id="area-baca" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-baca"></div>
                 
+                <!-- TOMBOL SIMPAN -->
                 <button onclick="simpanPenilaian('baca')" id="btn-simpan-baca" class="btn-primary" style="width: 100%; margin-top: 20px;">
-                    <span style="flex:1; text-align:left;">Simpan Nilai Baca</span>
+                    <span style="flex:1; text-align:left;">Simpan & Sinkronkan Nilai Baca</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
 
-                <button type="button" onclick="toggleOpsiLanjutan('baca')" class="btn-toggle-input" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; text-align: center; border: 1px dashed var(--border-color); color: var(--text-abu); background: transparent;">
-                    <i class="fa-solid fa-file-export"></i> Tampilkan Opsi Rekap Nilai
+                <!-- TOGGLE & BOX REKAP BACA DI BAGIAN BAWAH -->
+                <button type="button" onclick="toggleAreaRekap('baca')" class="btn-toggle-rekap">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Baca Qur'an
                 </button>
-
-                <div id="opsi-lanjutan-baca" style="display: none; margin-top: 15px;">
-                    <div id="area-rekap-baca" style="padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Baca Qur'an</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="downloadRekapPenilaian('baca', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                            <button onclick="downloadRekapPenilaian('baca', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                        </div>
+                <div id="area-rekap-baca" style="display: none; margin-top: 10px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;">Pilih Format File:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="downloadRekapPenilaian('baca', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button onclick="downloadRekapPenilaian('baca', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
             </div>
@@ -245,22 +246,21 @@
             <div id="area-tulis" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-tulis"></div>
                 
+                <!-- TOMBOL SIMPAN -->
                 <button onclick="simpanPenilaian('tulis')" id="btn-simpan-tulis" class="btn-primary" style="width: 100%; margin-top: 20px;">
                     <span style="flex:1; text-align:left;">Simpan Nilai Tulis</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
 
-                <button type="button" onclick="toggleOpsiLanjutan('tulis')" class="btn-toggle-input" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; text-align: center; border: 1px dashed var(--border-color); color: var(--text-abu); background: transparent;">
-                    <i class="fa-solid fa-file-export"></i> Tampilkan Opsi Rekap Nilai
+                <!-- TOGGLE & BOX REKAP TULIS DI BAGIAN BAWAH -->
+                <button type="button" onclick="toggleAreaRekap('tulis')" class="btn-toggle-rekap">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Tulis Qur'an
                 </button>
-
-                <div id="opsi-lanjutan-tulis" style="display: none; margin-top: 15px;">
-                    <div id="area-rekap-tulis" style="padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Tulis Qur'an</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="downloadRekapPenilaian('tulis', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                            <button onclick="downloadRekapPenilaian('tulis', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                        </div>
+                <div id="area-rekap-tulis" style="display: none; margin-top: 10px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;">Pilih Format File:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="downloadRekapPenilaian('tulis', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button onclick="downloadRekapPenilaian('tulis', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
             </div>
@@ -276,22 +276,21 @@
             <div id="area-sholat" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-sholat"></div>
                 
+                <!-- TOMBOL SIMPAN -->
                 <button onclick="simpanPenilaian('sholat')" id="btn-simpan-sholat" class="btn-primary" style="width: 100%; margin-top: 20px;">
                     <span style="flex:1; text-align:left;">Simpan Hafalan Sholat</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
 
-                <button type="button" onclick="toggleOpsiLanjutan('sholat')" class="btn-toggle-input" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; text-align: center; border: 1px dashed var(--border-color); color: var(--text-abu); background: transparent;">
-                    <i class="fa-solid fa-file-export"></i> Tampilkan Opsi Rekap Nilai
+                <!-- TOGGLE & BOX REKAP SHOLAT DI BAGIAN BAWAH -->
+                <button type="button" onclick="toggleAreaRekap('sholat')" class="btn-toggle-rekap">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Sholat
                 </button>
-
-                <div id="opsi-lanjutan-sholat" style="display: none; margin-top: 15px;">
-                    <div id="area-rekap-sholat" style="padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Sholat</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="downloadRekapPenilaian('sholat', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                            <button onclick="downloadRekapPenilaian('sholat', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                        </div>
+                <div id="area-rekap-sholat" style="display: none; margin-top: 10px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;">Pilih Format File:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="downloadRekapPenilaian('sholat', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button onclick="downloadRekapPenilaian('sholat', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
             </div>
@@ -307,22 +306,21 @@
             <div id="area-surah" style="display: none; padding-top: 5px;">
                 <div id="tempat-list-surah"></div>
                 
+                <!-- TOMBOL SIMPAN -->
                 <button onclick="simpanPenilaian('surah')" id="btn-simpan-surah" class="btn-primary" style="width: 100%; margin-top: 20px;">
                     <span style="flex:1; text-align:left;">Simpan Hafalan Surah</span>
                     <div class="icon-circle"><i class="fa-solid fa-check"></i></div>
                 </button>
 
-                <button type="button" onclick="toggleOpsiLanjutan('surah')" class="btn-toggle-input" style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; text-align: center; border: 1px dashed var(--border-color); color: var(--text-abu); background: transparent;">
-                    <i class="fa-solid fa-file-export"></i> Tampilkan Opsi Rekap Nilai
+                <!-- TOGGLE & BOX REKAP SURAH DI BAGIAN BAWAH -->
+                <button type="button" onclick="toggleAreaRekap('surah')" class="btn-toggle-rekap">
+                    <i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Surah
                 </button>
-
-                <div id="opsi-lanjutan-surah" style="display: none; margin-top: 15px;">
-                    <div id="area-rekap-surah" style="padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Hafalan Surah</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="downloadRekapPenilaian('surah', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                            <button onclick="downloadRekapPenilaian('surah', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                        </div>
+                <div id="area-rekap-surah" style="display: none; margin-top: 10px; padding: 12px; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue); border-radius: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--neon-blue); margin-bottom: 8px;">Pilih Format File:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="downloadRekapPenilaian('surah', 'excel')" class="btn-primary" style="flex: 1; background: var(--gradient-primary); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button onclick="downloadRekapPenilaian('surah', 'pdf')" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); justify-content: center; gap: 8px; font-size: 11px; padding: 8px;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
             </div>

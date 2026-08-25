@@ -53,7 +53,7 @@ function sortSiswaPenilaian(listData) {
 window.updateSelectColor = function(el) {
     const val = el.value;
     const reds = ['Tidak bisa baca', 'Tanpa tajwid', 'Tidak mengenal huruf', 'Banyak salah', 'Tanpa lagu', 'Tidak rapi', 'Belum hafal'];
-    const yellows = ['Terbata-bata ada salah', 'Terbata-bata bacaan benar', 'Cepat namun banyak salah', 'Panjang-pendek', 'Tajwid dasar', 'Salah sedikit', 'Kurang jelas', 'Kurang rapi', 'Cukup', 'Nada stabil', 'Tidak lancar'];
+    const yellows = ['Terbata-bata ada salah', 'Terbata-bata bacaan salah', 'Terbata-bata bacaan benar', 'Cepat namun banyak salah', 'Panjang-pendek', 'Tajwid dasar', 'Salah sedikit', 'Sedikit salah', 'Kurang jelas', 'Kurang rapi', 'Cukup', 'Nada stabil', 'Tidak lancar'];
     const lightGreens = ['Cepat dengan sedikit salah'];
     const darkGreens = ['Lancar', 'Mahir tanpa kesalahan', 'Tajwid lanjutan', 'Mahir', 'Jelas', 'Sangat jelas', 'Sudah tepat', 'Rapi', 'Lagu tilawah', 'Hafal'];
 
@@ -79,6 +79,47 @@ window.updateSelectColor = function(el) {
         el.style.borderColor = 'var(--border-color)';
     }
 };
+
+// ================= FORMULA KALKULASI SKOR BACA QURAN =================
+function kalkulasiSkorBaca(valLancar, valTajwid, valMakraj, valNada) {
+    if (!valLancar && !valTajwid && !valMakraj && !valNada) return null;
+
+    let skorLancar = 0;
+    if (valLancar === 'Tidak bisa baca') skorLancar = 10;
+    else if (valLancar === 'Terbata-bata ada salah' || valLancar === 'Terbata-bata bacaan salah') skorLancar = 15;
+    else if (valLancar === 'Terbata-bata bacaan benar') skorLancar = 20;
+    else if (valLancar === 'Cepat namun banyak salah') skorLancar = 25;
+    else if (valLancar === 'Cepat dengan sedikit salah') skorLancar = 30;
+    else if (valLancar === 'Lancar') skorLancar = 40;
+    else if (valLancar === 'Mahir tanpa kesalahan') skorLancar = 50;
+
+    let skorTajwid = 0;
+    if (valTajwid === 'Tanpa tajwid') skorTajwid = 10;
+    else if (valTajwid === 'Panjang-pendek') skorTajwid = 15;
+    else if (valTajwid === 'Tajwid dasar') skorTajwid = 25;
+    else if (valTajwid === 'Tajwid lanjutan' || valTajwid === 'Mahir') skorTajwid = 30;
+
+    let skorMakraj = 0;
+    if (valMakraj === 'Tidak mengenal huruf') skorMakraj = 0;
+    else if (valMakraj === 'Banyak salah') skorMakraj = 4;
+    else if (valMakraj === 'Salah sedikit' || valMakraj === 'Sedikit salah' || valMakraj === 'Kurang jelas') skorMakraj = 7;
+    else if (valMakraj === 'Jelas') skorMakraj = 12;
+    else if (valMakraj === 'Sangat jelas') skorMakraj = 15;
+
+    let skorNada = 0;
+    if (valNada === 'Tanpa lagu') skorNada = 2;
+    else if (valNada === 'Nada stabil') skorNada = 4;
+    else if (valNada === 'Lagu tilawah') skorNada = 5;
+
+    return skorLancar + skorTajwid + skorMakraj + skorNada;
+}
+
+// ================= FUNGSI PENENTU STATUS KETUNTASAN BACA QURAN =================
+function tentukanKetuntasanBaca(kriteriaKelancaran) {
+    if (!kriteriaKelancaran) return 'TS';
+    const tuntasList = ['Cepat dengan sedikit salah', 'Lancar', 'Mahir tanpa kesalahan'];
+    return tuntasList.includes(kriteriaKelancaran.trim()) ? 'T' : 'TS';
+}
 
 // ================= FUNGSI TAB & TOGGLE =================
 window.gantiTabPenilaian = function(tabName) {
@@ -113,6 +154,12 @@ window.toggleTugasBaru = function() {
     }
 };
 
+window.toggleAreaRekap = function(tipe) {
+    const el = document.getElementById(`area-rekap-${tipe}`);
+    if (!el) return;
+    el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+};
+
 window.setKetuntasan = function(idSiswa, status) {
     const parent = document.getElementById(`grp-tuntas-${idSiswa}`);
     if (!parent) return;
@@ -122,11 +169,10 @@ window.setKetuntasan = function(idSiswa, status) {
     const targetBtn = document.querySelector(`.btn-tuntas[data-idsiswa="${idSiswa}"][data-val="${status}"]`);
     if(targetBtn) targetBtn.classList.add('active', status.toLowerCase());
     
-    const inputVal = document.getElementById(`val-tuntas-${idSiswa}`);
-    if (inputVal) inputVal.value = status;
+    const inpVal = document.getElementById(`val-tuntas-${idSiswa}`);
+    if (inpVal) inpVal.value = status;
 };
 
-// FITUR: Auto Ketuntasan (>= 70 = T, < 70 atau kosong = TS)
 window.autoKetuntasan = function(idSiswa, nilai) {
     if (nilai === "" || nilai === null || nilai === undefined) {
         window.setKetuntasan(idSiswa, 'TS');
@@ -137,14 +183,6 @@ window.autoKetuntasan = function(idSiswa, nilai) {
         } else {
             window.setKetuntasan(idSiswa, 'TS');
         }
-    }
-};
-
-// FITUR: Buka/Tutup Opsi Lanjutan
-window.toggleOpsiLanjutan = function(tipe) {
-    const el = document.getElementById(`opsi-lanjutan-${tipe}`);
-    if (el) {
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 };
 
@@ -183,13 +221,28 @@ window.loadDaftarTugas = async function(idKelas) {
     }
 
     try {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('namatugas')
             .select('id, nama_tugas')
             .eq('id_kelas', idKelas)
             .order('created_at', { ascending: true });
 
         if (error) throw error;
+
+        const namaTugasDefault = "Nilai tes Membaca quran";
+        const isExist = (data || []).some(t => t.nama_tugas.trim().toLowerCase() === namaTugasDefault.toLowerCase());
+
+        if (!isExist) {
+            const { data: newTugas, error: errNewTugas } = await supabase
+                .from('namatugas')
+                .insert([{ id_kelas: idKelas, nama_tugas: namaTugasDefault }])
+                .select();
+
+            if (!errNewTugas && newTugas && newTugas.length > 0) {
+                if (!data) data = [];
+                data.unshift(newTugas[0]);
+            }
+        }
 
         let html = '<option value="">-- Pilih Tugas --</option>';
         if (data && data.length > 0) {
@@ -204,35 +257,114 @@ window.loadDaftarTugas = async function(idKelas) {
 };
 
 window.loadNilaiTugas = async function() {
-    const idTugas = document.getElementById('input-nama-tugas-dropdown').value;
+    const dd = document.getElementById('input-nama-tugas-dropdown');
+    const idTugas = dd ? dd.value : '';
+    const idKelas = document.getElementById('pilih-kelas-tugas') ? document.getElementById('pilih-kelas-tugas').value : '';
+    const namaTugasAktif = dd && dd.selectedIndex >= 0 && dd.options[dd.selectedIndex] ? dd.options[dd.selectedIndex].text.trim().toLowerCase() : '';
+    const isTugasBaca = (namaTugasAktif === 'nilai tes membaca quran');
     
-    document.querySelectorAll('.input-nilai-tugas').forEach(el => { el.value = ''; el.removeAttribute('data-recordid'); });
+    // Reset form dan style kunci
+    document.querySelectorAll('.input-nilai-tugas').forEach(el => { 
+        el.value = ''; 
+        el.removeAttribute('data-recordid');
+        el.readOnly = isTugasBaca;
+        el.style.backgroundColor = isTugasBaca ? 'rgba(255,255,255,0.03)' : 'var(--bg-card)';
+        el.style.color = isTugasBaca ? 'var(--neon-green)' : 'var(--text-putih)';
+        el.style.cursor = isTugasBaca ? 'not-allowed' : 'text';
+    });
     
     document.querySelectorAll('.val-ketuntasan').forEach(el => el.value = 'TS');
-    document.querySelectorAll('.btn-tuntas').forEach(el => el.classList.remove('active', 't', 'ts'));
+    document.querySelectorAll('.btn-tuntas').forEach(el => {
+        el.classList.remove('active', 't', 'ts');
+        el.disabled = isTugasBaca;
+        el.style.cursor = isTugasBaca ? 'not-allowed' : 'pointer';
+        el.style.opacity = isTugasBaca ? '0.85' : '1';
+    });
     document.querySelectorAll('.btn-tuntas[data-val="TS"]').forEach(el => el.classList.add('active', 'ts'));
     
-    document.querySelectorAll('.input-refleksi').forEach(el => el.value = '');
+    document.querySelectorAll('.input-refleksi').forEach(el => {
+        el.value = '';
+        el.readOnly = isTugasBaca;
+        el.style.backgroundColor = isTugasBaca ? 'rgba(255,255,255,0.03)' : 'var(--bg-card)';
+        el.style.cursor = isTugasBaca ? 'not-allowed' : 'text';
+    });
 
-    if(!idTugas) return;
+    const btnHapusTugas = document.getElementById('btn-hapus-tugas');
+    if (btnHapusTugas) {
+        btnHapusTugas.style.display = isTugasBaca ? 'none' : 'inline-flex';
+    }
+
+    if (!idTugas) return;
 
     try {
-        const { data } = await supabase.from('penilaiantugas').select('id, id_siswa, nilai_tugas, ketuntasan, refleksi').eq('id_tugas', idTugas);
-        if(data) {
-            data.forEach(d => {
-                const inpNilai = document.querySelector(`.input-nilai-tugas[data-idsiswa="${d.id_siswa}"]`);
-                const inpTuntas = document.getElementById(`val-tuntas-${d.id_siswa}`);
-                const inpRef = document.querySelector(`.input-refleksi[data-idsiswa="${d.id_siswa}"]`);
+        const { data: dataNilaiTugas } = await supabase
+            .from('penilaiantugas')
+            .select('id, id_siswa, nilai_tugas, ketuntasan, refleksi')
+            .eq('id_tugas', idTugas);
 
-                if(inpNilai) {
-                    inpNilai.value = d.nilai_tugas !== null ? d.nilai_tugas : '';
-                    inpNilai.setAttribute('data-recordid', d.id); 
-                }
-                if(inpRef) inpRef.value = d.refleksi || '';
-                if(inpTuntas && d.ketuntasan) setKetuntasan(d.id_siswa, d.ketuntasan);
-            });
+        let dataMap = new Map();
+        if (dataNilaiTugas && dataNilaiTugas.length > 0) {
+            dataNilaiTugas.forEach(d => dataMap.set(d.id_siswa, d));
         }
-    } catch(e) { console.error("Gagal load nilai tugas", e); }
+
+        // JIKA TUGAS ADALAH "Nilai tes Membaca quran", AMBIL DARI TABEL `penilaianmembaca`
+        if (isTugasBaca && idKelas) {
+            const { data: dataBaca } = await supabase
+                .from('penilaianmembaca')
+                .select('id_siswa, nilai, kelancaran_membaca, tajwid_bacaan, makraj_huruf, nada_suara, keterangan')
+                .eq('id_kelas', idKelas);
+
+            if (dataBaca && dataBaca.length > 0) {
+                dataBaca.forEach(b => {
+                    const existInTugas = dataMap.get(b.id_siswa);
+                    let finalNilai = b.nilai;
+                    
+                    if (finalNilai === null || finalNilai === undefined) {
+                        finalNilai = kalkulasiSkorBaca(b.kelancaran_membaca, b.tajwid_bacaan, b.makraj_huruf, b.nada_suara);
+                    }
+
+                    // Tentukan ketuntasan berdasarkan kriteria KELANCARAN
+                    const statusTuntasKelancaran = tentukanKetuntasanBaca(b.kelancaran_membaca);
+
+                    if (finalNilai !== null && finalNilai !== undefined) {
+                        if (!existInTugas) {
+                            dataMap.set(b.id_siswa, {
+                                id: null,
+                                id_siswa: b.id_siswa,
+                                nilai_tugas: finalNilai,
+                                ketuntasan: statusTuntasKelancaran,
+                                refleksi: b.keterangan || `Kelancaran: ${b.kelancaran_membaca || '-'}`
+                            });
+                        } else {
+                            existInTugas.nilai_tugas = finalNilai;
+                            existInTugas.ketuntasan = statusTuntasKelancaran;
+                            if (!existInTugas.refleksi || existInTugas.refleksi.includes('Tes Membaca') || existInTugas.refleksi.includes('Kelancaran:')) {
+                                existInTugas.refleksi = b.keterangan || `Kelancaran: ${b.kelancaran_membaca || '-'}`;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Tampilkan ke UI
+        dataMap.forEach(d => {
+            const inpNilai = document.querySelector(`.input-nilai-tugas[data-idsiswa="${d.id_siswa}"]`);
+            const inpTuntas = document.getElementById(`val-tuntas-${d.id_siswa}`);
+            const inpRef = document.querySelector(`.input-refleksi[data-idsiswa="${d.id_siswa}"]`);
+
+            if (inpNilai) {
+                inpNilai.value = d.nilai_tugas !== null && d.nilai_tugas !== undefined ? d.nilai_tugas : '';
+                if (d.id) inpNilai.setAttribute('data-recordid', d.id);
+            }
+            if (inpRef) inpRef.value = d.refleksi || '';
+            if (inpTuntas && d.ketuntasan) setKetuntasan(d.id_siswa, d.ketuntasan);
+            else if (d.nilai_tugas !== null && d.nilai_tugas !== undefined && !isTugasBaca) autoKetuntasan(d.id_siswa, d.nilai_tugas);
+        });
+
+    } catch (e) { 
+        console.error("Gagal load nilai tugas", e); 
+    }
 };
 
 window.hapusTugasAktif = async function() {
@@ -243,6 +375,11 @@ window.hapusTugasAktif = async function() {
 
     if (!idTugas) {
         alert("Pilih tugas yang ingin dihapus terlebih dahulu!");
+        return;
+    }
+
+    if (namaTugas.trim().toLowerCase() === "nilai tes membaca quran") {
+        alert("Tugas bawaan 'Nilai tes Membaca quran' tidak dapat dihapus!");
         return;
     }
 
@@ -285,9 +422,8 @@ window.bukaFormPenilaian = async function(tipe) {
 
     document.getElementById(`area-${tipe}`).style.display = 'block';
     
-    // Sembunyikan opsi lanjutan/rekap setiap ganti kelas
-    const elOpsi = document.getElementById(`opsi-lanjutan-${tipe}`);
-    if(elOpsi) elOpsi.style.display = 'none';
+    const elRekap = document.getElementById(`area-rekap-${tipe}`);
+    if(elRekap) elRekap.style.display = 'none';
     
     const container = document.getElementById(`tempat-list-${tipe}`);
     container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--neon-green);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat siswa...</div>';
@@ -363,22 +499,47 @@ window.bukaFormPenilaian = async function(tipe) {
                         <div class="form-group" style="margin-bottom:0;"><label>Kelancaran</label>
                             <select class="form-control input-kelancaran sel-kecil" data-idsiswa="${item.id_siswa}" data-recordid="${ex.id||''}" onchange="updateSelectColor(this)">
                                 <option value="">-Pilih-</option>
-                                <option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca</option>
-                                <option value="Terbata-bata ada salah" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata ada salah')}>Terbata-bata ada salah</option>
-                                <option value="Terbata-bata bacaan benar" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata bacaan benar')}>Terbata-bata bacaan benar</option>
-                                <option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah</option>
-                                <option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah</option>
-                                <option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar</option>
-                                <option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan</option>
+                                <option value="Tidak bisa baca" ${mkSel(ex.kelancaran_membaca, 'Tidak bisa baca')}>Tidak bisa baca (10)</option>
+                                <option value="Terbata-bata ada salah" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata ada salah') || mkSel(ex.kelancaran_membaca, 'Terbata-bata bacaan salah')}>Terbata-bata bacaan salah (15)</option>
+                                <option value="Terbata-bata bacaan benar" ${mkSel(ex.kelancaran_membaca, 'Terbata-bata bacaan benar')}>Terbata-bata bacaan benar (20)</option>
+                                <option value="Cepat namun banyak salah" ${mkSel(ex.kelancaran_membaca, 'Cepat namun banyak salah')}>Cepat namun banyak salah (25)</option>
+                                <option value="Cepat dengan sedikit salah" ${mkSel(ex.kelancaran_membaca, 'Cepat dengan sedikit salah')}>Cepat dengan sedikit salah (30)</option>
+                                <option value="Lancar" ${mkSel(ex.kelancaran_membaca, 'Lancar')}>Lancar (40)</option>
+                                <option value="Mahir tanpa kesalahan" ${mkSel(ex.kelancaran_membaca, 'Mahir tanpa kesalahan')}>Mahir tanpa kesalahan (50)</option>
                             </select>
                         </div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Tajwid</label><select class="form-control input-tajwid sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa tajwid" ${mkSel(ex.tajwid_bacaan, 'Tanpa tajwid')}>Tanpa tajwid</option><option value="Panjang-pendek" ${mkSel(ex.tajwid_bacaan, 'Panjang-pendek')}>Panjang-pendek</option><option value="Tajwid dasar" ${mkSel(ex.tajwid_bacaan, 'Tajwid dasar')}>Tajwid dasar</option><option value="Tajwid lanjutan" ${mkSel(ex.tajwid_bacaan, 'Tajwid lanjutan')}>Tajwid lanjutan</option><option value="Mahir" ${mkSel(ex.tajwid_bacaan, 'Mahir')}>Mahir</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Makhraj</label><select class="form-control input-makraj sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tidak mengenal huruf" ${mkSel(ex.makraj_huruf, 'Tidak mengenal huruf')}>Tidak mengenal huruf</option><option value="Banyak salah" ${mkSel(ex.makraj_huruf, 'Banyak salah')}>Banyak salah</option><option value="Salah sedikit" ${mkSel(ex.makraj_huruf, 'Salah sedikit')}>Salah sedikit</option><option value="Kurang jelas" ${mkSel(ex.makraj_huruf, 'Kurang jelas')}>Kurang jelas</option><option value="Jelas" ${mkSel(ex.makraj_huruf, 'Jelas')}>Jelas</option><option value="Sangat jelas" ${mkSel(ex.makraj_huruf, 'Sangat jelas')}>Sangat jelas</option></select></div>
-                        <div class="form-group" style="margin-bottom:0;"><label>Nada/Suara</label><select class="form-control input-nada sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)"><option value="">-Pilih-</option><option value="Tanpa lagu" ${mkSel(ex.nada_suara, 'Tanpa lagu')}>Tanpa lagu</option><option value="Nada stabil" ${mkSel(ex.nada_suara, 'Nada stabil')}>Nada stabil</option><option value="Lagu tilawah" ${mkSel(ex.nada_suara, 'Lagu tilawah')}>Lagu tilawah</option></select></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Tajwid</label>
+                            <select class="form-control input-tajwid sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)">
+                                <option value="">-Pilih-</option>
+                                <option value="Tanpa tajwid" ${mkSel(ex.tajwid_bacaan, 'Tanpa tajwid')}>Tanpa tajwid (10)</option>
+                                <option value="Panjang-pendek" ${mkSel(ex.tajwid_bacaan, 'Panjang-pendek')}>Panjang-pendek (15)</option>
+                                <option value="Tajwid dasar" ${mkSel(ex.tajwid_bacaan, 'Tajwid dasar')}>Tajwid dasar (25)</option>
+                                <option value="Tajwid lanjutan" ${mkSel(ex.tajwid_bacaan, 'Tajwid lanjutan')}>Tajwid lanjutan (30)</option>
+                                <option value="Mahir" ${mkSel(ex.tajwid_bacaan, 'Mahir')}>Mahir (30)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Makhraj</label>
+                            <select class="form-control input-makraj sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)">
+                                <option value="">-Pilih-</option>
+                                <option value="Tidak mengenal huruf" ${mkSel(ex.makraj_huruf, 'Tidak mengenal huruf')}>Tidak mengenal huruf (0)</option>
+                                <option value="Banyak salah" ${mkSel(ex.makraj_huruf, 'Banyak salah')}>Banyak salah (4)</option>
+                                <option value="Salah sedikit" ${mkSel(ex.makraj_huruf, 'Salah sedikit') || mkSel(ex.makraj_huruf, 'Sedikit salah')}>Salah sedikit (7)</option>
+                                <option value="Kurang jelas" ${mkSel(ex.makraj_huruf, 'Kurang jelas')}>Kurang jelas (7)</option>
+                                <option value="Jelas" ${mkSel(ex.makraj_huruf, 'Jelas')}>Jelas (12)</option>
+                                <option value="Sangat jelas" ${mkSel(ex.makraj_huruf, 'Sangat jelas')}>Sangat jelas (15)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Nada/Suara</label>
+                            <select class="form-control input-nada sel-kecil" data-idsiswa="${item.id_siswa}" onchange="updateSelectColor(this)">
+                                <option value="">-Pilih-</option>
+                                <option value="Tanpa lagu" ${mkSel(ex.nada_suara, 'Tanpa lagu')}>Tanpa lagu (2)</option>
+                                <option value="Nada stabil" ${mkSel(ex.nada_suara, 'Nada stabil')}>Nada stabil (4)</option>
+                                <option value="Lagu tilawah" ${mkSel(ex.nada_suara, 'Lagu tilawah')}>Lagu tilawah (5)</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="wrap-tugas">
-                        <input type="number" class="input-nilai-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Nilai Akhir" style="width:80px;" value="${ex.nilai !== undefined && ex.nilai !== null ? ex.nilai : ''}">
-                        <input type="text" class="input-ket-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Keterangan..." style="flex:1;" value="${ex.keterangan || ''}">
+                    <div class="wrap-tugas" style="margin-top:4px;">
+                        <input type="text" class="input-ket-baca form-control sel-kecil" data-idsiswa="${item.id_siswa}" placeholder="Catatan / Keterangan..." style="width:100%;" value="${ex.keterangan || ''}">
                     </div>`;
                 } 
                 else if (tipe === 'tulis') {
@@ -462,7 +623,7 @@ window.bukaFormPenilaian = async function(tipe) {
     }
 };
 
-// ================= FUNGSI SIMPAN =================
+// ================= FUNGSI SIMPAN & SINKRONISASI =================
 window.simpanPenilaian = async function(tipe) {
     const idKelas = document.getElementById(`pilih-kelas-${tipe}`).value;
     const btn = document.getElementById(`btn-simpan-${tipe}`);
@@ -520,28 +681,91 @@ window.simpanPenilaian = async function(tipe) {
             if(payloadInsert.length > 0) await pushToDatabase('penilaiantugas', payloadInsert);
 
         } else if (tipe === 'baca') {
+            let payloadSinkronTugas = [];
+
             dataSiswaPenilaian.forEach(item => {
                 const sel = document.querySelector(`.input-kelancaran[data-idsiswa="${item.id_siswa}"]`);
                 const iLancar = sel.value;
                 const iTajwid = document.querySelector(`.input-tajwid[data-idsiswa="${item.id_siswa}"]`).value;
                 const iMakraj = document.querySelector(`.input-makraj[data-idsiswa="${item.id_siswa}"]`).value;
                 const iNada = document.querySelector(`.input-nada[data-idsiswa="${item.id_siswa}"]`).value;
-                const iNilai = document.querySelector(`.input-nilai-baca[data-idsiswa="${item.id_siswa}"]`).value;
                 const iKet = document.querySelector(`.input-ket-baca[data-idsiswa="${item.id_siswa}"]`).value;
                 
-                if(iLancar || iTajwid || iMakraj || iNada || iNilai || iKet) {
+                if(iLancar || iTajwid || iMakraj || iNada || iKet) {
+                    const nilaiKalkulasi = kalkulasiSkorBaca(iLancar, iTajwid, iMakraj, iNada);
+                    const statusTuntasKelancaran = tentukanKetuntasanBaca(iLancar);
+
                     let record = { 
                         id_kelas: idKelas, id_siswa: item.id_siswa, 
                         kelancaran_membaca: iLancar || null, tajwid_bacaan: iTajwid || null, 
                         makraj_huruf: iMakraj || null, nada_suara: iNada || null,
-                        nilai: iNilai ? parseInt(iNilai) : null, keterangan: iKet || null
+                        nilai: nilaiKalkulasi, keterangan: iKet || null
                     };
                     let recId = sel.getAttribute('data-recordid');
                     if(recId && recId !== '') record.id = recId;
                     payloadInsert.push(record);
+
+                    if (nilaiKalkulasi !== null) {
+                        payloadSinkronTugas.push({
+                            id_siswa: item.id_siswa,
+                            nilai_tugas: nilaiKalkulasi,
+                            ketuntasan: statusTuntasKelancaran,
+                            refleksi: iKet || `Kelancaran: ${iLancar || '-'}`
+                        });
+                    }
                 }
             });
-            if(payloadInsert.length > 0) await pushToDatabase('penilaianmembaca', payloadInsert);
+
+            if(payloadInsert.length > 0) {
+                await pushToDatabase('penilaianmembaca', payloadInsert);
+
+                if (payloadSinkronTugas.length > 0) {
+                    const namaTugasDefault = "Nilai tes Membaca quran";
+                    
+                    let { data: tugasExist } = await supabase
+                        .from('namatugas')
+                        .select('id')
+                        .eq('id_kelas', idKelas)
+                        .eq('nama_tugas', namaTugasDefault)
+                        .maybeSingle();
+
+                    let idTugasTarget = null;
+                    if (tugasExist) {
+                        idTugasTarget = tugasExist.id;
+                    } else {
+                        const { data: newT } = await supabase
+                            .from('namatugas')
+                            .insert([{ id_kelas: idKelas, nama_tugas: namaTugasDefault }])
+                            .select();
+                        if (newT && newT.length > 0) idTugasTarget = newT[0].id;
+                    }
+
+                    if (idTugasTarget) {
+                        const { data: listNilaiTugasAda } = await supabase
+                            .from('penilaiantugas')
+                            .select('id, id_siswa')
+                            .eq('id_tugas', idTugasTarget);
+
+                        const mapNilaiAda = new Map((listNilaiTugasAda || []).map(n => [n.id_siswa, n.id]));
+
+                        const payloadFinalTugas = payloadSinkronTugas.map(p => {
+                            let itemTugas = {
+                                id_tugas: idTugasTarget,
+                                id_siswa: p.id_siswa,
+                                nilai_tugas: p.nilai_tugas,
+                                ketuntasan: p.ketuntasan,
+                                refleksi: p.refleksi
+                            };
+                            if (mapNilaiAda.has(p.id_siswa)) {
+                                itemTugas.id = mapNilaiAda.get(p.id_siswa);
+                            }
+                            return itemTugas;
+                        });
+
+                        await pushToDatabase('penilaiantugas', payloadFinalTugas);
+                    }
+                }
+            }
 
         } else if (tipe === 'tulis') {
             dataSiswaPenilaian.forEach(item => {
@@ -620,7 +844,7 @@ window.simpanPenilaian = async function(tipe) {
         if(payloadInsert.length === 0) {
             alert("Tidak ada data baru yang diubah/diisi! Pengisian dibatalkan.");
         } else {
-            alert(`Berhasil menyimpan data ke database!`);
+            alert(`Berhasil menyimpan data ke database${tipe === 'baca' ? ' & otomatis tersinkronisasi ke Penilaian Tugas' : ''}!`);
             bukaFormPenilaian(tipe); 
         }
     } catch (error) {
@@ -628,177 +852,6 @@ window.simpanPenilaian = async function(tipe) {
     } finally {
         btn.innerHTML = teksAsli;
         btn.disabled = false;
-    }
-};
-
-// ================= FITUR DOWNLOAD & UPLOAD FORMAT EXCEL TUGAS =================
-window.downloadTemplateNilaiTugas = async function() {
-    const idKelas = document.getElementById('pilih-kelas-tugas').value;
-    const ddTugas = document.getElementById('input-nama-tugas-dropdown');
-    const idTugas = ddTugas.value;
-    const namaTugas = ddTugas.options[ddTugas.selectedIndex]?.text || '';
-
-    if (!idKelas) {
-        alert("Pilih kelas terlebih dahulu!");
-        return;
-    }
-    if (!idTugas) {
-        alert("Pilih tugas terlebih dahulu dari dropdown sebelum mengunduh format!");
-        return;
-    }
-    if (!dataSiswaPenilaian || dataSiswaPenilaian.length === 0) {
-        alert("Data siswa di kelas ini belum termuat.");
-        return;
-    }
-
-    try {
-        const { data: nilaiExisting, error } = await supabase
-            .from('penilaiantugas')
-            .select('id_siswa, nilai_tugas, ketuntasan, refleksi')
-            .eq('id_tugas', idTugas);
-
-        if (error) throw error;
-
-        const mapNilai = {};
-        if (nilaiExisting) {
-            nilaiExisting.forEach(n => {
-                mapNilai[n.id_siswa] = n;
-            });
-        }
-
-        await window.loadExportLibsPenilaian();
-
-        const headers = [
-            ["ID_TUGAS", "ID_SISWA", "No Absen", "Nama Siswa", "Nilai", "Ketuntasan (T/TS)", "Catatan/Refleksi"]
-        ];
-
-        const rows = dataSiswaPenilaian.map(item => {
-            const existing = mapNilai[item.id_siswa];
-            
-            return [
-                idTugas,
-                item.id_siswa,
-                item.nomor_absen || '',
-                item.siswa && item.siswa.nama_siswa ? item.siswa.nama_siswa : '',
-                existing && existing.nilai_tugas !== null ? existing.nilai_tugas : '',
-                existing && existing.ketuntasan ? existing.ketuntasan : 'TS',
-                existing && existing.refleksi ? existing.refleksi : ''
-            ];
-        });
-
-        const ws = window.XLSX.utils.aoa_to_sheet([...headers, ...rows]);
-        
-        ws['!cols'] = [
-            { wch: 15 }, // ID_TUGAS
-            { wch: 15 }, // ID_SISWA
-            { wch: 10 }, // No Absen
-            { wch: 28 }, // Nama Siswa
-            { wch: 12 }, // Nilai
-            { wch: 18 }, // Ketuntasan
-            { wch: 30 }  // Catatan
-        ];
-
-        const wb = window.XLSX.utils.book_new();
-        window.XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
-
-        const cleanNama = namaTugas.replace(/[^a-zA-Z0-9_-]/g, '_');
-        window.XLSX.writeFile(wb, `Format_Nilai_${cleanNama}.xlsx`);
-    } catch (err) {
-        alert("Gagal mengunduh format: " + err.message);
-    }
-};
-
-window.handleUploadNilaiTugas = async function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const idTugasAktif = document.getElementById('input-nama-tugas-dropdown').value;
-    if (!idTugasAktif) {
-        alert("Pilih tugas aktif terlebih dahulu sebelum mengunggah file nilai!");
-        event.target.value = '';
-        return;
-    }
-
-    try {
-        await window.loadExportLibsPenilaian();
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = window.XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawData = window.XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (!rawData || rawData.length <= 1) {
-                    alert("File Excel kosong atau tidak memiliki baris data.");
-                    return;
-                }
-
-                let matchCount = 0;
-                let mismatchTugas = 0;
-
-                for (let i = 1; i < rawData.length; i++) {
-                    const row = rawData[i];
-                    if (!row || row.length === 0) continue;
-
-                    const rowIdTugas = row[0] !== undefined && row[0] !== null ? String(row[0]).trim() : '';
-                    const rowIdSiswa = row[1] !== undefined && row[1] !== null ? String(row[1]).trim() : '';
-                    const rawNilai = row[4];
-                    const rawTuntas = row[5] !== undefined && row[5] !== null ? String(row[5]).trim().toUpperCase() : '';
-                    const rawRefleksi = row[6] !== undefined && row[6] !== null ? String(row[6]).trim() : '';
-
-                    if (rowIdTugas && rowIdTugas !== String(idTugasAktif).trim()) {
-                        mismatchTugas++;
-                        continue;
-                    }
-
-                    if (!rowIdSiswa) continue;
-
-                    const inpNilai = document.querySelector(`.input-nilai-tugas[data-idsiswa="${rowIdSiswa}"]`);
-                    const inpRefleksi = document.querySelector(`.input-refleksi[data-idsiswa="${rowIdSiswa}"]`);
-
-                    if (inpNilai) {
-                        if (rawNilai !== undefined && rawNilai !== null && rawNilai !== '') {
-                            const valNum = parseFloat(rawNilai);
-                            inpNilai.value = isNaN(valNum) ? '' : valNum;
-
-                            if (rawTuntas === 'T' || rawTuntas === 'TS') {
-                                window.setKetuntasan(rowIdSiswa, rawTuntas);
-                            } else {
-                                window.autoKetuntasan(rowIdSiswa, inpNilai.value);
-                            }
-                        }
-
-                        if (inpRefleksi && rawRefleksi) {
-                            inpRefleksi.value = rawRefleksi;
-                        }
-
-                        matchCount++;
-                    }
-                }
-
-                if (mismatchTugas > 0) {
-                    alert(`Peringatan: ${mismatchTugas} baris dilewati karena ID Tugas pada file tidak cocok dengan tugas aktif.`);
-                }
-
-                if (matchCount > 0) {
-                    alert(`Berhasil membaca nilai ${matchCount} siswa. Klik tombol "Simpan Nilai Tugas" untuk menyimpan permanen.`);
-                } else {
-                    alert("Tidak ada ID Siswa yang cocok dengan kelas ini.");
-                }
-
-            } catch (errParse) {
-                alert("Gagal membaca file Excel: " + errParse.message);
-            } finally {
-                event.target.value = '';
-            }
-        };
-
-        reader.readAsArrayBuffer(file);
-    } catch (err) {
-        alert("Gagal memproses file: " + err.message);
-        event.target.value = '';
     }
 };
 
@@ -851,10 +904,14 @@ window.downloadRekapPenilaian = async function(tipe, format) {
             headers = [["No", "Nama Siswa", "L/P", "Kelancaran", "Tajwid", "Makhraj", "Nada/Suara", "Nilai Akhir", "Keterangan"]];
             siswaData.forEach((s, idx) => {
                 let rec = exData.find(x => x.id_siswa === s.id_siswa) || {};
+                let finalVal = rec.nilai;
+                if (finalVal === null || finalVal === undefined) {
+                    finalVal = kalkulasiSkorBaca(rec.kelancaran_membaca, rec.tajwid_bacaan, rec.makraj_huruf, rec.nada_suara) || '-';
+                }
                 reportData.push([
                     s.nomor_absen || (idx+1), s.siswa.nama_siswa, s.siswa.jenis_kelamin,
                     rec.kelancaran_membaca || '-', rec.tajwid_bacaan || '-', rec.makraj_huruf || '-',
-                    rec.nada_suara || '-', rec.nilai || '-', rec.keterangan || '-'
+                    rec.nada_suara || '-', finalVal, rec.keterangan || '-'
                 ]);
             });
         } 
