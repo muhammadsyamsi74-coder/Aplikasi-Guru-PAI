@@ -491,6 +491,57 @@
         </button>
     </div>
 
+    <!-- ================= 2.5. BAGIAN BANK KONSEP CERAMAH & KHUTBAH (COLLAPSIBLE / GARIS UNGU LEMBUT) ================= -->
+    <div class="card-data-compact" style="border: 1px solid rgba(168, 85, 247, 0.35);">
+        <div class="card-header-compact" onclick="toggleSectionCeramah()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <h3>
+                <i class="fa-solid fa-microphone-lines" style="color: var(--neon-purple);"></i> 
+                Bank Konsep Ceramah & Khutbah
+            </h3>
+            <button id="btn-toggle-ceramah-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-ceramah"></i> Buka Konsep
+            </button>
+        </div>
+
+        <!-- WADAH KONTEN CERAMAH (TERSEMBUNYI DEFAULT) -->
+        <div id="section-ceramah-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button onclick="toggleFormKonsepCeramah()" class="btn-compact" style="background:rgba(168, 85, 247, 0.15); color:var(--neon-purple); border:1px solid rgba(168, 85, 247, 0.3);">
+                    <i class="fa-solid fa-plus"></i> Tambah Konsep
+                </button>
+            </div>
+
+            <!-- FORM TAMBAH KONSEP CERAMAH -->
+            <div id="form-wrap-ceramah" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-purple); margin-bottom:10px;">
+                <form onsubmit="simpanKonsepCeramah(event)">
+                    <input type="text" id="cer-judul" class="form-control sel-compact" placeholder="Judul Konsep Ceramah / Khutbah..." style="margin-bottom:6px;" required>
+                    <input type="url" id="cer-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Web...)" style="margin-bottom:6px;" required>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 4px;">
+                        <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih);">
+                            <input type="checkbox" id="cer-pin" style="accent-color:var(--neon-yellow);"> <label for="cer-pin">Pin ke atas</label>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-simpan-ceramah" class="btn-compact btn-primary" style="width:100%; background:linear-gradient(135deg, #1e1b4b 0%, #a855f7 100%);">
+                        <i class="fa-solid fa-save"></i> Simpan Konsep
+                    </button>
+                </form>
+            </div>
+
+            <!-- SEARCH BAR PENCARIAN BERDASARKAN KATA -->
+            <div style="position:relative; margin-bottom:8px;">
+                <input type="text" id="cari-konsep-ceramah" class="form-control sel-compact" placeholder="Cari konsep ceramah..." oninput="cariKonsepCeramah(this.value)" style="padding-left:28px !important;">
+                <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:10px; top:10px; font-size:10px; color:var(--text-abu);"></i>
+            </div>
+
+            <div id="list-cards-ceramah" class="doc-grid-list">
+                <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat konsep ceramah...</div>
+            </div>
+            <button id="btn-expand-ceramah" onclick="toggleExpandCeramah()" class="btn-muat-semua" style="display:none;">
+                <i class="fa-solid fa-chevron-down"></i> Tampilkan Semua
+            </button>
+        </div>
+    </div>
+
     <!-- ================= 3. BAGIAN PERANGKAT AJAR (GARIS BIRU LEMBUT) ================= -->
     <div class="card-data-compact border-blue">
         <div class="card-header-compact" onclick="toggleSectionPerangkat()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
