@@ -2,6 +2,7 @@
 import supabase from '../supabase.js';
 
 let chartQuranInstance = null;
+let sholatIntervalTimer = null;
 
 // ================= DYNAMIC LOADER: CHART.JS =================
 async function loadChartJSLib() {
@@ -32,6 +33,7 @@ window.loadDashboardPaiApps = async function() {
         loadRingkasanMetrikDanAlert(),
         loadJadwalHariIni(hariJadwalDefault),
         loadPengingatKegiatan(), 
+        loadWaktuSholatDanCountdown(), // Inisialisasi API & Countdown Waktu Sholat
         loadGrafikMembacaQuran(),
         loadAnalitikKehadiranPerKelas(),
         loadAnalitikKetuntasanTugas(),
@@ -272,7 +274,6 @@ async function loadPengingatKegiatan() {
                     }
                 }
 
-                // LOGIKA TOMBOL SELESAI: Hanya muncul jika siklus adalah '1 Kali'
                 let actionButton = '';
                 if (item.siklus === '1 Kali') {
                     actionButton = `
@@ -371,7 +372,104 @@ window.selesaiPengingat = async function(btnElement, idPengingat, judul, siklus,
     }
 };
 
-// ================= 4. GRAFIK KELANCARAN MEMBACA =================
+// ================= 4. WIDGET WAKTU SHOLAT & REAL-TIME COUNTDOWN =================
+async function loadWaktuSholatDanCountdown() {
+    const elLabel = document.getElementById('sholat-next-label');
+    const elTimer = document.getElementById('sholat-timer');
+    if (!elLabel || !elTimer) return;
+
+    if (sholatIntervalTimer) {
+        clearInterval(sholatIntervalTimer);
+    }
+
+    try {
+        // Menggunakan AlAdhan API (Kota: Balikpapan, Metode Kemenag: 20)
+        const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Balikpapan&country=Indonesia&method=20');
+        const json = await res.json();
+        
+        if (!json || !json.data || !json.data.timings) {
+            throw new Error("Gagal mengambil data jadwal sholat");
+        }
+
+        const timings = json.data.timings;
+        const sholatList = [
+            { id: 'subuh', nama: 'Subuh', time: timings.Fajr },
+            { id: 'dzuhur', nama: 'Dzuhur', time: timings.Dhuhr },
+            { id: 'ashar', nama: 'Ashar', time: timings.Asr },
+            { id: 'maghrib', nama: 'Maghrib', time: timings.Maghrib },
+            { id: 'isya', nama: 'Isya', time: timings.Isha }
+        ];
+
+        // Tampilkan jam di pill masing-masing
+        sholatList.forEach(s => {
+            const elPillTime = document.getElementById(`time-${s.id}`);
+            if (elPillTime) elPillTime.innerText = s.time.substring(0, 5);
+        });
+
+        function updateCountdown() {
+            const now = new Date();
+            let nextSholat = null;
+            let targetDate = null;
+
+            // Reset semua border aktif
+            sholatList.forEach(s => {
+                const p = document.getElementById(`pill-${s.id}`);
+                if (p) p.classList.remove('sholat-pill-active');
+            });
+
+            for (let s of sholatList) {
+                const [jam, mnt] = s.time.split(':').map(Number);
+                const sDate = new Date();
+                sDate.setHours(jam, mnt, 0, 0);
+
+                if (sDate > now) {
+                    nextSholat = s;
+                    targetDate = sDate;
+                    break;
+                }
+            }
+
+            // Jika semua sholat hari ini sudah lewat, target sholat berikutnya adalah Subuh esok hari
+            if (!nextSholat) {
+                nextSholat = sholatList[0];
+                const [jam, mnt] = nextSholat.time.split(':').map(Number);
+                targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + 1);
+                targetDate.setHours(jam, mnt, 0, 0);
+            }
+
+            // Tandai pill sholat berikutnya
+            const activePill = document.getElementById(`pill-${nextSholat.id}`);
+            if (activePill) activePill.classList.add('sholat-pill-active');
+
+            // Hitung selisih detik mundur
+            const diffMs = targetDate - now;
+            if (diffMs <= 0) {
+                elLabel.innerHTML = `<span style="color:var(--neon-green);"><i class="fa-solid fa-bullhorn"></i> Waktu ${nextSholat.nama} Telah Tiba!</span>`;
+                elTimer.innerText = "00:00:00";
+                return;
+            }
+
+            const diffSecTotal = Math.floor(diffMs / 1000);
+            const hours = String(Math.floor(diffSecTotal / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((diffSecTotal % 3600) / 60)).padStart(2, '0');
+            const seconds = String(diffSecTotal % 60).padStart(2, '0');
+
+            elLabel.innerText = `Menuju Waktu ${nextSholat.nama}`;
+            elTimer.innerText = `${hours}:${minutes}:${seconds}`;
+        }
+
+        updateCountdown();
+        sholatIntervalTimer = setInterval(updateCountdown, 1000);
+
+    } catch (e) {
+        console.error("Gagal inisialisasi sholat:", e);
+        elLabel.innerText = "Jadwal Sholat Offline";
+        elTimer.innerText = "--:--:--";
+    }
+}
+
+// ================= 5. GRAFIK KELANCARAN MEMBACA =================
 async function loadGrafikMembacaQuran() {
     const canvas = document.getElementById('chart-quran-dashboard');
     const msgKosong = document.getElementById('chart-quran-kosong');
@@ -516,7 +614,7 @@ async function loadGrafikMembacaQuran() {
     }
 }
 
-// ================= 5. ANALITIK KEHADIRAN (MENGGUNAKAN POSTGRESQL VIEW) =================
+// ================= 6. ANALITIK KEHADIRAN (MENGGUNAKAN POSTGRESQL VIEW) =================
 async function loadAnalitikKehadiranPerKelas() {
     const container = document.getElementById('dash-list-analitik-kehadiran');
     if (!container) return;
@@ -569,7 +667,7 @@ async function loadAnalitikKehadiranPerKelas() {
     }
 }
 
-// ================= 6. ANALITIK KETUNTASAN TUGAS (PERSENTASE SISWA TUNTAS / T) =================
+// ================= 7. ANALITIK KETUNTASAN TUGAS (PERSENTASE SISWA TUNTAS / T) =================
 async function loadAnalitikKetuntasanTugas() {
     const container = document.getElementById('dash-list-analitik-tugas');
     if (!container) return;
@@ -624,7 +722,7 @@ async function loadAnalitikKetuntasanTugas() {
     }
 }
 
-// ================= 7. INFORMASI SISTEM =================
+// ================= 8. INFORMASI SISTEM =================
 async function loadInfoSistem() {
     const el = document.getElementById('dash-info-sistem');
     if (!el) return;

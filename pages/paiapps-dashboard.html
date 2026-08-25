@@ -161,7 +161,7 @@
         color: var(--neon-yellow);
     }
 
-    /* ================= PENGINGAT KEGIATAN PENTING ================= */
+    /* PENGINGAT KEGIATAN PENTING */
     .reminder-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
     .reminder-item {
         background: var(--bg-main);
@@ -192,6 +192,79 @@
         background: transparent; color: var(--text-abu); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
     }
     .reminder-action:hover { background: rgba(5, 213, 138, 0.2); color: var(--neon-green); border-color: var(--neon-green); }
+
+    /* ================= WIDGET WAKTU SHOLAT ================= */
+    .sholat-wrapper {
+        background: var(--bg-main);
+        border: 1px solid var(--border-green-subtle);
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .sholat-countdown-box {
+        background: linear-gradient(135deg, rgba(5, 213, 138, 0.15) 0%, rgba(30, 58, 138, 0.3) 100%);
+        border: 1px solid var(--neon-green);
+        border-radius: 8px;
+        padding: 8px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+    }
+    .sholat-countdown-info {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-putih);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .sholat-countdown-timer {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--neon-green);
+        font-family: monospace;
+        letter-spacing: 0.5px;
+    }
+    .grid-jadwal-sholat {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+    }
+    .sholat-pill {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 5px 2px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        transition: all 0.2s ease;
+    }
+    .sholat-pill-active {
+        background: rgba(5, 213, 138, 0.12) !important;
+        border: 1px solid var(--neon-green) !important;
+        box-shadow: 0 0 8px rgba(5, 213, 138, 0.25);
+    }
+    .sholat-pill-name {
+        font-size: 8.5px;
+        font-weight: 600;
+        color: var(--text-abu);
+        text-transform: uppercase;
+    }
+    .sholat-pill-active .sholat-pill-name {
+        color: var(--neon-green);
+        font-weight: 700;
+    }
+    .sholat-pill-time {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text-putih);
+    }
 
     /* LIST JADWAL */
     .jadwal-list { list-style: none; padding: 0; margin: 0; }
@@ -273,6 +346,12 @@
         .card-metrik { padding: 16px; border-radius: 14px; }
         .reminder-title { font-size: 12px; }
         .reminder-meta { font-size: 10px; }
+        .sholat-wrapper { padding: 14px; gap: 12px; }
+        .sholat-countdown-info { font-size: 12px; }
+        .sholat-countdown-timer { font-size: 14px; }
+        .sholat-pill { padding: 8px 4px; }
+        .sholat-pill-name { font-size: 9.5px; }
+        .sholat-pill-time { font-size: 11px; }
         .jadwal-item { flex-wrap: nowrap; align-items: center; } 
         .chart-wrapper { min-height: 280px; max-height: 360px; }
     }
@@ -321,7 +400,7 @@
         </ul>
     </div>
 
-    <!-- 4. PENGINGAT JADWAL MENGAJAR -->
+    <!-- 4. PENGINGAT JADWAL MENGAJAR & WAKTU SHOLAT -->
     <div class="card-data border-green">
         <div class="card-header">
             <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal (<span id="dash-nama-hari">-</span>)</h3>
@@ -334,6 +413,41 @@
                 </select>
             </div>
         </div>
+
+        <!-- SUB-WIDGET WAKTU SHOLAT REAL-TIME -->
+        <div class="sholat-wrapper" id="dash-sholat-wrapper">
+            <div class="sholat-countdown-box">
+                <div class="sholat-countdown-info">
+                    <i class="fa-solid fa-mosque" style="color: var(--neon-green);"></i>
+                    <span id="sholat-next-label">Menghubungkan API Waktu Sholat...</span>
+                </div>
+                <div class="sholat-countdown-timer" id="sholat-timer">-:--:--</div>
+            </div>
+            
+            <div class="grid-jadwal-sholat">
+                <div class="sholat-pill" id="pill-subuh">
+                    <span class="sholat-pill-name">Subuh</span>
+                    <span class="sholat-pill-time" id="time-subuh">--:--</span>
+                </div>
+                <div class="sholat-pill" id="pill-dzuhur">
+                    <span class="sholat-pill-name">Dzuhur</span>
+                    <span class="sholat-pill-time" id="time-dzuhur">--:--</span>
+                </div>
+                <div class="sholat-pill" id="pill-ashar">
+                    <span class="sholat-pill-name">Ashar</span>
+                    <span class="sholat-pill-time" id="time-ashar">--:--</span>
+                </div>
+                <div class="sholat-pill" id="pill-maghrib">
+                    <span class="sholat-pill-name">Maghrib</span>
+                    <span class="sholat-pill-time" id="time-maghrib">--:--</span>
+                </div>
+                <div class="sholat-pill" id="pill-isya">
+                    <span class="sholat-pill-name">Isya</span>
+                    <span class="sholat-pill-time" id="time-isya">--:--</span>
+                </div>
+            </div>
+        </div>
+
         <ul class="jadwal-list" id="dash-list-jadwal-hari-ini">
             <li style="text-align:center; padding:12px; color:var(--text-abu); font-size:11px;">
                 <i class="fa-solid fa-spinner fa-spin"></i> Memuat jadwal...
