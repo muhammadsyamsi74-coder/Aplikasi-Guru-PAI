@@ -383,7 +383,7 @@ async function loadWaktuSholatDanCountdown() {
                 const activePill = document.getElementById(`pill-${activeSholat.id}`);
                 if (activePill) activePill.classList.add('sholat-pill-active');
 
-                elLabel.innerHTML = `<span style="color:var(--neon-green);"><i class="fa-solid fa-mosque"></i> Sedang Memasuki Waktu Sholat ${activeSholat.nama}...</span>`;
+                elLabel.innerHTML = `<span style="color:var(--neon-green);"></i> Sedang Memasuki Waktu Sholat ${activeSholat.nama}</span>`;
                 elTimer.innerText = "00:00:00";
                 return;
             }

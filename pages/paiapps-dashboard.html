@@ -223,22 +223,21 @@
         border-color: var(--neon-green); 
     }
 
-    /* ================= WIDGET WAKTU SHOLAT ================= */
+/* ================= WIDGET WAKTU SHOLAT ================= */
     .sholat-wrapper {
-        background: var(--bg-main);
-        border: 1px solid var(--border-green-subtle);
-        border-radius: 10px;
-        padding: 10px;
+        background: transparent; /* Menghilangkan kotak background */
+        border: none; /* Menghilangkan border pembungkus luar */
+        padding: 5px 0 10px 0;
         margin-bottom: 12px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
     .sholat-countdown-box {
-        background: linear-gradient(135deg, rgba(5, 213, 138, 0.15) 0%, rgba(30, 58, 138, 0.3) 100%);
-        border: 1px solid var(--neon-green);
-        border-radius: 8px;
-        padding: 8px 10px;
+        background: transparent; /* Menghilangkan kotak gradient */
+        border: none; /* Menghilangkan border pembungkus dalam */
+        border-bottom: 1px dashed var(--border-color); /* Garis pemisah bawah yang clean */
+        padding: 0 0 10px 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -252,13 +251,30 @@
         align-items: center;
         gap: 6px;
     }
+    
+    /* Animasi Hitung Mundur (Timer) */
     .sholat-countdown-timer {
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 800;
         color: var(--neon-green);
         font-family: monospace;
         letter-spacing: 0.5px;
+        animation: timerPulse 1.5s infinite ease-in-out;
     }
+
+    @keyframes timerPulse {
+        0%, 100% { 
+            opacity: 1; 
+            text-shadow: 0 0 4px rgba(5, 213, 138, 0.4); 
+            transform: scale(1); 
+        }
+        50% { 
+            opacity: 0.6; 
+            text-shadow: 0 0 12px rgba(5, 213, 138, 1); 
+            transform: scale(1.05); 
+        }
+    }
+    /* Sisa kode .grid-jadwal-sholat dan .sholat-pill biarkan seperti semula */
     .grid-jadwal-sholat {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
