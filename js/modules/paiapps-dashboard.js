@@ -324,6 +324,18 @@ async function loadWaktuSholatDanCountdown() {
         }
 
         const timings = json.data.timings;
+
+        // FITUR BARU: TANGGAL HIJRIAH
+        const hijri = json.data.date.hijri;
+        const namaBulanIndo = {
+            "Muharram": "Muharram", "Safar": "Safar", "Rabi' al-awwal": "Rabiul Awal", "Rabi' al-thani": "Rabiul Akhir",
+            "Jumada al-awwal": "Jumadil Awal", "Jumada al-thani": "Jumadil Akhir", "Rajab": "Rajab", "Sha'ban": "Sya'ban",
+            "Ramadan": "Ramadhan", "Shawwal": "Syawal", "Dhu al-Qi'dah": "Dzulqa'dah", "Dhu al-Hijjah": "Dzulhijjah"
+        };
+        const bulanHijriah = namaBulanIndo[hijri.month.en] || hijri.month.en;
+        const elHijri = document.getElementById('sholat-hijri-date');
+        if (elHijri) elHijri.innerText = `${hijri.day} ${bulanHijriah} ${hijri.year} H`;
+
         const sholatList = [
             { id: 'subuh', nama: 'Subuh', time: timings.Fajr },
             { id: 'dzuhur', nama: 'Dzuhur', time: timings.Dhuhr },
