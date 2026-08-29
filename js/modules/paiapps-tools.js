@@ -1329,11 +1329,11 @@ window.gantiKategoriDalil = function(kategori) {
     if (kategori === 'quran') {
         if (tabQ) tabQ.classList.add('active');
         if (tabH) tabH.classList.remove('active');
-        if (lblSpesifik) lblSpesifik.innerText = 'Berdasarkan Surah & Ayat';
+        if (lblSpesifik) lblSpesifik.innerText = 'Surah';
     } else {
         if (tabH) tabH.classList.add('active');
         if (tabQ) tabQ.classList.remove('active');
-        if (lblSpesifik) lblSpesifik.innerText = 'Berdasarkan Kitab & Nomor Hadits';
+        if (lblSpesifik) lblSpesifik.innerText = 'Kitab Hadist';
     }
 
     window.gantiModePencarian(modePencarianAktif);
