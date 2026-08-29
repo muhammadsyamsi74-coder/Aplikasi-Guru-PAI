@@ -223,10 +223,10 @@
         border-color: var(--neon-green); 
     }
 
-/* ================= WIDGET WAKTU SHOLAT ================= */
+    /* ================= WIDGET WAKTU SHOLAT ================= */
     .sholat-wrapper {
-        background: transparent; /* Menghilangkan kotak background */
-        border: none; /* Menghilangkan border pembungkus luar */
+        background: transparent;
+        border: none;
         padding: 5px 0 10px 0;
         margin-bottom: 12px;
         display: flex;
@@ -234,9 +234,9 @@
         gap: 12px;
     }
     .sholat-countdown-box {
-        background: transparent; /* Menghilangkan kotak gradient */
-        border: none; /* Menghilangkan border pembungkus dalam */
-        border-bottom: 1px dashed var(--border-color); /* Garis pemisah bawah yang clean */
+        background: transparent;
+        border: none;
+        border-bottom: 1px dashed var(--border-color);
         padding: 0 0 10px 0;
         display: flex;
         justify-content: space-between;
@@ -274,7 +274,7 @@
             transform: scale(1.05); 
         }
     }
-    /* Sisa kode .grid-jadwal-sholat dan .sholat-pill biarkan seperti semula */
+    
     .grid-jadwal-sholat {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -449,15 +449,7 @@
     <!-- 4. PENGINGAT JADWAL MENGAJAR & WAKTU SHOLAT -->
     <div class="card-data border-green">
         <div class="card-header">
-            <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal (<span id="dash-nama-hari">-</span>)</h3>
-            <div>
-                <select id="pilih-hari-jadwal" class="form-control" onchange="gantiHariJadwal(this.value)" style="padding: 3px 6px; font-size: 10px; height: 26px; width: auto; border-radius: 6px; border: 1px solid var(--border-green-subtle); color: var(--neon-green); font-weight: 700; background: var(--bg-main); cursor: pointer;">
-                    <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
-                    <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
-                    <option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
-                    <option value="Minggu">Minggu</option>
-                </select>
-            </div>
+            <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal</h3>
         </div>
 
         <!-- SUB-WIDGET WAKTU SHOLAT REAL-TIME -->
@@ -467,33 +459,44 @@
                     <i class="fa-solid fa-mosque" style="color: var(--neon-green);"></i>
                     <span id="sholat-next-label">Menghubungkan API Waktu Sholat...</span>
                     <!-- FITUR BARU: TANGGAL HIJRIAH -->
-                    <span id="sholat-hijri-date" style="font-size: 10px; color: var(--neon-yellow); margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"></span>
+                    <span id="sholat-hijri-date" style="font-size: 12px; color: var(--neon-yellow); margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"></span>
                 </div>
-                <div class="sholat-countdown-timer" id="sholat-timer">-:--:--</div>
+                <div class="sholat-countdown-timer" id="sholat-timer" style="font-size: 13px;">-:--:--</div>
             </div>
             
             <div class="grid-jadwal-sholat">
                 <div class="sholat-pill" id="pill-subuh">
                     <span class="sholat-pill-name">Subuh</span>
-                    <span class="sholat-pill-time" id="time-subuh">--:--</span>
+                    <span class="sholat-pill-time" id="time-subuh" style="font-size:12px;">--:--</span>
                 </div>
                 <div class="sholat-pill" id="pill-dzuhur">
                     <span class="sholat-pill-name">Dzuhur</span>
-                    <span class="sholat-pill-time" id="time-dzuhur">--:--</span>
+                    <span class="sholat-pill-time" id="time-dzuhur" style="font-size:12px;">--:--</span>
                 </div>
                 <div class="sholat-pill" id="pill-ashar">
                     <span class="sholat-pill-name">Ashar</span>
-                    <span class="sholat-pill-time" id="time-ashar">--:--</span>
+                    <span class="sholat-pill-time" id="time-ashar" style="font-size:12px;">--:--</span>
                 </div>
                 <div class="sholat-pill" id="pill-maghrib">
                     <span class="sholat-pill-name">Maghrib</span>
-                    <span class="sholat-pill-time" id="time-maghrib">--:--</span>
+                    <span class="sholat-pill-time" id="time-maghrib" style="font-size:12px;">--:--</span>
                 </div>
                 <div class="sholat-pill" id="pill-isya">
                     <span class="sholat-pill-name">Isya</span>
-                    <span class="sholat-pill-time" id="time-isya">--:--</span>
+                    <span class="sholat-pill-time" id="time-isya" style="font-size:12px;">--:--</span>
                 </div>
             </div>
+        </div>
+
+        <!-- POSISI BARU: PEMILIH HARI JADWAL (SETELAH WAKTU SHOLAT) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 4px 0;">
+            <span style="font-size: 11px; font-weight: 600; color: var(--text-abu);">Pilih Hari KBM:</span>
+            <select id="pilih-hari-jadwal" class="form-control" onchange="gantiHariJadwal(this.value)" style="padding: 2px 7px; font-size: 12px; height: 28px; width: auto; border-radius: 6px; border: 1px solid var(--border-green-subtle); color: var(--neon-green); font-weight: 700; background: var(--bg-main); cursor: pointer;">
+                <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
+                <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
+                <option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
+                <option value="Minggu">Minggu</option>
+            </select>
         </div>
 
         <ul class="jadwal-list" id="dash-list-jadwal-hari-ini">
@@ -506,7 +509,7 @@
     <!-- 5. GRAFIK KEMAMPUAN MEMBACA AL-QUR'AN -->
     <div class="card-data border-green">
         <div class="card-header">
-            <h3><i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i> Grafik Kelancaran Membaca</h3>
+            <h3><i class="fa-solid fa-book-quran" style="color: var(--neon-green);"></i> Grafik Kelancaran Membaca Quran</h3>
         </div>
         <div class="chart-wrapper">
             <canvas id="chart-quran-dashboard"></canvas>

@@ -1246,3 +1246,167 @@ window.setTahunAjaranOtomatis = async function() {
         if (elTahunPer) elTahunPer.value = '2025/2026';
     }
 };
+
+// ================= FITUR MESIN PENCARI QURAN & HADITS (COLLAPSIBLE) =================
+let kategoriDalilAktif = 'quran'; // 'quran' atau 'hadis'
+
+window.toggleSectionDalil = function() {
+    const content = document.getElementById('section-dalil-content');
+    const icon = document.getElementById('icon-chevron-dalil');
+    const btn = document.getElementById('btn-toggle-dalil-section');
+
+    if (!content) return;
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        if (icon) icon.className = 'fa-solid fa-chevron-up';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-up" id="icon-chevron-dalil"></i> Tutup';
+    } else {
+        content.style.display = 'none';
+        if (icon) icon.className = 'fa-solid fa-chevron-down';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-chevron-down" id="icon-chevron-dalil"></i> Buka Pencarian';
+    }
+};
+
+window.gantiKategoriDalil = function(kategori) {
+    kategoriDalilAktif = kategori;
+    const tabQ = document.getElementById('tab-cari-quran');
+    const tabH = document.getElementById('tab-cari-hadis');
+    const input = document.getElementById('input-keyword-dalil');
+
+    if (kategori === 'quran') {
+        if (tabQ) tabQ.classList.add('active');
+        if (tabH) tabH.classList.remove('active');
+        if (input) input.placeholder = "Cari terjemahan Al-Qur'an (1-5 kata)...";
+    } else {
+        if (tabH) tabH.classList.add('active');
+        if (tabQ) tabQ.classList.remove('active');
+        if (input) input.placeholder = "Cari hadits shahih (1-5 kata)...";
+    }
+
+    if (input && input.value.trim()) {
+        window.eksekusiCariDalil();
+    }
+};
+
+window.eksekusiCariDalil = async function() {
+    const input = document.getElementById('input-keyword-dalil');
+    const container = document.getElementById('hasil-pencarian-dalil');
+    if (!input || !container) return;
+
+    const raw = input.value.trim();
+    if (!raw) {
+        alert("Masukkan minimal 1 kata kunci!");
+        return;
+    }
+
+    // Batasi 1 sampai 5 kata
+    const kataKunci = raw.split(/\s+/).slice(0, 5).join(' ');
+
+    container.innerHTML = '<div style="text-align:center; padding:15px; color:var(--neon-green); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Mencari dalil...</div>';
+
+    try {
+        if (kategoriDalilAktif === 'quran') {
+            const { data, error } = await supabase.rpc('cari_quran_multikata', {
+                kata_kunci: kataKunci,
+                limit_hasil: 25
+            });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;">Tidak ditemukan ayat dengan kata kunci <b>"${kataKunci}"</b>.</div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                html += `
+                    <div class="quran-hadis-item-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="badge-info-dalil"><i class="fa-solid fa-book-quran"></i> QS. ${item.nama_surah} [${item.surah_no}:${item.ayat_no}]</span>
+                            <button onclick="copyLinkDoc('${item.teks_arab} - QS ${item.nama_surah}:${item.ayat_no}')" class="btn-icon-doc" title="Salin Ayat"><i class="fa-solid fa-copy"></i></button>
+                        </div>
+                        <div class="text-arab-box">${item.teks_arab}</div>
+                        <div class="text-terjemahan-box">
+                            <b>Artinya:</b> "${item.terjemahan_id}"
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+        } else {
+            const { data, error } = await supabase.rpc('cari_hadis_multikata', {
+                kata_kunci: kataKunci,
+                limit_hasil: 25
+            });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;">Tidak ditemukan hadits dengan kata kunci <b>"${kataKunci}"</b>.</div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                // Memisahkan sanad dan matan untuk pewarnaan
+                const { arabHtml, indoHtml } = pisahkanSanadDanMatan(item.teks_arab, item.terjemahan_id);
+                const blockArab = item.teks_arab ? `<div class="text-arab-box">${arabHtml}</div>` : '';
+
+                html += `
+                    <div class="quran-hadis-item-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="badge-info-dalil" style="color:var(--neon-yellow); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.15);">
+                                <i class="fa-solid fa-scroll"></i> ${item.kitab} No. ${item.nomor_hadis} (${item.derajat_hadis || 'Shahih'})
+                            </span>
+                            <button onclick="copyLinkDoc('${(item.teks_arab || item.terjemahan_id).replace(/'/g, "\\'")} - ${item.kitab} No. ${item.nomor_hadis}')" class="btn-icon-doc" title="Salin Hadits">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+                        ${blockArab}
+                        <div class="text-terjemahan-box">
+                            <b style="color:var(--text-abu);">Artinya:</b> ${indoHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+    } catch (e) {
+        console.error("Gagal pencarian dalil:", e);
+        container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--neon-red); font-size:11px;">Gagal memuat pencarian: ${e.message}</div>`;
+    }
+};
+
+// ================= HELPER: PEWARNAAN SANAD (KUNING) & MATAN (PUTIH) =================
+function pisahkanSanadDanMatan(teksArab, teksIndo) {
+    let arabHtml = teksArab || '';
+    let indoHtml = teksIndo || '';
+
+    // 1. Pemisahan Teks Terjemahan Indonesia
+    // Mencari kata kunci transisi sanad: "bersabda:", "berkata:", atau "katanya:"
+    const regexIndo = /^(.*?(?:bersabda|berkata|katanya)\s*:\s*)(.*)$/is;
+    const matchIndo = indoHtml.match(regexIndo);
+
+    if (matchIndo && matchIndo[1] && matchIndo[2]) {
+        indoHtml = `<span class="sanad-text">${matchIndo[1]}</span><span class="matan-text">"${matchIndo[2].replace(/^["“]|["”]$/g, '').trim()}"</span>`;
+    } else {
+        indoHtml = `<span class="matan-text">"${indoHtml}"</span>`;
+    }
+
+    // 2. Pemisahan Teks Arab
+    // Mencari kata kunci transisi sanad: "قَالَ رَسُولُ اللَّهِ", "قَالَ النَّبِيُّ", "عَنِ ... قَالَ", atau "قَالَ:"
+    const regexArab = /^(.*?(?:قَالَ رَسُولُ اللَّهِ|قَالَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ|عَنْ.*?قَالَ|قَالَ)\s*:\s*)(.*)$/is;
+    const matchArab = arabHtml.match(regexArab);
+
+    if (matchArab && matchArab[1] && matchArab[2]) {
+        arabHtml = `<span class="sanad-text">${matchArab[1]}</span><span class="matan-text">${matchArab[2].trim()}</span>`;
+    } else {
+        arabHtml = `<span class="matan-text">${arabHtml}</span>`;
+    }
+
+    return { arabHtml, indoHtml };
+}

@@ -1,6 +1,7 @@
 // js/modules/paiapps-dashboard.js
 import supabase from '../supabase.js';
 
+
 let chartQuranInstance = null;
 let sholatIntervalTimer = null;
 
@@ -16,12 +17,62 @@ async function loadChartJSLib() {
     });
 }
 
+// ================= AKSI MENYELESAIKAN PENGINGAT (TOMBOL CEKLIS) =================
+window.selesaiPengingat = async function(btnEl, idPengingat, judul, siklus, tgl) {
+    if (!confirm(`Tandai agenda "${judul}" sebagai selesai?`)) return;
+
+    try {
+        if (btnEl) {
+            btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btnEl.disabled = true;
+        }
+
+        const { error } = await supabase
+            .from('pengingat_kegiatan')
+            .update({ status_selesai: true })
+            .eq('id', idPengingat);
+
+        if (error) throw error;
+
+        // Beri efek animasi hilang sebelum reload list
+        const itemRow = document.getElementById(`reminder-${idPengingat}`);
+        if (itemRow) {
+            itemRow.style.opacity = '0.3';
+            itemRow.style.transform = 'scale(0.95)';
+        }
+
+        setTimeout(() => {
+            loadPengingatKegiatan();
+        }, 300);
+
+    } catch (e) {
+        alert("Gagal menyelesaikan pengingat: " + e.message);
+        if (btnEl) {
+            btnEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+            btnEl.disabled = false;
+        }
+    }
+};
+
+
 // ================= FUNGSI UTAMA INISIALISASI DASHBOARD =================
 window.loadDashboardPaiApps = async function() {
     const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const hariIni = hariList[new Date().getDay()];
+    const now = new Date();
+    let indexHari = now.getDay();
+    const currentHour = now.getHours();
 
-    const hariJadwalDefault = (hariIni === 'Minggu') ? 'Senin' : hariIni;
+    // 1. Jika sudah jam 17:00 ke atas, arahkan ke hari esoknya
+    if (currentHour >= 17) {
+        indexHari = (indexHari + 1) % 7;
+    }
+
+    let hariJadwalDefault = hariList[indexHari];
+
+    // 2. Jika target hari jatuh pada Sabtu atau Minggu, otomatis arahkan ke Senin
+    if (hariJadwalDefault === 'Sabtu' || hariJadwalDefault === 'Minggu') {
+        hariJadwalDefault = 'Senin';
+    }
 
     const elNamaHari = document.getElementById('dash-nama-hari');
     if (elNamaHari) elNamaHari.innerText = hariJadwalDefault;
@@ -466,6 +517,12 @@ async function loadGrafikMembacaQuran() {
         const persenCepat = [];
         const persenLancarMahir = [];
 
+        // Array untuk menyimpan jumlah riil siswa per kategori
+        const countBelumArr = [];
+        const countTerbataArr = [];
+        const countCepatArr = [];
+        const countLancarMahirArr = [];
+
         listKelasAktif.forEach(kls => {
             const anggotaKls = listAnggota.filter(a => a.id_kelas === kls.id);
             const totalSiswa = anggotaKls.length;
@@ -509,10 +566,17 @@ async function loadGrafikMembacaQuran() {
                     }
                 });
 
+                // Simpan persentase untuk ketinggian bar
                 persenBelum.push(Math.round((countBelum / totalSiswa) * 100));
                 persenTerbata.push(Math.round((countTerbata / totalSiswa) * 100));
                 persenCepat.push(Math.round((countCepat / totalSiswa) * 100));
                 persenLancarMahir.push(Math.round((countLancarMahir / totalSiswa) * 100));
+
+                // Simpan jumlah riil siswa
+                countBelumArr.push(countBelum);
+                countTerbataArr.push(countTerbata);
+                countCepatArr.push(countCepat);
+                countLancarMahirArr.push(countLancarMahir);
             }
         });
 
@@ -535,10 +599,10 @@ async function loadGrafikMembacaQuran() {
             data: {
                 labels: labelsKelas,
                 datasets: [
-                    { label: 'Belum Dinilai', data: persenBelum, backgroundColor: '#64748b', borderRadius: 6 },
-                    { label: 'Belum Bisa & Terbata-bata', data: persenTerbata, backgroundColor: '#ef4444', borderRadius: 6 },
-                    { label: 'Cepat (Banyak/Sedikit Salah)', data: persenCepat, backgroundColor: '#f59e0b', borderRadius: 6 },
-                    { label: 'Lancar & Mahir', data: persenLancarMahir, backgroundColor: '#05d58a', borderRadius: 6 }
+                    { label: 'Belum Dinilai', data: persenBelum, counts: countBelumArr, backgroundColor: '#64748b', borderRadius: 6 },
+                    { label: 'Belum Bisa & Terbata-bata', data: persenTerbata, counts: countTerbataArr, backgroundColor: '#ef4444', borderRadius: 6 },
+                    { label: 'Cepat (Banyak/Sedikit Salah)', data: persenCepat, counts: countCepatArr, backgroundColor: '#f59e0b', borderRadius: 6 },
+                    { label: 'Lancar & Mahir', data: persenLancarMahir, counts: countLancarMahirArr, backgroundColor: '#05d58a', borderRadius: 6 }
                 ]
             },
             options: {
@@ -551,7 +615,12 @@ async function loadGrafikMembacaQuran() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) { return ` ${context.dataset.label}: ${context.raw}%`; }
+                            label: function(context) { 
+                                const dataset = context.dataset;
+                                const index = context.dataIndex;
+                                const totalSiswa = dataset.counts ? dataset.counts[index] : 0;
+                                return ` ${dataset.label}: ${totalSiswa} Siswa (${context.raw}%)`; 
+                            }
                         }
                     }
                 },
@@ -709,3 +778,4 @@ async function loadInfoSistem() {
         el.innerHTML = 'Gagal memuat identitas sistem.';
     }
 }
+
