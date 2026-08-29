@@ -1,6 +1,5 @@
 <!-- pages/paiapps-tools.html -->
 <style>
-
     @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap');
 
     /* =========================================================
@@ -417,7 +416,16 @@
         color: var(--neon-blue);
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
-    <!--STAYLE UNTUK QURAN DAN HADIST-->
+
+    /* EFEK STABILO UNTUK KATA KUNCI PENCARIAN */
+    .highlight-kata {
+        background-color: rgba(245, 158, 11, 0.35);
+        color: #fef08a !important;
+        font-weight: 700;
+        padding: 1px 4px;
+        border-radius: 4px;
+        border-bottom: 1px solid var(--neon-yellow);
+    }
 </style>
 
 <div class="paiapps-tools-container">
@@ -530,8 +538,8 @@
     <div class="card-data-compact border-green">
         <div class="card-header-compact">
             <h3><i class="fa-solid fa-book-open" style="color: var(--neon-green);"></i> Bank Materi Ajar</h3>
-            <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:1px solid rgba(5,213,138,0.3);">
-                <i class="fa-solid fa-plus"></i> Upload Materi
+            <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:3px solid rgba(5,213,138,0.3);">
+                <i class="fa-solid fa-plus"></i>
             </button>
         </div>
 
@@ -539,7 +547,7 @@
         <div id="form-wrap-materi" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-green); margin-bottom:10px;">
             <form onsubmit="simpanMateriAjar(event)">
                 <div style="display:flex; gap:6px; margin-bottom:6px;">
-                    <select id="mat-jenis" class="form-control sel-compact" style="flex:1.2;" onchange="toggleInputLainnyaMateri(this)" required>
+                    <select id="mat-jenis" class="form-control sel-compact" style="flex:1.6;" onchange="toggleInputLainnyaMateri(this)" required>
                         <option value="Materi Utama">Materi Utama</option>
                         <option value="Power Point">Power Point</option>
                         <option value="Referensi Dokumen">Referensi Dokumen</option>
@@ -547,20 +555,15 @@
                         <option value="Web">Web</option>
                         <option value="Lainnya">Lainnya (Ketik Sendiri)</option>
                     </select>
-                    <select id="mat-semester" class="form-control sel-compact" style="flex:0.8;" required>
+                    <select id="mat-semester" class="form-control sel-compact" style="flex:0.9;" required>
                         <option value="Ganjil">Ganjil</option>
                         <option value="Genap">Genap</option>
                     </select>
+                    <input type="text" id="mat-tahun" class="form-control sel-compact" placeholder="Thn Ajaran" style="flex:1;" required>
                 </div>
                 <input type="text" id="mat-jenis-kustom" class="form-control sel-compact" placeholder="Tulis jenis materi..." style="display:none; margin-bottom:6px;">
                 <input type="text" id="mat-judul" class="form-control sel-compact" placeholder="Judul Materi..." style="margin-bottom:6px;" required>
                 <input type="text" id="mat-deskripsi" class="form-control sel-compact" placeholder="Deskripsi singkat..." style="margin-bottom:6px;">
-                <div style="display:flex; gap:6px; margin-bottom:6px;">
-                    <input type="text" id="mat-tahun" class="form-control sel-compact" placeholder="Thn Ajaran" style="flex:1;" required>
-                    <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih); flex:1;">
-                        <input type="checkbox" id="mat-pin" style="accent-color:var(--neon-yellow);"> <label for="mat-pin">Pin ke atas</label>
-                    </div>
-                </div>
                 <input type="url" id="mat-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Canva / Web...)" style="margin-bottom:8px;" required>
                 <button type="submit" id="btn-simpan-materi" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-primary);"><i class="fa-solid fa-save"></i> Simpan Materi</button>
             </form>
@@ -574,7 +577,6 @@
         </button>
     </div>
 
-
     <!-- ================= 2.2. BAGIAN MESIN PENCARI QURAN & HADITS (COLLAPSIBLE) ================= -->
     <div class="card-data-compact border-green">
         <div class="card-header-compact" onclick="toggleSectionDalil()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
@@ -582,8 +584,8 @@
                 <i class="fa-solid fa-magnifying-glass-arrow-right" style="color: var(--neon-green);"></i> 
                 Pencarian Al-Qur'an & Hadits Sahih
             </h3>
-            <button id="btn-toggle-dalil-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3);">
-                <i class="fa-solid fa-chevron-down" id="icon-chevron-dalil"></i> Buka Pencarian
+            <button id="btn-toggle-dalil-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 3px solid rgba(5, 213, 138, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-dalil"></i>
             </button>
         </div>
 
@@ -593,17 +595,29 @@
             <!-- SUB TAB PILIHAN QURAN / HADITS -->
             <div class="search-tab-nav">
                 <button type="button" id="tab-cari-quran" class="btn-search-tab active" onclick="gantiKategoriDalil('quran')">
-                    <i class="fa-solid fa-book-quran"></i> Cari Al-Qur'an
+                    <i class="fa-solid fa-book-quran"></i> Al-Qur'an
                 </button>
                 <button type="button" id="tab-cari-hadis" class="btn-search-tab" onclick="gantiKategoriDalil('hadis')">
-                    <i class="fa-solid fa-scroll"></i> Cari Hadits Sahih
+                    <i class="fa-solid fa-scroll"></i> Hadits Sahih
                 </button>
             </div>
 
-            <!-- INPUT FORM PENCARIAN (1 - 5 KATA) -->
-            <div style="position:relative; margin-bottom:10px;">
+            <!-- PILIHAN METODE PENCARIAN -->
+            <div style="display:flex; gap:12px; margin-bottom:10px; font-size:11px; color:var(--text-putih); padding-left:2px;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="radio" name="mode-cari-dalil" value="kata" checked onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
+                    Berdasarkan Kata / Tema
+                </label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="radio" name="mode-cari-dalil" value="spesifik" onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
+                    <span id="label-mode-spesifik">Berdasarkan Surah & Ayat</span>
+                </label>
+            </div>
+
+            <!-- FORM 1: PENCARIAN KATA (DEFAULT) -->
+            <div id="box-cari-kata" style="position:relative; margin-bottom:10px;">
                 <input type="text" id="input-keyword-dalil" class="form-control sel-compact" 
-                       placeholder="Ketik 1 - 5 kata (contoh: berbakti orang tua / menuntut ilmu)..." 
+                       placeholder="Ketik 1 - 5 kata kunci terjemahan..." 
                        onkeydown="if(event.key==='Enter') eksekusiCariDalil()"
                        style="padding-left:30px !important; padding-right:75px !important; font-size:11px;">
                 <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:10px; top:9px; font-size:11px; color:var(--text-abu);"></i>
@@ -614,15 +628,41 @@
                 </button>
             </div>
 
+            <!-- FORM 2: PENCARIAN SPESIFIK QURAN (SURAH & RENTANG AYAT) -->
+            <div id="box-cari-spesifik-quran" style="display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+                <select id="pilih-surah-quran" class="form-control sel-compact" style="flex:2; min-width:140px;"></select>
+                <input type="number" id="input-ayat-mulai" class="form-control sel-compact" placeholder="Ayat dr" min="1" max="286" style="width:70px; text-align:center;">
+                <input type="number" id="input-ayat-sampai" class="form-control sel-compact" placeholder="s/d" min="1" max="286" style="width:70px; text-align:center;">
+                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
+                    <i class="fa-solid fa-search"></i> Buka Ayat
+                </button>
+            </div>
+
+            <!-- FORM 3: PENCARIAN SPESIFIK HADITS (KITAB & NOMOR HADITS) -->
+            <div id="box-cari-spesifik-hadis" style="display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+                <select id="pilih-kitab-hadis" class="form-control sel-compact" style="flex:2; min-width:150px;">
+                    <option value="Shahih Bukhari">Shahih Bukhari</option>
+                    <option value="Shahih Muslim">Shahih Muslim</option>
+                    <option value="Sunan Abu Daud">Sunan Abu Daud</option>
+                    <option value="Jami At-Tirmidzi">Jami At-Tirmidzi</option>
+                    <option value="Sunan An-Nasai">Sunan An-Nasai</option>
+                    <option value="Sunan Ibnu Majah">Sunan Ibnu Majah</option>
+                    <option value="Arba'in An-Nawawi">Arba'in An-Nawawi</option>
+                </select>
+                <input type="number" id="input-nomor-hadis" class="form-control sel-compact" placeholder="No. Hadits (misal: 1)" min="1" style="width:130px; text-align:center;">
+                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
+                    <i class="fa-solid fa-search"></i> Buka Hadits
+                </button>
+            </div>
+
             <!-- DAFTAR HASIL PENCARIAN -->
             <div id="hasil-pencarian-dalil" style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;">
-                    Silakan masukkan kata kunci terjemahan untuk mulai mencari.
+                    Silakan tentukan pencarian dalil untuk memuat hasil.
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- ================= 2.5. BAGIAN BANK KONSEP CERAMAH & KHUTBAH (COLLAPSIBLE / GARIS UNGU LEMBUT) ================= -->
     <div class="card-data-compact" style="border: 1px solid rgba(168, 85, 247, 0.35);">
@@ -631,18 +671,14 @@
                 <i class="fa-solid fa-microphone-lines" style="color: var(--neon-purple);"></i> 
                 Bank Konsep Ceramah & Khutbah
             </h3>
-            <button id="btn-toggle-ceramah-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.3);">
-                <i class="fa-solid fa-chevron-down" id="icon-chevron-ceramah"></i> Buka Konsep
+            <button id="btn-toggle-ceramah-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 3px solid rgba(168, 85, 247, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-ceramah"></i>
             </button>
         </div>
 
         <!-- WADAH KONTEN CERAMAH (TERSEMBUNYI DEFAULT) -->
         <div id="section-ceramah-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                <button onclick="toggleFormKonsepCeramah()" class="btn-compact" style="background:rgba(168, 85, 247, 0.15); color:var(--neon-purple); border:1px solid rgba(168, 85, 247, 0.3);">
-                    <i class="fa-solid fa-plus"></i> Tambah Konsep
-                </button>
-            </div>
+            
 
             <!-- FORM TAMBAH KONSEP CERAMAH -->
             <div id="form-wrap-ceramah" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-purple); margin-bottom:10px;">
@@ -661,9 +697,17 @@
             </div>
 
             <!-- SEARCH BAR PENCARIAN BERDASARKAN KATA -->
-            <div style="position:relative; margin-bottom:8px;">
-                <input type="text" id="cari-konsep-ceramah" class="form-control sel-compact" placeholder="Cari konsep ceramah..." oninput="cariKonsepCeramah(this.value)" style="padding-left:28px !important;">
-                <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:10px; top:10px; font-size:10px; color:var(--text-abu);"></i>
+            <div style="display: flex; gap: 8px; align-items: center; width: 100%; margin-bottom: 10px;">
+                <div style="position: relative; flex: 1;">
+                    <input type="text" id="cari-konsep-ceramah" class="form-control sel-compact" 
+                           placeholder="Cari konsep ceramah..." oninput="cariKonsepCeramah(this.value)" 
+                           style="width: 100%; padding-left: 28px !important; margin: 0;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 10px; font-size: 11px; color: var(--text-abu);"></i>
+                </div>
+                <button type="button" onclick="toggleFormKonsepCeramah()" class="btn-compact" 
+                        style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.4); height: 32px; width: 36px; padding: 0 !important; flex-shrink: 0;" title="Tambah Konsep">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
             </div>
 
             <div id="list-cards-ceramah" class="doc-grid-list">
@@ -682,8 +726,8 @@
                 <i class="fa-solid fa-folder-tree" style="color: var(--neon-blue);"></i> 
                 Perangkat Ajar Guru
             </h3>
-            <button id="btn-toggle-perangkat-section" class="btn-compact" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue); border: 1px solid rgba(59, 130, 246, 0.3);">
-                <i class="fa-solid fa-chevron-down" id="icon-chevron-perangkat"></i> Buka Perangkat
+            <button id="btn-toggle-perangkat-section" class="btn-compact" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue); border: 3px solid rgba(59, 130, 246, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-perangkat"></i>
             </button>
         </div>
 
@@ -691,7 +735,7 @@
         <div id="section-perangkat-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
             <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
                 <button onclick="toggleFormPerangkatAjar()" class="btn-compact" style="background:rgba(59,130,246,0.15); color:var(--neon-blue); border:1px solid rgba(59,130,246,0.3);">
-                    <i class="fa-solid fa-plus"></i> Upload Perangkat
+                    <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
 
@@ -745,8 +789,8 @@
                 <i class="fa-brands fa-whatsapp" style="color: var(--neon-green);"></i> 
                 WhatsApp Group & Pengurus Kelas
             </h3>
-            <button id="btn-toggle-wa-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid rgba(5, 213, 138, 0.3);">
-                <i class="fa-solid fa-chevron-down" id="icon-chevron-wa"></i> Buka Grup
+            <button id="btn-toggle-wa-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 3px solid rgba(5, 213, 138, 0.3);">
+                <i class="fa-solid fa-chevron-down" id="icon-chevron-wa"></i>
             </button>
         </div>
         
