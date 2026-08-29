@@ -1,16 +1,8 @@
 <!-- pages/paiapps-dashboard.html -->
 <style>
     /* =========================================================
-       DASHBOARD PAI-APPS PREMIUM DARK NEON THEME (MOBILE FIX)
+       DYNAMIC THEME - DASHBOARD PAI-APPS (DARK & LIGHT READY)
        ========================================================= */
-    :root {
-        --border-blue-subtle: rgba(59, 130, 246, 0.3);
-        --border-green-subtle: rgba(5, 213, 138, 0.3);
-        --border-yellow-subtle: rgba(245, 158, 11, 0.3);
-        --border-purple-subtle: rgba(168, 85, 247, 0.3);
-        --border-red-subtle: rgba(239, 68, 68, 0.3);
-    }
-
     .dashboard-container { 
         animation: fadeIn 0.4s ease-out; 
         max-width: 100%; 
@@ -32,7 +24,7 @@
         display: flex;
         align-items: center;
         gap: 8px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         overflow: hidden;
     }
     .card-metrik.border-blue { border: 1px solid var(--border-blue-subtle); }
@@ -91,14 +83,14 @@
     .alert-info { background: rgba(245, 158, 11, 0.1); color: var(--neon-yellow); border: 1px solid var(--border-yellow-subtle); }
     .alert-success { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); border: 1px solid var(--border-green-subtle); }
 
-    /* KARTU KONTEN UTAMA (RESPONSIF PADAT) */
+    /* KARTU KONTEN UTAMA */
     .card-data { 
         background: var(--bg-card); 
         border-radius: 12px; 
         padding: 12px; 
         border: 1px solid var(--border-color); 
         margin-bottom: 15px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         max-width: 100%;
         overflow: hidden; 
     }
@@ -131,12 +123,12 @@
         white-space: normal; 
     }
 
-    /* POLICE LINE BACKGROUND UNTUK HEADER PENGINGAT */
+    /* POLICE LINE BACKGROUND */
     .police-line-header {
         background: repeating-linear-gradient(
             -45deg,
-            #000000,
-            #000000 15px,
+            #1e293b,
+            #1e293b 15px,
             var(--neon-yellow) 15px,
             var(--neon-yellow) 30px
         );
@@ -145,7 +137,7 @@
         margin-bottom: 15px;
         border: none !important; 
         justify-content: center !important;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     }
     .police-line-text {
         background: var(--bg-card);
@@ -155,13 +147,13 @@
         color: var(--text-putih) !important;
         text-transform: uppercase;
         letter-spacing: 1px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     .police-line-text i {
         color: var(--neon-yellow);
     }
 
-    /* PENGINGAT KEGIATAN PENTING (1 BARIS RINGKAS DESKTOP & MOBILE) */
+    /* PENGINGAT KEGIATAN PENTING */
     .reminder-list { 
         list-style: none; 
         padding: 0; 
@@ -223,7 +215,7 @@
         border-color: var(--neon-green); 
     }
 
-    /* ================= WIDGET WAKTU SHOLAT ================= */
+    /* WIDGET WAKTU SHOLAT */
     .sholat-wrapper {
         background: transparent;
         border: none;
@@ -252,7 +244,6 @@
         gap: 6px;
     }
     
-    /* Animasi Hitung Mundur (Timer) */
     .sholat-countdown-timer {
         font-size: 13px;
         font-weight: 800;
@@ -281,7 +272,7 @@
         gap: 4px;
     }
     .sholat-pill {
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--bg-main);
         border: 1px solid var(--border-color);
         border-radius: 6px;
         padding: 5px 2px;
@@ -329,9 +320,8 @@
     }
     .jadwal-item:last-child { margin-bottom: 0; }
 
-    /* HIGHLIGHT JADWAL SEDANG BERLANGSUNG */
     .jadwal-item-aktif {
-        background: linear-gradient(135deg, rgba(5, 213, 138, 0.12) 0%, rgba(30, 58, 138, 0.25) 100%) !important;
+        background: linear-gradient(135deg, rgba(5, 213, 138, 0.12) 0%, rgba(59, 130, 246, 0.18) 100%) !important;
         border: 1.5px solid var(--neon-green) !important;
         box-shadow: 0 0 15px rgba(5, 213, 138, 0.35) !important;
         animation: pulseAktif 2s infinite ease-in-out;
@@ -340,7 +330,7 @@
 
     @keyframes pulseAktif {
         0%, 100% { box-shadow: 0 0 10px rgba(5, 213, 138, 0.25); border-color: var(--neon-green); }
-        50% { box-shadow: 0 0 20px rgba(5, 213, 138, 0.55); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 20px rgba(5, 213, 138, 0.55); border-color: var(--neon-cyan); }
     }
 
     .badge-live-kbm {
@@ -358,7 +348,6 @@
         word-break: break-all;
     }
 
-    /* WADAH GRAFIK AL-QURAN */
     .chart-wrapper {
         position: relative;
         width: 100%;
@@ -367,7 +356,6 @@
         max-height: 300px;
     }
 
-    /* PROGRESS BAR ANALITIK */
     .progress-bar-wrap {
         background: var(--bg-main);
         border-radius: 6px;
@@ -384,14 +372,12 @@
         border-radius: 6px;
     }
 
-    /* TAMPILAN DESKTOP (>768px) */
     @media (min-width: 768px) {
         .card-data { padding: 20px; border-radius: 16px; margin-bottom: 20px; }
         .card-header h3 { font-size: 13px; }
         .grid-metrik-utama { gap: 15px; }
         .card-metrik { padding: 16px; border-radius: 14px; }
         .reminder-title { font-size: 12px; }
-        .reminder-meta { font-size: 10px; }
         .sholat-wrapper { padding: 14px; gap: 12px; }
         .sholat-countdown-info { font-size: 12px; }
         .sholat-countdown-timer { font-size: 14px; }
@@ -434,7 +420,7 @@
         </div>
     </div>
 
-    <!-- 3. PENGINGAT KEGIATAN PENTING (DIAMBIL DARI DATABASE BERDASARKAN HARI INI) -->
+    <!-- 3. PENGINGAT KEGIATAN PENTING -->
     <div class="card-data border-yellow" id="dash-card-reminder" style="display: none;">
         <div class="card-header police-line-header">
             <h3 class="police-line-text"><i class="fa-solid fa-triangle-exclamation"></i> Agenda & Pengingat</h3>
@@ -452,14 +438,13 @@
             <h3><i class="fa-solid fa-calendar-day" style="color: var(--neon-green);"></i> Jadwal</h3>
         </div>
 
-        <!-- SUB-WIDGET WAKTU SHOLAT REAL-TIME -->
+        <!-- SUB-WIDGET WAKTU SHOLAT -->
         <div class="sholat-wrapper" id="dash-sholat-wrapper">
             <div class="sholat-countdown-box">
                 <div class="sholat-countdown-info">
                     <i class="fa-solid fa-mosque" style="color: var(--neon-green);"></i>
                     <span id="sholat-next-label">Menghubungkan API Waktu Sholat...</span>
-                    <!-- FITUR BARU: TANGGAL HIJRIAH -->
-                    <span id="sholat-hijri-date" style="font-size: 12px; color: var(--neon-yellow); margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;"></span>
+                    <span id="sholat-hijri-date" style="font-size: 12px; color: var(--neon-yellow); margin-left: 8px; border-left: 1px solid var(--border-color); padding-left: 8px;"></span>
                 </div>
                 <div class="sholat-countdown-timer" id="sholat-timer" style="font-size: 13px;">-:--:--</div>
             </div>
@@ -488,7 +473,6 @@
             </div>
         </div>
 
-        <!-- POSISI BARU: PEMILIH HARI JADWAL (SETELAH WAKTU SHOLAT) -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 4px 0;">
             <span style="font-size: 11px; font-weight: 600; color: var(--text-abu);">Pilih Hari KBM:</span>
             <select id="pilih-hari-jadwal" class="form-control" onchange="gantiHariJadwal(this.value)" style="padding: 2px 7px; font-size: 12px; height: 28px; width: auto; border-radius: 6px; border: 1px solid var(--border-green-subtle); color: var(--neon-green); font-weight: 700; background: var(--bg-main); cursor: pointer;">

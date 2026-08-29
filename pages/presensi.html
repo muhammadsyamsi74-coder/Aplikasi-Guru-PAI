@@ -1,21 +1,8 @@
 <!-- pages/presensi.html -->
 <style>
     /* =========================================================
-       PREMIUM DARK NEON THEME - PRESENSI
+       DYNAMIC THEME - PRESENSI (DARK & LIGHT READY)
        ========================================================= */
-    :root {
-        --bg-main: #0b121e;
-        --bg-card: #151d2a;
-        --border-color: #232f40;
-        --text-putih: #ffffff;
-        --text-abu: #8494a8;
-        --neon-green: #05d58a;
-        --neon-blue: #3b82f6;
-        --neon-yellow: #f59e0b;
-        --neon-red: #ef4444;
-        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
-    }
-
     .presensi-container { animation: fadeIn 0.4s ease-out; }
     
     .card-data { 
@@ -32,7 +19,7 @@
     }
     .form-control:focus { border-color: var(--neon-green); box-shadow: 0 0 0 4px rgba(5, 213, 138, 0.1); }
     
-    /* TAB CONTAINER (Dark Mode) */
+    /* TAB CONTAINER */
     .tab-container { 
         display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
         margin-bottom: 25px; border: 1px solid var(--border-color);
@@ -43,7 +30,7 @@
         font-size: 12px; font-weight: 600; color: var(--text-abu); cursor: pointer; white-space: nowrap; 
         transition: all 0.3s; border-radius: 8px; text-align: center;
     }
-    .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
+    .tab-btn.active { background: rgba(5, 213, 138, 0.15); color: var(--neon-green); }
 
     /* =========================================================
        KOTAK RINGKASAN EKSKLUSIF (4 KOTAK TERPISAH)
@@ -92,14 +79,14 @@
     }
 
     /* =========================================================
-       SISTEM TABEL ABSENSI (DARK NEON CARDS)
+       SISTEM TABEL ABSENSI
        ========================================================= */
     .table-scroll { width: 100%; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
     .table-inner { min-width: 330px; }
 
     .header-tabel-presensi {
         display: flex; align-items: center; padding: 10px 8px; margin-bottom: 5px;
-        font-size: 10px; font-weight: 500; color: var(--text-abu); background: transparent;
+        font-size: 10px; font-weight: 600; color: var(--text-abu); background: transparent;
         border-bottom: 1px solid var(--border-color); text-transform: capitalize;
     }
 
@@ -108,7 +95,7 @@
         display: flex !important; flex-direction: row !important; align-items: center !important; 
         justify-content: flex-start !important; flex-wrap: nowrap !important; padding: 10px 12px !important;
         background: var(--bg-card) !important; border: 1px solid var(--border-color) !important; 
-        border-radius: 12px !important; margin-bottom: 10px !important; width: 100% !important;
+        border-radius: 12px !important; margin-bottom: 1px !important; width: 100% !important;
     }
 
     .absen-info { display: flex !important; flex-direction: row !important; align-items: center !important; flex: 1 !important; min-width: 0 !important; }
@@ -146,14 +133,14 @@
         cursor: pointer; transition: all 0.2s; box-shadow: none !important; flex-shrink: 0 !important;
     }
 
-    .btn-hadir.active, .btn-sh.active { background: var(--neon-green) !important; color: var(--bg-main) !important; border-color: var(--neon-green) !important; box-shadow: 0 0 10px rgba(5,213,138,0.4) !important;}
-    .btn-sakit.active { background: var(--neon-yellow) !important; color: var(--bg-main) !important; border-color: var(--neon-yellow) !important; box-shadow: 0 0 10px rgba(245,158,11,0.4) !important;}
-    .btn-izin.active { background: var(--neon-blue) !important; color: #fff !important; border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(59,130,246,0.4) !important;}
-    .btn-alpa.active, .btn-ts.active { background: var(--neon-red) !important; color: #fff !important; border-color: var(--neon-red) !important; box-shadow: 0 0 10px rgba(239,68,68,0.4) !important;}
-    .btn-bawa.active { background: var(--neon-green) !important; color: var(--bg-main) !important; border-color: var(--neon-green) !important;}
-    .btn-tbawa.active { background: var(--neon-red) !important; color: #fff !important; border-color: var(--neon-red) !important;}
-    .btn-strip.active { background: #334155 !important; color: #fff !important; border-color: #475569 !important;}
-    .btn-hd.active { background: #d946ef !important; color: #fff !important; border-color: #d946ef !important;}
+    .btn-hadir.active, .btn-sh.active { background: var(--neon-green) !important; color: #ffffff !important; border-color: var(--neon-green) !important; box-shadow: 0 0 10px rgba(5,213,138,0.4) !important;}
+    .btn-sakit.active { background: var(--neon-yellow) !important; color: #ffffff !important; border-color: var(--neon-yellow) !important; box-shadow: 0 0 10px rgba(245,158,11,0.4) !important;}
+    .btn-izin.active { background: var(--neon-blue) !important; color: #ffffff !important; border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(59,130,246,0.4) !important;}
+    .btn-alpa.active, .btn-ts.active { background: var(--neon-red) !important; color: #ffffff !important; border-color: var(--neon-red) !important; box-shadow: 0 0 10px rgba(239,68,68,0.4) !important;}
+    .btn-bawa.active { background: var(--neon-green) !important; color: #ffffff !important; border-color: var(--neon-green) !important;}
+    .btn-tbawa.active { background: var(--neon-red) !important; color: #ffffff !important; border-color: var(--neon-red) !important;}
+    .btn-strip.active { background: var(--border-color) !important; color: var(--text-putih) !important; border-color: var(--border-color) !important;}
+    .btn-hd.active { background: #d946ef !important; color: #ffffff !important; border-color: #d946ef !important;}
 
     /* TOMBOL SIMPAN PREMIUM */
     .btn-primary {
@@ -168,11 +155,11 @@
     .list-data { list-style: none; padding: 0; }
     .list-data li { 
         padding: 10px 12px; 
-        background: rgba(255, 255, 255, 0.9); 
-        border: 1px solid #e2e8f0; 
+        background: var(--bg-main); 
+        border: 1px solid var(--border-color); 
         border-radius: 10px; 
         margin-bottom: 8px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         display: flex; 
         flex-direction: column; 
         gap: 4px;
@@ -181,14 +168,14 @@
     .list-data li:last-child { margin-bottom: 0; }
     
     .btn-action { 
-        background: #f8fafc; border: 1px solid #cbd5e1; cursor: pointer; 
+        background: var(--bg-card); border: 1px solid var(--border-color); cursor: pointer; 
         padding: 5px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; 
         transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; 
-        color: #334155; 
+        color: var(--text-putih); 
     }
-    .btn-action:hover { transform: scale(1.05); background: #e2e8f0; }
-    .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
-    .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
+    .btn-action:hover { transform: scale(1.05); background: var(--bg-card-hover); }
+    .btn-edit { color: var(--neon-blue); border-color: var(--border-blue-subtle); }
+    .btn-delete { color: var(--neon-red); border-color: var(--border-red-subtle); }
 
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }

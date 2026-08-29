@@ -27,20 +27,34 @@ window.toggleInputLainnyaMateri = function(el) {
 // ================= SIMPAN MATERI AJAR =================
 window.simpanMateriAjar = async function(event) {
     event.preventDefault();
-    let jenis = document.getElementById('mat-jenis').value;
-    if (jenis === 'Lainnya') {
-        jenis = document.getElementById('mat-jenis-kustom').value.trim();
+    
+    const elJenis = document.getElementById('mat-jenis');
+    const elJenisKustom = document.getElementById('mat-jenis-kustom');
+    const elSemester = document.getElementById('mat-semester');
+    const elJudul = document.getElementById('mat-judul');
+    const elDeskripsi = document.getElementById('mat-deskripsi');
+    const elTahun = document.getElementById('mat-tahun');
+    const elPin = document.getElementById('mat-pin');
+    const elLink = document.getElementById('mat-link');
+
+    let jenis = elJenis ? elJenis.value : '';
+    if (jenis === 'Lainnya' && elJenisKustom) {
+        jenis = elJenisKustom.value.trim();
     }
 
-    const semester = document.getElementById('mat-semester').value;
-    const judul = document.getElementById('mat-judul').value.trim();
-    const deskripsi = document.getElementById('mat-deskripsi').value.trim();
-    const tahun = document.getElementById('mat-tahun').value.trim();
-    const isPinned = document.getElementById('mat-pin').checked;
-    const link = document.getElementById('mat-link').value.trim();
+    const semester = elSemester ? elSemester.value : 'Ganjil';
+    const judul = elJudul ? elJudul.value.trim() : '';
+    const deskripsi = elDeskripsi ? elDeskripsi.value.trim() : '';
+    const tahun = elTahun ? elTahun.value.trim() : '';
+    const isPinned = elPin ? elPin.checked : false;
+    const link = elLink ? elLink.value.trim() : '';
 
     if (!jenis) {
         alert("Jenis materi ajar wajib diisi!");
+        return;
+    }
+    if (!judul || !link) {
+        alert("Judul dan link materi wajib diisi!");
         return;
     }
 
@@ -56,11 +70,14 @@ window.simpanMateriAjar = async function(event) {
         if (isPinned) {
             const { count, error: errCount } = await supabase
                 .from('materiajar')
-                .select('*', { count: 'exact', head: true })
+                .select('*', { count: 'exact' })
                 .eq('is_pinned', true);
-            if (errCount) throw errCount;
-            if (count >= 25) {
+            if (!errCount && count >= 25) {
                 alert("Batas maksimal 25 Pin tercapai!");
+                if (btn) {
+                    btn.innerHTML = txtAsli;
+                    btn.disabled = false;
+                }
                 return;
             }
         }
@@ -80,8 +97,7 @@ window.simpanMateriAjar = async function(event) {
         alert("Materi ajar berhasil disimpan!");
         event.target.reset();
         
-        const inpKustom = document.getElementById('mat-jenis-kustom');
-        if (inpKustom) inpKustom.style.display = 'none';
+        if (elJenisKustom) elJenisKustom.style.display = 'none';
         
         if (typeof window.setTahunAjaranOtomatis === 'function') {
             window.setTahunAjaranOtomatis();

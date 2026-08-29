@@ -1,21 +1,8 @@
 <!-- pages/penilaian.html -->
 <style>
     /* =========================================================
-       PREMIUM DARK NEON THEME - PENILAIAN (COMPACT MOBILE UI)
+       DYNAMIC THEME - PENILAIAN (COMPACT MOBILE & DESKTOP UI)
        ========================================================= */
-    :root {
-        --bg-main: #0b121e;
-        --bg-card: #151d2a;
-        --border-color: #232f40;
-        --text-putih: #ffffff;
-        --text-abu: #8494a8;
-        --neon-green: #05d58a;
-        --neon-blue: #3b82f6;
-        --neon-yellow: #f59e0b;
-        --neon-red: #ef4444;
-        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
-    }
-
     .penilaian-container { animation: fadeIn 0.4s ease-out; }
     
     .card-data { 
@@ -44,10 +31,10 @@
         font-size: 11px; font-weight: 600; color: var(--text-abu); cursor: pointer; white-space: nowrap; 
         transition: all 0.3s; border-radius: 8px; text-align: center;
     }
-    .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
+    .tab-btn.active { background: rgba(5, 213, 138, 0.15); color: var(--neon-green); }
 
-    /* DESAIN STUDENT CARD & ACCORDION (COMPACT MOBILE MODE) */
-    .absen-card { display: flex; flex-direction: column; padding: 8px 10px; border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 10px; margin-bottom: 8px; }
+    /* DESAIN STUDENT CARD & ACCORDION */
+    .absen-card { display: flex; flex-direction: column; padding: 8px 10px; border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 10px; margin-bottom: 1px; }
     .absen-info-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .absen-identity { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
     
@@ -94,8 +81,8 @@
     /* LAYOUT TUGAS T/TS */
     .wrap-tugas { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; width: 100%; margin-top: 6px;}
     .btn-tuntas { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-abu); font-weight: 700; font-size: 10px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display:flex; justify-content:center; align-items:center; padding:0; }
-    .btn-tuntas.active.t { background: var(--neon-green); color: var(--bg-main); border-color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.4); }
-    .btn-tuntas.active.ts { background: var(--neon-red); color: #fff; border-color: var(--neon-red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    .btn-tuntas.active.t { background: var(--neon-green); color: #ffffff; border-color: var(--neon-green); box-shadow: 0 0 10px rgba(5, 213, 138, 0.4); }
+    .btn-tuntas.active.ts { background: var(--neon-red); color: #ffffff; border-color: var(--neon-red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
 
     /* LAYOUT KOMPONEN BANYAK (GRID) */
     .grid-input-nilai { display: grid; grid-template-columns: 1fr; gap: 6px; width: 100%; margin-bottom: 6px; }
@@ -122,7 +109,6 @@
         .grid-input-nilai { grid-template-columns: repeat(2, 1fr); }
         .hafalan-grid { grid-template-columns: repeat(4, 1fr); }
 
-        /* KARTU TUGAS 1 BARIS DESKTOP */
         .absen-card-tugas {
             flex-direction: row !important;
             align-items: center !important;
@@ -170,7 +156,7 @@
                                 <select id="input-nama-tugas-dropdown" class="form-control" onchange="loadNilaiTugas()" style="flex: 1;">
                                     <option value="">-- Pilih Tugas --</option>
                                 </select>
-                                <button type="button" id="btn-hapus-tugas" onclick="hapusTugasAktif()" class="btn-toggle-input" style="color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); padding: 10px 12px; border-radius: 8px;" title="Hapus Tugas Ini">
+                                <button type="button" id="btn-hapus-tugas" onclick="hapusTugasAktif()" class="btn-toggle-input" style="color: var(--neon-red); border-color: var(--border-red-subtle); padding: 10px 12px; border-radius: 8px;" title="Hapus Tugas Ini">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>

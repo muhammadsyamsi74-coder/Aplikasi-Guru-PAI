@@ -1,37 +1,18 @@
 <!-- pages/master.html -->
 <style>
     /* =========================================================
-       PREMIUM DARK NEON THEME - MASTER (KELAS & SISWA)
+       DYNAMIC THEME - MASTER (KELAS, SISWA, JADWAL, PENGINGAT)
        ========================================================= */
-    :root {
-        --bg-main: #0b121e;
-        --bg-card: #151d2a;
-        --border-color: #232f40;
-        --border-blue-subtle: rgba(59, 130, 246, 0.28);
-        --text-putih: #ffffff;
-        --text-abu: #8494a8;
-        --neon-green: #05d58a;
-        --neon-blue: #3b82f6;
-        --neon-yellow: #f59e0b;
-        --neon-red: #ef4444;
-        --neon-purple: #8b5cf6;
-        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
-        --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
-        --gradient-yellow: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
-        --gradient-red: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
-    }
-
     .master-container { animation: fadeIn 0.4s ease-out; }
     .section-title { font-size: 18px; font-weight: 700; color: var(--text-putih); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
     
-    /* KARTU GELAP (GARIS MENYELURUH TIPIS BIRU LEMBUT) */
+    /* KARTU DATA UTAMA */
     .card-data { 
         background: var(--bg-card); 
         border-radius: 16px; padding: 20px; 
         border: 1px solid var(--border-blue-subtle); 
         margin-bottom: 20px; 
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
     
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
@@ -47,7 +28,7 @@
     .form-control:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
     textarea.form-control { resize: vertical; min-height: 80px; }
     
-    /* TOMBOL UTAMA PREMIUM */
+    /* TOMBOL UTAMA */
     .btn-primary {
         background: var(--gradient-primary); border: none; border-radius: 16px;
         color: white; font-weight: 700; font-size: 13px; box-shadow: 0 6px 20px rgba(5, 213, 138, 0.2);
@@ -60,11 +41,11 @@
     .btn-yellow { background: var(--gradient-yellow); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2); }
     .btn-red { background: var(--gradient-red); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2); }
 
-    /* DESAIN LAYOUT DESKTOP 1 BARIS */
+    /* LAYOUT DESKTOP 1 BARIS */
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
 
-    /* KELENGKAPAN LIST & ACTION BTN */
+    /* RIWAYAT & DAFTAR LIST */
     .list-data { list-style: none; padding: 0; }
     .list-data li { padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-putih); display: flex; justify-content: space-between; align-items: center; }
     .list-data li:last-child { border-bottom: none; }
@@ -72,7 +53,7 @@
     .btn-action { background: var(--bg-main); border: 1px solid var(--border-blue-subtle); cursor: pointer; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-action:hover { transform: scale(1.05); }
     .btn-edit { color: var(--neon-blue); }
-    .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
+    .btn-delete { color: var(--neon-red); border-color: var(--border-red-subtle); }
 
     /* BADGE STATUS KELAS */
     .badge-status-kelas {
@@ -206,18 +187,18 @@
                     <div class="form-group" style="flex: 0.8;">
                         <label>Kelamin</label>
                         <select id="input-jk" class="form-control" required>
-                            <option value="L" style="background:var(--bg-card);">Laki-laki</option>
-                            <option value="P" style="background:var(--bg-card);">Perempuan</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label>Jabatan di Kelas</label>
                         <select id="input-jabatan" class="form-control" required>
-                            <option value="Anggota" style="background:var(--bg-card);">Anggota</option>
-                            <option value="Ketua Kelas" style="background:var(--bg-card);">Ketua Kelas</option>
-                            <option value="Wakil Ketua" style="background:var(--bg-card);">Wakil Ketua</option>
-                            <option value="Sekretaris" style="background:var(--bg-card);">Sekretaris</option>
-                            <option value="Bendahara" style="background:var(--bg-card);">Bendahara</option>
+                            <option value="Anggota">Anggota</option>
+                            <option value="Ketua Kelas">Ketua Kelas</option>
+                            <option value="Wakil Ketua">Wakil Ketua</option>
+                            <option value="Sekretaris">Sekretaris</option>
+                            <option value="Bendahara">Bendahara</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1;">
@@ -529,7 +510,6 @@
                 </div>
 
                 <div class="desktop-row">
-                    <!-- KOTAK WAKTU YANG DI RENDER OTOMATIS OLEH JS SESUAI SIKLUS -->
                     <div class="form-group" style="flex: 1.5;" id="wadah-input-waktu"></div>
                     
                     <div class="form-group" style="flex: 1;">

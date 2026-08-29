@@ -1,34 +1,17 @@
 <!-- pages/jurnal.html -->
 <style>
     /* =========================================================
-       PREMIUM DARK NEON THEME - JURNAL
+       DYNAMIC THEME - JURNAL (DARK & LIGHT READY)
        ========================================================= */
-    :root {
-        --bg-main: #0b121e;
-        --bg-card: #151d2a;
-        --border-color: #232f40;
-        --text-putih: #ffffff;
-        --text-abu: #8494a8;
-        --neon-green: #05d58a;
-        --neon-blue: #3b82f6;
-        --neon-yellow: #f59e0b;
-        --neon-red: #ef4444;
-        --neon-purple: #8b5cf6;
-        --border-blue-subtle: rgba(59, 130, 246, 0.28);
-        --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #05d58a 100%);
-        --gradient-blue: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        --gradient-purple: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%);
-    }
-
     .jurnal-container { animation: fadeIn 0.4s ease-out; }
     
-    /* DESAIN KARTU GELAP UTAMA */
+    /* DESAIN KARTU UTAMA */
     .card-data { 
         background: var(--bg-card); 
         border-radius: 16px; padding: 20px; 
         border: 1px solid var(--border-blue-subtle);
         margin-bottom: 20px; 
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
     
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
@@ -68,7 +51,7 @@
     /* DESAIN TAB */
     .tab-container { 
         display: flex; background: var(--bg-card); border-radius: 12px; padding: 6px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 25px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 25px; 
         border: 1px solid var(--border-blue-subtle);
         overflow-x: auto; scrollbar-width: none; margin-top: 5px; 
     }
@@ -78,7 +61,7 @@
         font-size: 12px; font-weight: 600; color: var(--text-abu); cursor: pointer; white-space: nowrap; 
         transition: all 0.3s; border-radius: 8px; text-align: center;
     }
-    .tab-btn.active { background: rgba(5, 213, 138, 0.1); color: var(--neon-green); }
+    .tab-btn.active { background: rgba(5, 213, 138, 0.15); color: var(--neon-green); }
 
     .desktop-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 15px; }
     .desktop-row .form-group { flex: 1; min-width: 140px; margin-bottom: 0; }
@@ -120,11 +103,11 @@
     .list-data { list-style: none; padding: 0; }
     .list-data li { 
         padding: 10px 12px; 
-        background: rgba(255, 255, 255, 0.95); 
-        border: 1px solid rgba(59, 130, 246, 0.35); 
+        background: var(--bg-main); 
+        border: 1px solid var(--border-blue-subtle); 
         border-radius: 10px; 
         margin-bottom: 8px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         display: flex; 
         flex-direction: column; 
         gap: 4px;
@@ -133,19 +116,19 @@
     .list-data li:last-child { margin-bottom: 0; }
     
     .btn-action { 
-        background: #f8fafc; border: 1px solid #cbd5e1; cursor: pointer; 
+        background: var(--bg-card); border: 1px solid var(--border-color); cursor: pointer; 
         padding: 5px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; 
         transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; 
-        color: #334155; 
+        color: var(--text-putih); 
     }
-    .btn-action:hover { transform: scale(1.05); background: #e2e8f0; }
-    .btn-edit { color: var(--neon-blue); border-color: rgba(59, 130, 246, 0.3); }
-    .btn-delete { color: var(--neon-red); border-color: rgba(239, 68, 68, 0.3); }
+    .btn-action:hover { transform: scale(1.05); background: var(--bg-card-hover); }
+    .btn-edit { color: var(--neon-blue); border-color: var(--border-blue-subtle); }
+    .btn-delete { color: var(--neon-red); border-color: var(--border-red-subtle); }
 
     /* CHECKBOX & KOTAK SISWA */
     .check-all-wrapper { 
         display: flex; align-items: center; gap: 10px; padding: 12px; 
-        background: rgba(5, 213, 138, 0.05); border-radius: 12px; font-weight: 600; 
+        background: rgba(5, 213, 138, 0.08); border-radius: 12px; font-weight: 600; 
         font-size: 12px; color: var(--neon-green); margin-bottom: 10px; 
         border: 1px solid var(--border-blue-subtle);
     }
@@ -178,7 +161,7 @@
     <div id="tab-jurnal-mengajar" style="display: block;">
         <div class="card-data">
             
-            <!-- BARIS 1: KELAS, TANGGAL, PERTEMUAN KE (1 BARIS PENUH DI MOBILE & DESKTOP) -->
+            <!-- BARIS 1: KELAS, TANGGAL, PERTEMUAN KE -->
             <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; width: 100%;">
                 <div class="form-group" style="flex: 1.5; margin-bottom: 0; min-width: 0;">
                     <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kelas</label>
@@ -239,7 +222,7 @@
             </button>
         </div>
 
-        <!-- KOTAK REKAP MENGAJAR (TERSEMBUNYI SECARA DEFAULT) -->
+        <!-- KOTAK REKAP MENGAJAR -->
         <div id="area-rekap-jurnal-mengajar" class="card-data" style="display: none; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Mengajar</div>
             <div class="desktop-row" style="margin-bottom: 10px;">
@@ -290,9 +273,8 @@
                 </div>
             </div>
 
-            <!-- Bagian 1: Mode Kelas -->
+            <!-- Mode Kelas -->
             <div id="wrap-sikap-mode-kelas">
-                <!-- BARIS 1: KELAS & TANGGAL (1 BARIS DENGAN KELAS LEBIH LEBAR) -->
                 <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 12px; width: 100%;">
                     <div class="form-group" style="flex: 1.6; margin-bottom: 0; min-width: 0;">
                         <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pilih Kelas</label>
@@ -316,9 +298,8 @@
                 </div>
             </div>
 
-            <!-- Bagian 2: Mode Manual -->
+            <!-- Mode Manual -->
             <div id="wrap-sikap-mode-manual" style="display: none;">
-                <!-- BARIS 1 MANUAL: NAMA & KELAS (1 BARIS) -->
                 <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 12px; width: 100%;">
                     <div class="form-group" style="flex: 2; margin-bottom: 0; min-width: 0;">
                         <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nama Siswa</label>
@@ -331,7 +312,7 @@
                 </div>
             </div>
 
-            <!-- BARIS 2 KESELURUHAN: JENIS SIKAP & KATEGORI (1 BARIS PENUH) -->
+            <!-- Baris Jenis Sikap & Kategori -->
             <div style="display: flex; gap: 6px; flex-wrap: nowrap; align-items: flex-end; margin-bottom: 15px; margin-top: 5px; width: 100%;">
                 <div class="form-group" style="flex: 1; margin-bottom: 0; min-width: 0;">
                     <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Jenis Sikap</label>
@@ -376,7 +357,7 @@
             </button>
         </div>
 
-        <!-- KOTAK REKAP SIKAP (TERSEMBUNYI SECARA DEFAULT) -->
+        <!-- KOTAK REKAP SIKAP -->
         <div id="area-rekap-jurnal-sikap" class="card-data" style="display: none; background: rgba(59, 130, 246, 0.05); border: 1px dashed var(--neon-blue);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-blue); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Sikap</div>
             <div class="desktop-row" style="margin-bottom: 10px;">
@@ -462,7 +443,7 @@
             </button>
         </div>
 
-        <!-- KOTAK REKAP WALI (TERSEMBUNYI SECARA DEFAULT) -->
+        <!-- KOTAK REKAP WALI -->
         <div id="area-rekap-jurnal-wali" class="card-data" style="display: none; background: rgba(139, 92, 246, 0.05); border: 1px dashed var(--neon-purple);">
             <div style="font-size: 13px; font-weight: 700; color: var(--neon-purple); margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> Unduh Rekap Jurnal Guru Wali</div>
             <div class="desktop-row">

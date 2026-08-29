@@ -3,25 +3,16 @@
     @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap');
 
     /* =========================================================
-       COMPACT UI - TOOLS & DOKUMEN AJAR PAI (VERTIKAL STACK)
+       DYNAMIC THEME - TOOLS & DOKUMEN AJAR PAI (DARK & LIGHT)
        ========================================================= */
-    :root {
-        --border-blue-subtle: rgba(59, 130, 246, 0.3);
-        --border-green-subtle: rgba(5, 213, 138, 0.3);
-        --border-yellow-subtle: rgba(245, 158, 11, 0.3);
-        --border-purple-subtle: rgba(168, 85, 247, 0.3);
-        --border-emerald-subtle: rgba(16, 185, 129, 0.35);
-    }
-
     .card-data-compact {
         background: var(--bg-card);
         border-radius: 14px;
         padding: 14px;
         border: 1px solid var(--border-color);
         margin-bottom: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     }
-    /* VARIASI WARNA BORDER MENYELURUH */
     .card-data-compact.border-yellow { border: 1px solid var(--border-yellow-subtle); }
     .card-data-compact.border-green { border: 1px solid var(--border-green-subtle); }
     .card-data-compact.border-blue { border: 1px solid var(--border-blue-subtle); }
@@ -71,7 +62,7 @@
     }
     .app-card-compact:hover, .app-card-compact:active {
         border-color: var(--neon-green);
-        background: var(--bg-card-hover, #1b2534);
+        background: var(--bg-card-hover);
     }
     .app-card-compact i { font-size: 14px; }
     .app-card-compact span { font-size: 10px; font-weight: 600; color: var(--text-putih); }
@@ -161,7 +152,7 @@
     }
     .item-doc-row.pinned {
         border-color: rgba(245, 158, 11, 0.4);
-        background: rgba(245, 158, 11, 0.03);
+        background: rgba(245, 158, 11, 0.05);
     }
     .doc-left-area {
         display: flex;
@@ -187,7 +178,6 @@
         flex-shrink: 0;
     }
 
-    /* TOMBOL IKON MINIMALIS */
     .btn-icon-doc {
         width: 24px;
         height: 24px;
@@ -214,7 +204,7 @@
         border-radius: 4px;
         background: rgba(59, 130, 246, 0.15);
         color: var(--neon-blue);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid var(--border-blue-subtle);
         flex-shrink: 0;
     }
 
@@ -283,7 +273,7 @@
     .btn-open-group {
         width: 100%;
         background: linear-gradient(135deg, #059669 0%, #05d58a 100%);
-        color: #0b121e;
+        color: #ffffff;
         border: none;
         border-radius: 8px;
         padding: 8px;
@@ -322,7 +312,7 @@
     .btn-wa-personal {
         background: rgba(5, 213, 138, 0.15);
         color: var(--neon-green);
-        border: 1px solid rgba(5, 213, 138, 0.3);
+        border: 1px solid var(--border-green-subtle);
         border-radius: 4px;
         padding: 2px 6px;
         font-size: 9px;
@@ -335,10 +325,10 @@
     }
     .btn-wa-personal:hover {
         background: var(--neon-green);
-        color: var(--bg-main);
+        color: #ffffff;
     }
 
-    /* STYLING KHUSUS FITUR PENCARIAN QURAN & HADIS */
+    /* FITUR PENCARIAN QURAN & HADIS */
     .search-tab-nav {
         display: flex;
         gap: 6px;
@@ -388,6 +378,7 @@
         padding: 8px 0;
         letter-spacing: 0;
         word-spacing: 1.5px;
+        color: var(--text-putih);
     }
 
     .text-terjemahan-box {
@@ -395,15 +386,15 @@
         line-height: 1.6;
         border-top: 1px dashed var(--border-color);
         padding-top: 8px;
+        color: var(--text-putih);
     }
 
-    /* KELAS PEWARNAAN SANAD & MATAN */
     .sanad-text {
         color: var(--neon-yellow) !important;
         font-weight: 500;
     }
     .matan-text {
-        color: #ffffff !important;
+        color: var(--text-putih) !important;
         font-weight: 400;
     }
 
@@ -414,13 +405,12 @@
         border-radius: 5px;
         background: rgba(59, 130, 246, 0.15);
         color: var(--neon-blue);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        border: 1px solid var(--border-blue-subtle);
     }
 
-    /* EFEK STABILO UNTUK KATA KUNCI PENCARIAN */
     .highlight-kata {
-        background-color: rgba(245, 158, 11, 0.35);
-        color: #fef08a !important;
+        background-color: rgba(245, 158, 11, 0.25);
+        color: var(--neon-yellow) !important;
         font-weight: 700;
         padding: 1px 4px;
         border-radius: 4px;
@@ -430,7 +420,7 @@
 
 <div class="paiapps-tools-container">
 
-    <!-- ================= 1. BAGIAN ALAT BANTU (GARIS KUNING LEMBUT) ================= -->
+    <!-- ================= 1. ALAT BANTU (GARIS KUNING LEMBUT) ================= -->
     <div class="card-data-compact border-yellow">
         <div class="card-header-compact">
             <h3><i class="fa-solid fa-toolbox" style="color: var(--neon-yellow);"></i> Alat Bantu Pengajaran PAI</h3>
@@ -501,14 +491,14 @@
                 <button onclick="tutupSemuaTools()" style="background:none; border:none; color:var(--neon-red); cursor:pointer; font-size:12px;"><i class="fa-solid fa-times"></i></button>
             </div>
             <input type="text" id="input-list-giliran" class="form-control sel-compact" placeholder="Nama / Kelompok pisahkan koma..." style="margin-bottom:6px;">
-            <div id="display-spin-pemenang" style="padding:8px; text-align:center; background:var(--bg-card); border-radius:8px; border:1px dashed var(--neon-purple); font-size:13px; font-weight:700; color:var(--neon-purple); margin-bottom:6px;">
+            <div id="display-spin-pemenang" style="padding:8px; text-align:center; background:var(--bg-card); border-radius:8px; border:1px dashed var(--border-purple-subtle); font-size:13px; font-weight:700; color:var(--neon-purple); margin-bottom:6px;">
                 Siap diundi
             </div>
             <div style="display:flex; gap:6px;">
                 <button onclick="putarUndianMaju()" class="btn-compact" style="flex:2; background:var(--gradient-purple); color:#fff;">
                     <i class="fa-solid fa-play"></i> Putar Giliran
                 </button>
-                <button onclick="resetUndianMaju()" class="btn-compact btn-action" style="flex:1; color:var(--neon-red); border:1px solid rgba(239,68,68,0.3); background:transparent;">
+                <button onclick="resetUndianMaju()" class="btn-compact btn-action" style="flex:1; color:var(--neon-red); border:1px solid var(--border-red-subtle); background:transparent;">
                     <i class="fa-solid fa-rotate-left"></i> Reset
                 </button>
             </div>
@@ -534,11 +524,11 @@
         </div>
     </div>
 
-    <!-- ================= 2. BAGIAN MATERI AJAR (GARIS HIJAU LEMBUT) ================= -->
+    <!-- ================= 2. MATERI AJAR (GARIS HIJAU LEMBUT) ================= -->
     <div class="card-data-compact border-green">
         <div class="card-header-compact">
             <h3><i class="fa-solid fa-book-open" style="color: var(--neon-green);"></i> Bank Materi Ajar</h3>
-            <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:3px solid rgba(5,213,138,0.3);">
+            <button onclick="toggleFormMateriAjar()" class="btn-compact" style="background:rgba(5,213,138,0.15); color:var(--neon-green); border:1px solid var(--border-green-subtle);">
                 <i class="fa-solid fa-plus"></i>
             </button>
         </div>
@@ -550,7 +540,7 @@
                     <select id="mat-jenis" class="form-control sel-compact" style="flex:1.6;" onchange="toggleInputLainnyaMateri(this)" required>
                         <option value="Materi Utama">Materi Utama</option>
                         <option value="Power Point">Power Point</option>
-                        <option value="Referensi Dokumen">Referensi Dokumen</option>
+                        <option value="Referensi">Referensi</option>
                         <option value="Ringkasan">Ringkasan</option>
                         <option value="Web">Web</option>
                         <option value="Lainnya">Lainnya (Ketik Sendiri)</option>
@@ -565,7 +555,17 @@
                 <input type="text" id="mat-judul" class="form-control sel-compact" placeholder="Judul Materi..." style="margin-bottom:6px;" required>
                 <input type="text" id="mat-deskripsi" class="form-control sel-compact" placeholder="Deskripsi singkat..." style="margin-bottom:6px;">
                 <input type="url" id="mat-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Canva / Web...)" style="margin-bottom:8px;" required>
-                <button type="submit" id="btn-simpan-materi" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-primary);"><i class="fa-solid fa-save"></i> Simpan Materi</button>
+                
+                <!-- TOMBOL SIMPAN & CHECKBOX PIN -->
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="submit" id="btn-simpan-materi" class="btn-compact btn-primary" style="flex: 1; height: 32px; background: var(--gradient-primary);">
+                        <i class="fa-solid fa-save"></i> Simpan Materi
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-putih); background: var(--bg-card); padding: 0 10px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); white-space: nowrap;">
+                        <input type="checkbox" id="mat-pin" style="accent-color: var(--neon-yellow); cursor: pointer;">
+                        <label for="mat-pin" style="cursor: pointer; margin: 0; font-weight: 600; color: var(--neon-yellow);"><i class="fa-solid fa-thumbtack"></i> Pin</label>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -577,22 +577,21 @@
         </button>
     </div>
 
-    <!-- ================= 2.2. BAGIAN MESIN PENCARI QURAN & HADITS (COLLAPSIBLE) ================= -->
+    <!-- ================= 2.2. MESIN PENCARI QURAN & HADITS (COLLAPSIBLE) ================= -->
     <div class="card-data-compact border-green">
         <div class="card-header-compact" onclick="toggleSectionDalil()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-solid fa-magnifying-glass-arrow-right" style="color: var(--neon-green);"></i> 
                 Pencarian Al-Qur'an & Hadits Sahih
             </h3>
-            <button id="btn-toggle-dalil-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 3px solid rgba(5, 213, 138, 0.3);">
+            <button id="btn-toggle-dalil-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid var(--border-green-subtle);">
                 <i class="fa-solid fa-chevron-down" id="icon-chevron-dalil"></i>
             </button>
         </div>
 
-        <!-- WADAH KONTEN PENCARIAN (DEFAULT TERSEMBUNYI) -->
+        <!-- WADAH KONTEN PENCARIAN -->
         <div id="section-dalil-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
             
-            <!-- SUB TAB PILIHAN QURAN / HADITS -->
             <div class="search-tab-nav">
                 <button type="button" id="tab-cari-quran" class="btn-search-tab active" onclick="gantiKategoriDalil('quran')">
                     <i class="fa-solid fa-book-quran"></i> Al-Qur'an
@@ -602,7 +601,6 @@
                 </button>
             </div>
 
-            <!-- PILIHAN METODE PENCARIAN -->
             <div style="display:flex; gap:12px; margin-bottom:10px; font-size:11px; color:var(--text-putih); padding-left:2px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="radio" name="mode-cari-dalil" value="kata" checked onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
@@ -610,12 +608,11 @@
                 </label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="radio" name="mode-cari-dalil" value="spesifik" onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
-                    <span id="label-mode-spesifik">surat
-                    </span>
+                    <span id="label-mode-spesifik">surat</span>
                 </label>
             </div>
 
-            <!-- FORM 1: PENCARIAN KATA (DEFAULT) -->
+            <!-- FORM 1: PENCARIAN KATA -->
             <div id="box-cari-kata" style="position:relative; margin-bottom:10px;">
                 <input type="text" id="input-keyword-dalil" class="form-control sel-compact" 
                        placeholder="Ketik 1 - 5 kata kunci terjemahan..." 
@@ -624,21 +621,22 @@
                 <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:10px; top:9px; font-size:11px; color:var(--text-abu);"></i>
                 
                 <button onclick="eksekusiCariDalil()" class="btn-compact" 
-                        style="position:absolute; right:3px; top:3px; height:26px; background:var(--neon-green); color:#0b121e; font-weight:800; border-radius:6px;">
+                        style="position:absolute; right:3px; top:3px; height:26px; background:var(--neon-green); color:#ffffff; font-weight:800; border-radius:6px;">
                     Cari
                 </button>
             </div>
 
-            <!-- FORM 2: PENCARIAN SPESIFIK QURAN (SURAH & RENTANG AYAT) -->
+            <!-- FORM 2: PENCARIAN SPESIFIK QURAN -->
             <div id="box-cari-spesifik-quran" style="display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
                 <select id="pilih-surah-quran" class="form-control sel-compact" style="flex:2; min-width:140px;"></select>
                 <input type="number" id="input-ayat-mulai" class="form-control sel-compact" placeholder="Ayat dr" min="1" max="286" style="width:70px; text-align:center;">
                 <input type="number" id="input-ayat-sampai" class="form-control sel-compact" placeholder="s/d" min="1" max="286" style="width:70px; text-align:center;">
-                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
-                    <i class="fa-solid fa-search"></i> cari
+                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#ffffff; padding:6px 12px !important; font-weight:800;">
+                    <i class="fa-solid fa-search"></i> Cari
                 </button>
             </div>
-            <!-- FORM 3: PENCARIAN SPESIFIK HADITS (KITAB & NOMOR HADITS) -->
+
+            <!-- FORM 3: PENCARIAN SPESIFIK HADITS -->
             <div id="box-cari-spesifik-hadis" style="display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
                 <select id="pilih-kitab-hadis" class="form-control sel-compact" style="flex:2; min-width:150px;">
                     <option value="Shahih Bukhari">Shahih Bukhari</option>
@@ -650,12 +648,12 @@
                     <option value="Arba'in An-Nawawi">Arba'in An-Nawawi</option>
                 </select>
                 <input type="number" id="input-nomor-hadis" class="form-control sel-compact" placeholder="No. Hadits (misal: 1)" min="1" style="width:130px; text-align:center;">
-                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
-                    <i class="fa-solid fa-search"></i> cari
+                <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#ffffff; padding:6px 12px !important; font-weight:800;">
+                    <i class="fa-solid fa-search"></i> Cari
                 </button>
             </div>
 
-            <!-- DAFTAR HASIL PENCARIAN -->
+            <!-- HASIL PENCARIAN -->
             <div id="hasil-pencarian-dalil" style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;">
                     Silakan tentukan pencarian dalil untuk memuat hasil.
@@ -664,39 +662,41 @@
         </div>
     </div>
 
-    <!-- ================= 2.5. BAGIAN BANK KONSEP CERAMAH & KHUTBAH (COLLAPSIBLE / GARIS UNGU LEMBUT) ================= -->
-    <div class="card-data-compact" style="border: 1px solid rgba(168, 85, 247, 0.35);">
+    <!-- ================= 2.5. BANK KONSEP CERAMAH & KHUTBAH (COLLAPSIBLE) ================= -->
+    <div class="card-data-compact border-purple">
         <div class="card-header-compact" onclick="toggleSectionCeramah()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-solid fa-microphone-lines" style="color: var(--neon-purple);"></i> 
                 Bank Konsep Ceramah & Khutbah
             </h3>
-            <button id="btn-toggle-ceramah-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 3px solid rgba(168, 85, 247, 0.3);">
+            <button id="btn-toggle-ceramah-section" class="btn-compact" style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid var(--border-purple-subtle);">
                 <i class="fa-solid fa-chevron-down" id="icon-chevron-ceramah"></i>
             </button>
         </div>
 
-        <!-- WADAH KONTEN CERAMAH (TERSEMBUNYI DEFAULT) -->
+        <!-- WADAH KONTEN CERAMAH -->
         <div id="section-ceramah-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
             
-
             <!-- FORM TAMBAH KONSEP CERAMAH -->
             <div id="form-wrap-ceramah" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-purple); margin-bottom:10px;">
                 <form onsubmit="simpanKonsepCeramah(event)">
                     <input type="text" id="cer-judul" class="form-control sel-compact" placeholder="Judul Konsep Ceramah / Khutbah..." style="margin-bottom:6px;" required>
-                    <input type="url" id="cer-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Web...)" style="margin-bottom:6px;" required>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 4px;">
-                        <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih);">
-                            <input type="checkbox" id="cer-pin" style="accent-color:var(--neon-yellow);"> <label for="cer-pin">Pin ke atas</label>
+                    <input type="url" id="cer-link" class="form-control sel-compact" placeholder="Link Materi (Google Drive / Web...)" style="margin-bottom:8px;" required>
+                    
+                    <!-- BARIS TOMBOL SIMPAN & CHECKBOX PIN -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="submit" id="btn-simpan-ceramah" class="btn-compact btn-primary" style="flex: 1; height: 32px; background: var(--gradient-purple);">
+                            <i class="fa-solid fa-save"></i> Simpan Konsep
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-putih); background: var(--bg-card); padding: 0 10px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); white-space: nowrap;">
+                            <input type="checkbox" id="cer-pin" style="accent-color: var(--neon-yellow); cursor: pointer;">
+                            <label for="cer-pin" style="cursor: pointer; margin: 0; font-weight: 600; color: var(--neon-yellow);"><i class="fa-solid fa-thumbtack"></i> Pin</label>
                         </div>
                     </div>
-                    <button type="submit" id="btn-simpan-ceramah" class="btn-compact btn-primary" style="width:100%; background:linear-gradient(135deg, #1e1b4b 0%, #a855f7 100%);">
-                        <i class="fa-solid fa-save"></i> Simpan Konsep
-                    </button>
                 </form>
             </div>
 
-            <!-- SEARCH BAR PENCARIAN BERDASARKAN KATA -->
+            <!-- SEARCH BAR CERAMAH -->
             <div style="display: flex; gap: 8px; align-items: center; width: 100%; margin-bottom: 10px;">
                 <div style="position: relative; flex: 1;">
                     <input type="text" id="cari-konsep-ceramah" class="form-control sel-compact" 
@@ -705,7 +705,7 @@
                     <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 10px; font-size: 11px; color: var(--text-abu);"></i>
                 </div>
                 <button type="button" onclick="toggleFormKonsepCeramah()" class="btn-compact" 
-                        style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(168, 85, 247, 0.4); height: 32px; width: 36px; padding: 0 !important; flex-shrink: 0;" title="Tambah Konsep">
+                        style="background: rgba(168, 85, 247, 0.15); color: var(--neon-purple); border: 1px solid var(--border-purple-subtle); height: 32px; width: 36px; padding: 0 !important; flex-shrink: 0;" title="Tambah Konsep">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
@@ -719,22 +719,22 @@
         </div>
     </div>
 
-    <!-- ================= 3. BAGIAN PERANGKAT AJAR (GARIS BIRU LEMBUT) ================= -->
+    <!-- ================= 3. PERANGKAT AJAR (GARIS BIRU LEMBUT) ================= -->
     <div class="card-data-compact border-blue">
         <div class="card-header-compact" onclick="toggleSectionPerangkat()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-solid fa-folder-tree" style="color: var(--neon-blue);"></i> 
                 Perangkat Ajar Guru
             </h3>
-            <button id="btn-toggle-perangkat-section" class="btn-compact" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue); border: 3px solid rgba(59, 130, 246, 0.3);">
+            <button id="btn-toggle-perangkat-section" class="btn-compact" style="background: rgba(59, 130, 246, 0.15); color: var(--neon-blue); border: 1px solid var(--border-blue-subtle);">
                 <i class="fa-solid fa-chevron-down" id="icon-chevron-perangkat"></i>
             </button>
         </div>
 
-        <!-- WADAH KONTEN PERANGKAT AJAR (TERSEMBUNYI) -->
+        <!-- WADAH KONTEN PERANGKAT AJAR -->
         <div id="section-perangkat-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
             <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                <button onclick="toggleFormPerangkatAjar()" class="btn-compact" style="background:rgba(59,130,246,0.15); color:var(--neon-blue); border:1px solid rgba(59,130,246,0.3);">
+                <button onclick="toggleFormPerangkatAjar()" class="btn-compact" style="background:rgba(59,130,246,0.15); color:var(--neon-blue); border:1px solid var(--border-blue-subtle);">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
@@ -742,34 +742,40 @@
             <!-- FORM TAMBAH PERANGKAT -->
             <div id="form-wrap-perangkat" style="display:none; background:var(--bg-main); padding:10px; border-radius:8px; border:1px dashed var(--neon-blue); margin-bottom:10px;">
                 <form onsubmit="simpanPerangkatAjar(event)">
-                    <div style="display:flex; gap:6px; margin-bottom:6px;">
-                        <select id="per-jenis" class="form-control sel-compact" style="flex:1.2;" onchange="toggleInputLainnyaPerangkat(this)" required>
+                    <div style="display: flex; gap: 4px; margin-bottom: 6px; width: 100%;">
+                        <select id="per-jenis" class="form-control sel-compact" style="flex: 1.4; min-width: 0; padding: 6px 4px !important;" onchange="toggleInputLainnyaPerangkat(this)" required>
                             <option value="Modul">Modul</option>
                             <option value="Prota">Prota</option>
                             <option value="Prosem">Prosem</option>
                             <option value="KKTP">KKTP</option>
                             <option value="ATP">ATP</option>
-                            <option value="Tujuan Pembelajaran">Tujuan Pembelajaran</option>
-                            <option value="Capaian Pembelajaran">Capaian Pembelajaran</option>
+                            <option value="Tujuan Pembelajaran">TP</option>
+                            <option value="Capaian Pembelajaran">CP</option>
                             <option value="RPE">RPE</option>
-                            <option value="Lainnya">Lainnya (Ketik Sendiri)</option>
+                            <option value="Lainnya">Lainnya</option>
                         </select>
-                        <select id="per-semester" class="form-control sel-compact" style="flex:0.8;" required>
+                        <select id="per-semester" class="form-control sel-compact" style="flex: 1; min-width: 0; padding: 6px 4px !important;" required>
                             <option value="Ganjil">Ganjil</option>
                             <option value="Genap">Genap</option>
-                            <option value="1 Tahun">1 Tahun</option>
+                            <option value="1 Tahun">1 Thn</option>
                         </select>
+                        <input type="text" id="per-tahun" class="form-control sel-compact" placeholder="Thn Ajaran" style="flex: 1.1; min-width: 0; padding: 6px 4px !important; text-align: center;" required>
                     </div>
+
                     <input type="text" id="per-jenis-kustom" class="form-control sel-compact" placeholder="Tulis jenis perangkat..." style="display:none; margin-bottom:6px;">
                     <input type="text" id="per-deskripsi" class="form-control sel-compact" placeholder="Deskripsi singkat perangkat..." style="margin-bottom:6px;">
-                    <div style="display:flex; gap:6px; margin-bottom:6px;">
-                        <input type="text" id="per-tahun" class="form-control sel-compact" placeholder="Tahun Ajaran" style="flex:1;" required>
-                        <div style="display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text-putih); flex:1;">
-                            <input type="checkbox" id="per-pin" style="accent-color:var(--neon-yellow);"> <label for="per-pin">Pin ke atas</label>
+                    <input type="url" id="per-link" class="form-control sel-compact" placeholder="Link Perangkat Ajar..." style="margin-bottom:8px;" required>
+                    
+                    <!-- TOMBOL SIMPAN & CHECKBOX PIN -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="submit" id="btn-simpan-perangkat" class="btn-compact btn-primary" style="flex: 1; height: 32px; background: var(--gradient-blue);">
+                            <i class="fa-solid fa-save"></i> Simpan Perangkat
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-putih); background: var(--bg-card); padding: 0 10px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); white-space: nowrap;">
+                            <input type="checkbox" id="per-pin" style="accent-color: var(--neon-yellow); cursor: pointer;">
+                            <label for="per-pin" style="cursor: pointer; margin: 0; font-weight: 600; color: var(--neon-yellow);"><i class="fa-solid fa-thumbtack"></i> Pin</label>
                         </div>
                     </div>
-                    <input type="url" id="per-link" class="form-control sel-compact" placeholder="Link Perangkat Ajar..." style="margin-bottom:8px;" required>
-                    <button type="submit" id="btn-simpan-perangkat" class="btn-compact btn-primary" style="width:100%; background:var(--gradient-blue);"><i class="fa-solid fa-save"></i> Simpan Perangkat</button>
                 </form>
             </div>
 
@@ -782,19 +788,18 @@
         </div>
     </div>
 
-    <!-- ================= 4. BAGIAN WHATSAPP GROUP (GARIS EMERALD/GREEN) ================= -->
+    <!-- ================= 4. WHATSAPP GROUP (GARIS EMERALD/GREEN) ================= -->
     <div class="card-data-compact border-emerald">
         <div class="card-header-compact" onclick="toggleSectionWaGroup()" style="cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
             <h3>
                 <i class="fa-brands fa-whatsapp" style="color: var(--neon-green);"></i> 
                 WhatsApp Group & Pengurus Kelas
             </h3>
-            <button id="btn-toggle-wa-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 3px solid rgba(5, 213, 138, 0.3);">
+            <button id="btn-toggle-wa-section" class="btn-compact" style="background: rgba(5, 213, 138, 0.15); color: var(--neon-green); border: 1px solid var(--border-emerald-subtle);">
                 <i class="fa-solid fa-chevron-down" id="icon-chevron-wa"></i>
             </button>
         </div>
         
-        <!-- WADAH KONTEN GRUP WA (TERSEMBUNYI) -->
         <div id="section-wa-content" style="display: none; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
             <div id="container-wa-kelas" class="wa-grid-container">
                 <div style="text-align:center; padding:15px; color:var(--text-abu); font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat grup kelas...</div>
@@ -817,28 +822,28 @@
                 </div>
 
                 <!-- WALI KELAS -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(16, 185, 129, 0.35); margin-bottom:8px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-emerald-subtle); margin-bottom:8px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-green); margin-bottom:4px;">🌿 Wali Kelas</div>
                     <input type="text" id="modal-wa-nama-walikelas" class="form-control sel-compact" placeholder="Nama Wali Kelas & Gelar" style="margin-bottom:4px;">
                     <input type="text" id="modal-wa-no-walikelas" class="form-control sel-compact" placeholder="No. WA Wali Kelas (cth: 08123456789)">
                 </div>
                 
                 <!-- KETUA KELAS -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(245, 158, 11, 0.3); margin-bottom:8px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-yellow-subtle); margin-bottom:8px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-yellow); margin-bottom:4px;">☀️ Ketua Kelas</div>
                     <select id="modal-wa-id-ketua" class="form-control sel-compact" onchange="sinkronNomorPengurus('ketua')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-ketua" class="form-control sel-compact" placeholder="No. WA Ketua (cth: 08123456789)">
                 </div>
 
                 <!-- SEKRETARIS -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(59, 130, 246, 0.3); margin-bottom:8px;">
-                    <div style="font-size:10px; font-weight:700; color:var(--neon-blue); margin-bottom:4px;">🌙 Sekretaris</div>
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-blue-subtle); margin-bottom:8px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--neon-blue); margin-bottom:4px;">🌙体制 Sekretaris</div>
                     <select id="modal-wa-id-sekretaris" class="form-control sel-compact" onchange="sinkronNomorPengurus('sekretaris')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-sekretaris" class="form-control sel-compact" placeholder="No. WA Sekretaris (cth: 08123456789)">
                 </div>
 
                 <!-- BENDAHARA -->
-                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.3); margin-bottom:12px;">
+                <div style="background:var(--bg-main); padding:8px; border-radius:8px; border:1px solid var(--border-red-subtle); margin-bottom:12px;">
                     <div style="font-size:10px; font-weight:700; color:var(--neon-red); margin-bottom:4px;">⭕ Bendahara</div>
                     <select id="modal-wa-id-bendahara" class="form-control sel-compact" onchange="sinkronNomorPengurus('bendahara')" style="margin-bottom:4px;"></select>
                     <input type="text" id="modal-wa-no-bendahara" class="form-control sel-compact" placeholder="No. WA Bendahara (cth: 08123456789)">
