@@ -606,11 +606,12 @@
             <div style="display:flex; gap:12px; margin-bottom:10px; font-size:11px; color:var(--text-putih); padding-left:2px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="radio" name="mode-cari-dalil" value="kata" checked onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
-                    Berdasarkan Kata / Tema
+                    tema
                 </label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <input type="radio" name="mode-cari-dalil" value="spesifik" onchange="gantiModePencarian(this.value)" style="accent-color:var(--neon-green);"> 
-                    <span id="label-mode-spesifik">Berdasarkan Surah & Ayat</span>
+                    <span id="label-mode-spesifik">surat
+                    </span>
                 </label>
             </div>
 
@@ -634,10 +635,10 @@
                 <input type="number" id="input-ayat-mulai" class="form-control sel-compact" placeholder="Ayat dr" min="1" max="286" style="width:70px; text-align:center;">
                 <input type="number" id="input-ayat-sampai" class="form-control sel-compact" placeholder="s/d" min="1" max="286" style="width:70px; text-align:center;">
                 <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
-                    <i class="fa-solid fa-search"></i> Buka Ayat
+                    <i class="fa-solid fa-search"></i> cari
                 </button>
             </div>
-
+git commit -m "feat: pembaruan layout input konsep ceramah, perbaikan script dalil, dan pencarian spesifik surah/hadits"
             <!-- FORM 3: PENCARIAN SPESIFIK HADITS (KITAB & NOMOR HADITS) -->
             <div id="box-cari-spesifik-hadis" style="display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
                 <select id="pilih-kitab-hadis" class="form-control sel-compact" style="flex:2; min-width:150px;">
@@ -651,7 +652,7 @@
                 </select>
                 <input type="number" id="input-nomor-hadis" class="form-control sel-compact" placeholder="No. Hadits (misal: 1)" min="1" style="width:130px; text-align:center;">
                 <button onclick="eksekusiCariDalil()" class="btn-compact" style="background:var(--neon-green); color:#0b121e; padding:6px 12px !important; font-weight:800;">
-                    <i class="fa-solid fa-search"></i> Buka Hadits
+                    <i class="fa-solid fa-search"></i> cari
                 </button>
             </div>
 
