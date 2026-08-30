@@ -55,7 +55,7 @@ window.loadDataKelas = async function() {
             htmlContent += `
                 <li style="transition: background 0.2s; padding: 10px 12px; border-radius: 8px;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
                     <div onclick="bukaDetailKelas('${item.id}', '${item.nama_kelas}')" style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1;">
-                        <i class="fa-solid fa-chalkboard" style="color: var(--neon-green); font-size: 16px;"></i>
+                        <i class="fa-solid fa-chalkboard" style="color: var(--neon-green); font-size: 10px;"></i>
                         <span style="display: flex; align-items: center; gap: 8px;">
                             <b>${item.nama_kelas}</b> (Tingkat ${item.tingkat}) - ${item.tahun_ajaran || ''}
                             ${badgeStatus}
@@ -1157,8 +1157,8 @@ window.downloadBlangkoExcel = async function() {
         await window.loadSheetJS();
         const headers = [["No Absen", "NISN", "Kode Siswa", "Nama Lengkap", "L/P", "Tempat Lahir", "Tanggal Lahir (YYYY-MM-DD)", "Alamat", "WA Siswa", "Email Siswa", "WA Ortu", "Instagram", "Jabatan"]];
         const exampleData = [
-            ["1", "1234567890", "K-01", "Budi Santoso", "L", "Jakarta", "2010-05-12", "Jl. Merdeka No 1", "08123456789", "budi@email.com", "08987654321", "@budi_s", "Ketua Kelas"],
-            ["2", "0987654321", "", "Siti Aminah", "P", "Bandung", "2010-08-20", "Jl. Sudirman", "", "", "", "", "Anggota"]
+            ["1", "1234567890", "VII-13", "ujiciba 1", "L", "Jakarta", "2010-05-12", "Jl. Merdeka No 1", "08999999999", "budi@email.com", "089999999999", "@budi_s", "Ketua Kelas"],
+            ["2", "0987654321", "", "ujicoba2", "P", "Bandung", "2010-08-20", "Jl. Sudirman", "", "", "", "", "Anggota"]
         ];
         const dataSheet = [...headers, ...exampleData];
         const ws = window.XLSX.utils.aoa_to_sheet(dataSheet);
