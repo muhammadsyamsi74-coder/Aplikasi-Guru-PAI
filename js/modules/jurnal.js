@@ -27,11 +27,9 @@ function sortSiswaJurnal(listData) {
 window.pilihAngkaJam = function(angka) {
     angka = parseInt(angka);
     
-    // Jika angka sudah ada, hapus (toggle off)
     if (selectedJam.includes(angka)) {
         selectedJam = selectedJam.filter(n => n !== angka);
     } else {
-        // Jika sudah memilih 2 angka, reset dan mulai dari angka baru yang diklik
         if (selectedJam.length >= 2) {
             selectedJam = [angka];
         } else {
@@ -39,9 +37,7 @@ window.pilihAngkaJam = function(angka) {
         }
     }
     
-    // Urutkan angka dari kecil ke besar (misal [2, 1] menjadi [1, 2])
     selectedJam.sort((a, b) => a - b);
-    
     renderPilihanJam();
 };
 
@@ -50,7 +46,6 @@ function renderPilihanJam() {
     const labelTampil = document.getElementById('label-terpilih-jam');
     const gridBtns = document.querySelectorAll('.btn-jam-num');
 
-    // Update class active pada tombol angka 1-9
     gridBtns.forEach(btn => {
         const val = parseInt(btn.innerText);
         if (selectedJam.includes(val)) {
@@ -60,7 +55,6 @@ function renderPilihanJam() {
         }
     });
 
-    // Format nilai string hasil gabungan (contoh: "1" atau "1-2")
     const strVal = selectedJam.join('-');
     if (inputVal) inputVal.value = strVal;
     if (labelTampil) labelTampil.innerText = strVal ? `Jam ${strVal}` : '-';
@@ -336,12 +330,12 @@ window.loadSiswaJurnal = async function(tipe) {
 
         let htmlContent = '';
         data.forEach((item, index) => {
-            const jk = item.siswa.jenis_kelamin;
+            const jk = item.siswa ? item.siswa.jenis_kelamin : '-';
             const ikonGender = jk === 'L' ? '<i class="fa-solid fa-mars" style="color:var(--neon-blue);"></i>' : '<i class="fa-solid fa-venus" style="color:var(--neon-red);"></i>';
             htmlContent += `
                 <label class="student-checkbox-item" for="cb-${tipe}-${index}">
                     <input type="checkbox" id="cb-${tipe}-${index}" class="check-siswa-${tipe}" value="${item.id_siswa}">
-                    <span>${item.nomor_absen || '-'} | ${item.siswa.nama_siswa} ${ikonGender}</span>
+                    <span>${item.nomor_absen || '-'} | ${(item.siswa && item.siswa.nama_siswa) ? item.siswa.nama_siswa : '-'} ${ikonGender}</span>
                 </label>
             `;
         });
@@ -444,12 +438,12 @@ window.loadRiwayatMengajar = async function() {
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                     <div style="display:flex; align-items:center;">
-                        <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
+                        <b style="color:var(--neon-blue); font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
                         ${statusBadge}
                     </div>
-                    <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
+                    <span style="font-size:9px; color:var(--text-abu); font-weight:700; background: var(--bg-card); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-color);"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
-                <div style="font-size:10px; color:#475569; margin-top:2px;"><b>Jam:</b> ${d.jam_ke || '-'} | <b>Materi:</b> ${d.judul_materi || '-'}</div>
+                <div style="font-size:10px; color:var(--text-putih); margin-top:2px;"><b>Jam:</b> ${d.jam_ke || '-'} | <b>Materi:</b> ${d.judul_materi || '-'}</div>
                 <div style="display:flex; gap:6px; margin-top:4px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditMengajar('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalmengajar', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
@@ -458,7 +452,7 @@ window.loadRiwayatMengajar = async function() {
         });
         container.innerHTML = html;
     } catch(e) { 
-        container.innerHTML = `<li style="color:var(--neon-red); font-size:11px;">Gagal memuat.</li>`; 
+        container.innerHTML = `<li style="color:var(--neon-red); font-size:11px;">Gagal memuat: ${e.message}</li>`; 
     }
 };
 
@@ -487,7 +481,7 @@ window.panggilEditMengajar = async function(id) {
     }
 };
 
-// ================= JURNAL SIKAP (DUAL MODE: KELAS & MANUAL) =================
+// ================= JURNAL SIKAP =================
 window.simpanJurnalSikap = async function() {
     const elTgl = document.getElementById('js-tanggal');
     if (!elTgl || !elTgl.value) { alert("Tanggal harus diisi."); return; }
@@ -620,10 +614,10 @@ window.loadRiwayatSikap = async function() {
             html += `
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                    <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-user-check" style="color:${clr}; margin-right:4px;"></i> ${d.display_nama}</b>
-                    <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f92b; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
+                    <b style="color:var(--neon-blue); font-size:12px;"><i class="fa-solid fa-user-check" style="color:${clr}; margin-right:4px;"></i> ${d.display_nama}</b>
+                    <span style="font-size:9px; color:var(--text-abu); font-weight:700; background: var(--bg-card); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-color);"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
-                <div style="font-size:10px; color:#475569; margin-top:2px;">${d.display_kelas} | <b style="color:${clr}">${d.jenis_sikap}</b> - ${d.kategori_sikap} | ${d.deskripsi_sikap || '-'}</div>
+                <div style="font-size:10px; color:var(--text-putih); margin-top:2px;">${d.display_kelas} | <b style="color:${clr}">${d.jenis_sikap}</b> - ${d.kategori_sikap} | ${d.deskripsi_sikap || '-'}</div>
                 <div style="display:flex; gap:6px; margin-top:4px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditSikap('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalsikap', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
@@ -673,24 +667,24 @@ window.panggilEditSikap = async function(id) {
     }
 };
 
-// ================= JURNAL WALI (TERHUBUNG KE SISWAGURUWALI) =================
+// ================= JURNAL WALI (PERBAIKAN PAYLOAD INSERT & UPDATE) =================
+// js/modules/jurnal.js (Fungsi simpanJurnalWali Sesuai Skema Terbaru)
 window.simpanJurnalWali = async function() {
     const elTgl = document.getElementById('jw-tanggal');
-    const checkboxes = document.querySelectorAll('.check-siswa-wali:checked');
-    
     if (!elTgl || !elTgl.value) { alert("Tanggal harus diisi."); return; }
-    if (checkboxes.length === 0) { alert('Centang minimal 1 siswa!'); return; }
+
+    const deskripsi = document.getElementById('jw-deskripsi').value;
+    const tindak = document.getElementById('jw-tindak').value;
+    const refleksi = document.getElementById('jw-refleksi').value;
 
     const btn = document.getElementById('btn-simpan-wali');
-    const teksAsli = btn.innerHTML;
+    const teksAsli = btn ? btn.innerHTML : '';
     
     try {
-        btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
-        btn.disabled = true;
-
-        const deskripsi = document.getElementById('jw-deskripsi').value;
-        const tindak = document.getElementById('jw-tindak').value;
-        const refleksi = document.getElementById('jw-refleksi').value;
+        if (btn) {
+            btn.innerHTML = '<span style="flex:1; text-align:left;"><i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...</span><div class="icon-circle"><i class="fa-solid fa-check"></i></div>';
+            btn.disabled = true;
+        }
 
         if (editModeWali) {
             const payload = { 
@@ -703,17 +697,24 @@ window.simpanJurnalWali = async function() {
             if (error) throw error;
             alert('Jurnal wali berhasil diperbarui!');
         } else {
+            const checkboxes = document.querySelectorAll('.check-siswa-wali:checked');
+            if (checkboxes.length === 0) { 
+                alert('Centang minimal 1 siswa bimbingan wali!'); 
+                if (btn) { btn.innerHTML = teksAsli; btn.disabled = false; }
+                return; 
+            }
+
             let payloadInsert = [];
             checkboxes.forEach(cb => {
                 payloadInsert.push({
                     tanggal: elTgl.value, 
-                    id_siswa: cb.value,
-                    id_kelas: null,
+                    id_siswa: cb.value, // Mengarah ke siswaguruwali.id
                     deskripsi_pembinaan: deskripsi || null, 
                     tindak_lanjut: tindak || null, 
                     refleksi: refleksi || null
                 });
             });
+
             const { error } = await supabase.from('jurnalwali').insert(payloadInsert);
             if (error) throw error;
             alert(`Jurnal pembinaan wali berhasil disimpan untuk ${payloadInsert.length} siswa!`);
@@ -724,10 +725,12 @@ window.simpanJurnalWali = async function() {
     } catch (error) { 
         alert("Gagal menyimpan: " + error.message); 
     } finally { 
-        btn.innerHTML = teksAsli; 
-        btn.disabled = false; 
+        if (btn) {
+            btn.innerHTML = teksAsli; 
+            btn.disabled = false; 
+        }
     }
-};
+}
 
 window.loadRiwayatWali = async function() {
     const container = document.getElementById('list-riwayat-wali');
@@ -770,10 +773,10 @@ window.loadRiwayatWali = async function() {
             html += `
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                    <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-user-shield" style="color:var(--neon-purple); margin-right:4px;"></i> ${d.siswa_wali.nama_siswa}</b>
-                    <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
+                    <b style="color:var(--neon-purple); font-size:12px;"><i class="fa-solid fa-user-shield" style="color:var(--neon-purple); margin-right:4px;"></i> ${d.siswa_wali.nama_siswa}</b>
+                    <span style="font-size:9px; color:var(--text-abu); font-weight:700; background: var(--bg-card); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-color);"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
-                <div style="font-size:10px; color:#475569; margin-top:2px;">${kelasText} | <b>Pembinaan:</b> ${d.deskripsi_pembinaan || '-'}</div>
+                <div style="font-size:10px; color:var(--text-putih); margin-top:2px;">${kelasText} | <b>Pembinaan:</b> ${d.deskripsi_pembinaan || '-'}</div>
                 <div style="display:flex; gap:6px; margin-top:4px; width: 100%; justify-content: flex-end;">
                     <button onclick="panggilEditWali('${d.id}')" class="btn-action btn-edit"><i class="fa-solid fa-edit"></i> Edit</button>
                     <button onclick="hapusJurnal('jurnalwali', '${d.id}')" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
