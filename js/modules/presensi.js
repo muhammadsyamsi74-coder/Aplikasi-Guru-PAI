@@ -42,7 +42,7 @@ window.loadKelasUntukPresensi = async function() {
         if (error) throw error;
 
         let options = '<option value="">-- Pilih Kelas --</option>';
-        data.forEach(item => { options += `<option value="${item.id}">${item.nama_kelas} (Kelas ${item.tingkat})</option>`; });
+        data.forEach(item => { options += `<option value="${item.id}">${item.nama_kelas}</option>`; });
         
         if (selKelas) selKelas.innerHTML = options;
         if (selSholat) selSholat.innerHTML = options;
@@ -451,10 +451,10 @@ window.loadRiwayatKelas = async function(idKelas) {
             const badgeJam = g.jam_ke ? `<span style="font-size:10px; color:var(--neon-green); margin-left:6px; font-weight:700;">(Jam ${g.jam_ke})</span>` : '';
 
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(66, 66, 68, 0.15); border: 1px solid #89919c6b; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan}) ${badgeJam}</b>
-                    <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
+                    <b style="color:#0773d3; font-size:13px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${namaKelas} (Pert. ${g.pertemuan}) ${badgeJam}</b>
+                    <span style="font-size:10px; color:#001487; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
@@ -721,9 +721,9 @@ window.loadRiwayatSholat = async function(idKelas) {
         sortedKeys.forEach(k => {
             const g = grouped[k];
             html += `
-            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <li style="flex-direction:column; align-items:flex-start; gap:8px; padding: 12px; background: rgba(152, 154, 157, 0.12); border: 1px solid #8f8f90; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <b style="color:#0f172a; font-size:13px;"><i class="fa-solid fa-mosque" style="color:var(--neon-green); margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
+                    <b style="color:#0773d3; font-size:13px;"><i class="fa-solid fa-mosque" style="color:var(--neon-green); margin-right:4px;"></i> ${namaKelas} (${g.sholat})</b>
                     <span style="font-size:10px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;"><i class="fa-regular fa-calendar"></i> ${g.tanggal}</span>
                 </div>
                 

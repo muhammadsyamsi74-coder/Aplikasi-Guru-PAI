@@ -444,7 +444,7 @@ window.loadRiwayatMengajar = async function() {
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                     <div style="display:flex; align-items:center;">
-                        <b style="color:#0f172a; font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
+                        <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-chalkboard-user" style="color:var(--neon-blue); margin-right:4px;"></i> ${d.kelas ? d.kelas.nama_kelas : '-'} - Pert. ${d.pertemuan_ke || '-'}</b>
                         ${statusBadge}
                     </div>
                     <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
@@ -620,8 +620,8 @@ window.loadRiwayatSikap = async function() {
             html += `
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                    <b style="color:#0f172a; font-size:12px;"><i class="fa-solid fa-user-check" style="color:${clr}; margin-right:4px;"></i> ${d.display_nama}</b>
-                    <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
+                    <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-user-check" style="color:${clr}; margin-right:4px;"></i> ${d.display_nama}</b>
+                    <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f92b; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
                 <div style="font-size:10px; color:#475569; margin-top:2px;">${d.display_kelas} | <b style="color:${clr}">${d.jenis_sikap}</b> - ${d.kategori_sikap} | ${d.deskripsi_sikap || '-'}</div>
                 <div style="display:flex; gap:6px; margin-top:4px; width: 100%; justify-content: flex-end;">
@@ -770,7 +770,7 @@ window.loadRiwayatWali = async function() {
             html += `
             <li>
                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                    <b style="color:#0f172a; font-size:12px;"><i class="fa-solid fa-user-shield" style="color:var(--neon-purple); margin-right:4px;"></i> ${d.siswa_wali.nama_siswa}</b>
+                    <b style="color:#0773d3; font-size:12px;"><i class="fa-solid fa-user-shield" style="color:var(--neon-purple); margin-right:4px;"></i> ${d.siswa_wali.nama_siswa}</b>
                     <span style="font-size:9px; color:#64748b; font-weight:700; background: #f1f5f9; padding: 3px 6px; border-radius: 4px;"><i class="fa-regular fa-calendar"></i> ${d.tanggal}</span>
                 </div>
                 <div style="font-size:10px; color:#475569; margin-top:2px;">${kelasText} | <b>Pembinaan:</b> ${d.deskripsi_pembinaan || '-'}</div>
