@@ -29,6 +29,48 @@ window.clearAppBadge = function() {
     }
 };
 
+// ================= GLOBAL WATCHDOG: PERTAHANKAN BADGE =================
+window.checkGlobalBadge = async function() {
+    try {
+        // Hanya ambil data yang diperlukan untuk menghitung badge
+        const { data, error } = await supabase
+            .from('pengingat_kegiatan')
+            .select('tanggal_pelaksanaan, ingatkan_h_min')
+            .eq('status_selesai', false);
+
+        if (error) throw error;
+
+        let countVisible = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                let tglParts = item.tanggal_pelaksanaan.split('-');
+                const targetDate = new Date(tglParts[0], tglParts[1] - 1, tglParts[2]);
+                targetDate.setHours(0, 0, 0, 0);
+                
+                const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+                if (diffDays <= item.ingatkan_h_min) {
+                    countVisible++;
+                }
+            });
+        }
+        
+        // Paksa tempelkan badge kembali
+        window.updateAppBadge(countVisible);
+    } catch (e) {
+        console.warn("Gagal mengecek badge global:", e.message);
+    }
+};
+
+// Pantau saat aplikasi dibuka kembali dari background
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' || document.visibilityState === 'hidden') {
+        window.checkGlobalBadge();
+    }
+});
+
 // ================= LOGIKA NAVIGASI HALAMAN =================
 window.loadPage = function(pageName, pageTitle) {
     document.getElementById('page-title').innerText = pageTitle;
@@ -64,7 +106,7 @@ window.loadPage = function(pageName, pageTitle) {
         });
 };
 
-// ================= LOGIKA SUB-TAB PAI-APPS (PENTING AGAR TIDAK STUCK MEMUAT) =================
+// ================= LOGIKA SUB-TAB PAI-APPS =================
 window.initPaiApps = function() {
     if (typeof window.bukaSubTabPaiApps === 'function') {
         window.bukaSubTabPaiApps('dashboard');
@@ -229,18 +271,15 @@ window.simpanProfil = async function(e) {
     }
 };
 
+// ================= INIT PADA SAAT WEBSITE DIMUAT =================
 document.addEventListener('DOMContentLoaded', () => {
-    loadPage('paiapps', 'PAI-APPS');
-    fetchProfile(); 
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Meminta izin notifikasi agar App Badge diizinkan oleh OS
+    // 1. Meminta izin OS untuk mengatur Notifikasi/Lencana
     if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission().then(permission => {
-            console.log('Status Izin Notifikasi:', permission);
-        });
+        Notification.requestPermission();
     }
+    
+    // 2. Hitung badge segera setelah web dimuat
+    window.checkGlobalBadge();
 
     loadPage('paiapps', 'PAI-APPS');
     fetchProfile(); 
