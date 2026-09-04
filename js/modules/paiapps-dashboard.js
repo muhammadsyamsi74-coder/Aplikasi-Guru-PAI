@@ -4,7 +4,6 @@ import supabase from '../supabase.js';
 let chartQuranInstance = null;
 let sholatIntervalTimer = null;
 
-// ================= DYNAMIC LOADER: CHART.JS =================
 async function loadChartJSLib() {
     if (window.Chart) return;
     return new Promise((resolve, reject) => {
@@ -16,58 +15,30 @@ async function loadChartJSLib() {
     });
 }
 
-// ================= AKSI MENYELESAIKAN PENGINGAT (TOMBOL CEKLIS) =================
 window.selesaiPengingat = async function(btnEl, idPengingat, judul, siklus, tgl) {
     if (!confirm(`Tandai agenda "${judul}" sebagai selesai?`)) return;
-
     try {
-        if (btnEl) {
-            btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btnEl.disabled = true;
-        }
-
-        const { error } = await supabase
-            .from('pengingat_kegiatan')
-            .update({ status_selesai: true })
-            .eq('id', idPengingat);
-
+        if (btnEl) { btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btnEl.disabled = true; }
+        const { error } = await supabase.from('pengingat_kegiatan').update({ status_selesai: true }).eq('id', idPengingat);
         if (error) throw error;
 
         const itemRow = document.getElementById(`reminder-${idPengingat}`);
-        if (itemRow) {
-            itemRow.style.opacity = '0.3';
-            itemRow.style.transform = 'scale(0.95)';
-        }
-
-        setTimeout(() => {
-            loadPengingatKegiatan();
-        }, 300);
-
+        if (itemRow) { itemRow.style.opacity = '0.3'; itemRow.style.transform = 'scale(0.95)'; }
+        setTimeout(() => { loadPengingatKegiatan(); }, 300);
     } catch (e) {
         alert("Gagal menyelesaikan pengingat: " + e.message);
-        if (btnEl) {
-            btnEl.innerHTML = '<i class="fa-solid fa-check"></i>';
-            btnEl.disabled = false;
-        }
+        if (btnEl) { btnEl.innerHTML = '<i class="fa-solid fa-check"></i>'; btnEl.disabled = false; }
     }
 };
 
-// ================= FUNGSI UTAMA INISIALISASI DASHBOARD =================
 window.loadDashboardPaiApps = async function() {
     const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const now = new Date();
     let indexHari = now.getDay();
-    const currentHour = now.getHours();
-
-    if (currentHour >= 17) {
-        indexHari = (indexHari + 1) % 7;
-    }
-
+    if (now.getHours() >= 17) indexHari = (indexHari + 1) % 7;
+    
     let hariJadwalDefault = hariList[indexHari];
-
-    if (hariJadwalDefault === 'Sabtu' || hariJadwalDefault === 'Minggu') {
-        hariJadwalDefault = 'Senin';
-    }
+    if (hariJadwalDefault === 'Sabtu' || hariJadwalDefault === 'Minggu') hariJadwalDefault = 'Senin';
 
     const elNamaHari = document.getElementById('dash-nama-hari');
     if (elNamaHari) elNamaHari.innerText = hariJadwalDefault;
@@ -75,26 +46,30 @@ window.loadDashboardPaiApps = async function() {
     const selectHari = document.getElementById('pilih-hari-jadwal');
     if (selectHari) selectHari.value = hariJadwalDefault;
 
-    await Promise.all([
-        loadRingkasanMetrikDanAlert(),
-        loadJadwalHariIni(hariJadwalDefault),
-        loadPengingatKegiatan(), 
-        loadWaktuSholatDanCountdown(),
-        loadGrafikMembacaQuran(),
-        loadAnalitikKehadiranPerKelas(),
-        loadAnalitikKetuntasanTugas(),
-        loadInfoSistem()
-    ]);
+    // Load API eksternal mandiri agar tidak membuat blank saat offline
+    loadWaktuSholatDanCountdown().catch(e => console.warn('Waktu sholat tertunda:', e));
+
+    try {
+        await Promise.all([
+            loadRingkasanMetrikDanAlert(),
+            loadJadwalHariIni(hariJadwalDefault),
+            loadPengingatKegiatan(), 
+            loadGrafikMembacaQuran(),
+            loadAnalitikKehadiranPerKelas(),
+            loadAnalitikKetuntasanTugas(),
+            loadInfoSistem()
+        ]);
+    } catch (e) {
+        console.error("Gagal load data dashboard:", e);
+    }
 };
 
-// ================= GANTI HARI JADWAL MENGAJAR =================
 window.gantiHariJadwal = function(hariDipilih) {
     const elNamaHari = document.getElementById('dash-nama-hari');
     if (elNamaHari) elNamaHari.innerText = hariDipilih;
     loadJadwalHariIni(hariDipilih);
 };
 
-// ================= 1. METRIK UTAMA & ACTIONABLE ALERTS =================
 async function loadRingkasanMetrikDanAlert() {
     const elJmlSiswa = document.getElementById('dash-jml-siswa');
     const elJmlKelas = document.getElementById('dash-jml-kelas');
@@ -111,7 +86,6 @@ async function loadRingkasanMetrikDanAlert() {
 
         const listKelasAktif = resKelasAktif.data || [];
         const setKelasAktifId = new Set(listKelasAktif.map(k => k.id));
-
         const anggotaKelasAktif = (resAnggota.data || []).filter(a => setKelasAktifId.has(a.id_kelas));
         const setSiswaAktif = new Set(anggotaKelasAktif.map(a => a.id_siswa));
 
@@ -119,12 +93,11 @@ async function loadRingkasanMetrikDanAlert() {
         if (elJmlKelas) elJmlKelas.innerText = listKelasAktif.length;
 
         let alertsHtml = '';
-
         const listDraftAktif = (resJurnalDraft.data || []).filter(j => setKelasAktifId.has(j.id_kelas));
         if (listDraftAktif.length > 0) {
             alertsHtml += `
                 <div class="alert-card alert-warning" onclick="loadPage('jurnal', 'Jurnal Guru')">
-                    <span><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i> Terdapat <b>${listDraftAktif.length} sesi jurnal</b> di kelas aktif yang masih berstatus draft.</span>
+                    <span><i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i> Terdapat <b>${listDraftAktif.length} sesi jurnal</b> di kelas aktif yang masih draft.</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </div>
             `;
@@ -135,48 +108,29 @@ async function loadRingkasanMetrikDanAlert() {
         let tugasBelumSelesai = 0;
 
         tugasKelasAktif.forEach(t => {
-            const jmlTersimpan = allNilai.filter(n => n.id_tugas === t.id).length;
-            if (jmlTersimpan === 0) tugasBelumSelesai++;
+            if (allNilai.filter(n => n.id_tugas === t.id).length === 0) tugasBelumSelesai++;
         });
 
         if (tugasBelumSelesai > 0) {
             alertsHtml += `
                 <div class="alert-card alert-info" onclick="loadPage('penilaian', 'Penilaian')">
-                    <span><i class="fa-solid fa-clock-rotate-left" style="margin-right:8px;"></i> Terdapat <b>${tugasBelumSelesai} tugas</b> di kelas aktif yang belum memiliki nilai siswa.</span>
+                    <span><i class="fa-solid fa-clock-rotate-left" style="margin-right:8px;"></i> Terdapat <b>${tugasBelumSelesai} tugas</b> yang belum dinilai.</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </div>
             `;
         }
 
         if (!alertsHtml) {
-            alertsHtml = `
-                <div class="alert-card alert-success">
-                    <span><i class="fa-solid fa-circle-check" style="margin-right:8px;"></i> Semua administrasi jurnal dan tugas kelas aktif dalam status tertib!</span>
-                </div>
-            `;
+            alertsHtml = `<div class="alert-card alert-success"><span><i class="fa-solid fa-circle-check" style="margin-right:8px;"></i> Administrasi jurnal dan tugas terpantau tertib!</span></div>`;
         }
-
         if (alertBox) alertBox.innerHTML = alertsHtml;
-
-    } catch (e) {
-        console.error("Gagal load metrik & alerts:", e);
-    }
+    } catch (e) { console.error("Gagal load metrik:", e); }
 }
 
-// ================= 2. PENGINGAT JADWAL MENGAJAR =================
 async function loadJadwalHariIni(hari) {
     const container = document.getElementById('dash-list-jadwal-hari-ini');
     if (!container) return;
-
-    if (hari === 'Minggu') {
-        container.innerHTML = `
-            <li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;">
-                <i class="fa-solid fa-mug-hot" style="color:var(--neon-green); font-size:18px; margin-bottom:6px; display:block;"></i>
-                Hari Minggu adalah hari libur. Tidak ada jadwal KBM.
-            </li>
-        `;
-        return;
-    }
+    if (hari === 'Minggu') { container.innerHTML = `<li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;"><i class="fa-solid fa-mug-hot" style="color:var(--neon-green); font-size:18px; margin-bottom:6px; display:block;"></i>Hari libur, tidak ada KBM.</li>`; return; }
 
     try {
         const [resKelasAktif, resJadwal] = await Promise.all([
@@ -186,88 +140,53 @@ async function loadJadwalHariIni(hari) {
 
         const listKelasAktif = resKelasAktif.data || [];
         const mapKelasAktif = new Map(listKelasAktif.map(k => [k.id, k]));
-
         const jadwalAktif = (resJadwal.data || []).filter(j => mapKelasAktif.has(j.id_kelas));
 
         if (jadwalAktif.length === 0) {
-            container.innerHTML = `
-                <li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;">
-                    <i class="fa-regular fa-calendar-xmark" style="font-size:16px; margin-bottom:4px; display:block;"></i>
-                    Tidak ada jadwal mengajar kelas aktif pada hari ${hari}.
-                </li>
-            `;
+            container.innerHTML = `<li style="text-align:center; padding:15px; color:var(--text-abu); font-size:12px;"><i class="fa-regular fa-calendar-xmark" style="font-size:16px; margin-bottom:4px; display:block;"></i>Tidak ada jadwal mengajar pada hari ${hari}.</li>`;
             return;
         }
 
         jadwalAktif.sort((a, b) => String(a.jam_ke).localeCompare(String(b.jam_ke)));
-
         const now = new Date();
         const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const hariAsliSekarang = hariList[now.getDay()];
-        const nowJam = String(now.getHours()).padStart(2, '0');
-        const nowMenit = String(now.getMinutes()).padStart(2, '0');
-        const currentTimeStr = `${nowJam}:${nowMenit}`;
+        const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
         let html = '';
         jadwalAktif.forEach(item => {
-            const kls = mapKelasAktif.get(item.id_kelas);
-            const namaKls = kls ? kls.nama_kelas : '-';
-            const jM = item.jam_mulai ? item.jam_mulai.substring(0, 5) : '';
-            const jS = item.jam_selesai ? item.jam_selesai.substring(0, 5) : '';
+            const namaKls = mapKelasAktif.get(item.id_kelas)?.nama_kelas || '-';
+            const jM = item.jam_mulai?.substring(0, 5) || '';
+            const jS = item.jam_selesai?.substring(0, 5) || '';
             const jamStr = (jM && jS) ? `${jM} - ${jS}` : 'Waktu Fleksibel';
-            const ketStr = item.keterangan ? ` | ${item.keterangan}` : '';
-
-            let isCurrentLive = false;
-            if (hari === hariAsliSekarang && jM && jS) {
-                if (currentTimeStr >= jM && currentTimeStr <= jS) {
-                    isCurrentLive = true;
-                }
-            }
-
-            const liveClass = isCurrentLive ? 'jadwal-item-aktif' : '';
-            const liveBadge = isCurrentLive ? '<span class="badge-live-kbm"><i class="fa-solid fa-circle-play"></i> SEDANG BERLANGSUNG</span>' : '';
-
+            
+            let isCurrentLive = (hari === hariAsliSekarang && jM && jS && currentTimeStr >= jM && currentTimeStr <= jS);
             html += `
-                <li class="jadwal-item ${liveClass}">
+                <li class="jadwal-item ${isCurrentLive ? 'jadwal-item-aktif' : ''}">
                     <div>
                         <div style="display:flex; align-items:center; flex-wrap:wrap;">
-                            <b style="color:var(--text-putih); font-size:13px;">
-                                <i class="fa-solid fa-chalkboard" style="color:var(--neon-yellow); margin-right:6px;"></i> Kelas ${namaKls}
-                            </b>
-                            ${liveBadge}
+                            <b style="color:var(--text-putih); font-size:13px;"><i class="fa-solid fa-chalkboard" style="color:var(--neon-yellow); margin-right:6px;"></i> Kelas ${namaKls}</b>
+                            ${isCurrentLive ? '<span class="badge-live-kbm"><i class="fa-solid fa-circle-play"></i> SEDANG BERLANGSUNG</span>' : ''}
                         </div>
-                        <div style="font-size:10px; color:var(--text-abu); margin-top:2px;">
-                            JP ${item.jam_ke} (${item.jumlah_jp || 1} JP) ${ketStr}
-                        </div>
+                        <div style="font-size:10px; color:var(--text-abu); margin-top:2px;">JP ${item.jam_ke} (${item.jumlah_jp || 1} JP) ${item.keterangan ? '| '+item.keterangan : ''}</div>
                     </div>
                     <div style="text-align:right;">
-                        <span style="font-size:11px; font-weight:700; color:var(--neon-green); background:rgba(5,213,138,0.1); padding:4px 8px; border-radius:6px; border:1px solid rgba(5,213,138,0.2);">
-                            <i class="fa-regular fa-clock"></i> ${jamStr}
-                        </span>
+                        <span style="font-size:11px; font-weight:700; color:var(--neon-green); background:rgba(5,213,138,0.1); padding:4px 8px; border-radius:6px; border:1px solid rgba(5,213,138,0.2);"><i class="fa-regular fa-clock"></i> ${jamStr}</span>
                     </div>
                 </li>
             `;
         });
         container.innerHTML = html;
-
-    } catch (e) {
-        container.innerHTML = `<li style="color:var(--neon-red); text-align:center; font-size:11px; padding:10px;">Gagal memuat jadwal: ${e.message}</li>`;
-    }
+    } catch (e) { container.innerHTML = `<li style="color:var(--neon-red); text-align:center; font-size:11px; padding:10px;">Gagal memuat jadwal: ${e.message}</li>`; }
 }
 
-// ================= 3. PENGINGAT KEGIATAN & SINKRONISASI APP BADGE =================
 async function loadPengingatKegiatan() {
     const container = document.getElementById('dash-list-reminder');
     const cardContainer = document.getElementById('dash-card-reminder');
     if (!container || !cardContainer) return;
 
     try {
-        const { data, error } = await supabase
-            .from('pengingat_kegiatan')
-            .select('*')
-            .eq('status_selesai', false)
-            .order('tanggal_pelaksanaan', { ascending: true });
-
+        const { data, error } = await supabase.from('pengingat_kegiatan').select('*').eq('status_selesai', false).order('tanggal_pelaksanaan', { ascending: true });
         if (error) throw error;
 
         if (!data || data.length === 0) {
@@ -278,7 +197,6 @@ async function loadPengingatKegiatan() {
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         let html = '';
         let countVisible = 0;
 
@@ -286,111 +204,61 @@ async function loadPengingatKegiatan() {
             let tglParts = item.tanggal_pelaksanaan.split('-');
             const targetDate = new Date(tglParts[0], tglParts[1] - 1, tglParts[2]);
             targetDate.setHours(0, 0, 0, 0);
-
-            const diffTime = targetDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
 
             if (diffDays <= item.ingatkan_h_min) {
                 countVisible++;
-
-                let statusWaktu = '';
-                let warnaWaktu = 'color: var(--text-abu);';
+                let statusWaktu = '', warnaWaktu = 'color: var(--text-abu);';
                 
-                if (diffDays > 0) {
-                    statusWaktu = `(H-${diffDays})`;
-                    warnaWaktu = 'color: var(--neon-yellow); font-weight:700;';
-                } else if (diffDays === 0) {
-                    statusWaktu = `(Hari Ini!)`;
-                    warnaWaktu = 'color: var(--neon-red); font-weight:700;';
-                } else {
-                    if (item.siklus === '1 Kali') {
-                        statusWaktu = `(Lewat ${Math.abs(diffDays)}hr)`;
-                        warnaWaktu = 'color: var(--neon-red); font-weight:700;';
-                    } else {
-                        statusWaktu = `(Rutin)`; 
-                        warnaWaktu = 'color: var(--neon-green); font-weight:700;';
-                    }
-                }
-
-                const tglDeadline = `${tglParts[2]}/${tglParts[1]}`;
-
-                let actionButton = '';
-                if (item.siklus === '1 Kali') {
-                    actionButton = `
-                        <button class="reminder-action" onclick="selesaiPengingat(this, '${item.id}', '${item.judul_pengingat}', '${item.siklus}', '${item.tanggal_pelaksanaan}')" title="Tandai Selesai">
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    `;
+                if (diffDays > 0) { statusWaktu = `(H-${diffDays})`; warnaWaktu = 'color: var(--neon-yellow); font-weight:700;'; } 
+                else if (diffDays === 0) { statusWaktu = `(Hari Ini!)`; warnaWaktu = 'color: var(--neon-red); font-weight:700;'; } 
+                else {
+                    statusWaktu = item.siklus === '1 Kali' ? `(Lewat ${Math.abs(diffDays)}hr)` : `(Rutin)`; 
+                    warnaWaktu = item.siklus === '1 Kali' ? 'color: var(--neon-red); font-weight:700;' : 'color: var(--neon-green); font-weight:700;';
                 }
 
                 html += `
                     <li class="reminder-item" id="reminder-${item.id}">
                         <span class="reminder-title" title="${item.judul_pengingat}">${item.judul_pengingat}</span>
                         <div class="reminder-meta-compact">
-                            <span style="color: var(--text-abu);"><i class="fa-regular fa-calendar" style="margin-right:2px;"></i>${tglDeadline}</span>
+                            <span style="color: var(--text-abu);"><i class="fa-regular fa-calendar" style="margin-right:2px;"></i>${tglParts[2]}/${tglParts[1]}</span>
                             <span style="${warnaWaktu}">${statusWaktu}</span>
                         </div>
-                        ${actionButton}
+                        ${item.siklus === '1 Kali' ? `<button class="reminder-action" onclick="selesaiPengingat(this, '${item.id}', '${item.judul_pengingat}', '${item.siklus}', '${item.tanggal_pelaksanaan}')" title="Tandai Selesai"><i class="fa-solid fa-check"></i></button>` : ''}
                     </li>
                 `;
             }
         });
 
-        // Update badge ikon aplikasi dengan jumlah pengingat yang aktif
-        if (typeof window.updateAppBadge === 'function') {
-            window.updateAppBadge(countVisible);
-        }
+        if (typeof window.updateAppBadge === 'function') window.updateAppBadge(countVisible);
 
-        if (countVisible === 0) {
-            cardContainer.style.display = 'none';
-        } else {
-            cardContainer.style.display = 'block';
-            container.innerHTML = html;
-        }
-
+        if (countVisible === 0) cardContainer.style.display = 'none';
+        else { cardContainer.style.display = 'block'; container.innerHTML = html; }
     } catch (e) {
-        console.error("Gagal memuat pengingat:", e);
         cardContainer.style.display = 'block';
         container.innerHTML = `<li style="color:var(--neon-red); text-align:center; font-size:11px; padding:10px;">Gagal memuat pengingat: ${e.message}</li>`;
     }
 }
 
-// ================= 4. WIDGET WAKTU SHOLAT & REAL-TIME COUNTDOWN =================
 async function loadWaktuSholatDanCountdown() {
     const elLabel = document.getElementById('sholat-next-label');
     const elTimer = document.getElementById('sholat-timer');
     if (!elLabel || !elTimer) return;
-
-    if (sholatIntervalTimer) {
-        clearInterval(sholatIntervalTimer);
-    }
+    if (sholatIntervalTimer) clearInterval(sholatIntervalTimer);
 
     try {
         const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Balikpapan&country=Indonesia&method=20');
         const json = await res.json();
-        
-        if (!json || !json.data || !json.data.timings) {
-            throw new Error("Gagal mengambil data jadwal sholat");
-        }
-
         const timings = json.data.timings;
-
         const hijri = json.data.date.hijri;
-        const namaBulanIndo = {
-            "Muharram": "Muharram", "Safar": "Safar", "Rabi' al-awwal": "Rabiul Awal", "Rabi' al-thani": "Rabiul Akhir",
-            "Jumada al-awwal": "Jumadil Awal", "Jumada al-thani": "Jumadil Akhir", "Rajab": "Rajab", "Sha'ban": "Sya'ban",
-            "Ramadan": "Ramadhan", "Shawwal": "Syawal", "Dhu al-Qi'dah": "Dzulqa'dah", "Dhu al-Hijjah": "Dzulhijjah"
-        };
-        const bulanHijriah = namaBulanIndo[hijri.month.en] || hijri.month.en;
+        const namaBulanIndo = { "Muharram": "Muharram", "Safar": "Safar", "Rabi' al-awwal": "Rabiul Awal", "Rabi' al-thani": "Rabiul Akhir", "Jumada al-awwal": "Jumadil Awal", "Jumada al-thani": "Jumadil Akhir", "Rajab": "Rajab", "Sha'ban": "Sya'ban", "Ramadan": "Ramadhan", "Shawwal": "Syawal", "Dhu al-Qi'dah": "Dzulqa'dah", "Dhu al-Hijjah": "Dzulhijjah" };
+        
         const elHijri = document.getElementById('sholat-hijri-date');
-        if (elHijri) elHijri.innerText = `${hijri.day} ${bulanHijriah} ${hijri.year} H`;
+        if (elHijri) elHijri.innerText = `${hijri.day} ${namaBulanIndo[hijri.month.en] || hijri.month.en} ${hijri.year} H`;
 
         const sholatList = [
-            { id: 'subuh', nama: 'Subuh', time: timings.Fajr },
-            { id: 'dzuhur', nama: 'Dzuhur', time: timings.Dhuhr },
-            { id: 'ashar', nama: 'Ashar', time: timings.Asr },
-            { id: 'maghrib', nama: 'Maghrib', time: timings.Maghrib },
-            { id: 'isya', nama: 'Isya', time: timings.Isha }
+            { id: 'subuh', nama: 'Subuh', time: timings.Fajr }, { id: 'dzuhur', nama: 'Dzuhur', time: timings.Dhuhr },
+            { id: 'ashar', nama: 'Ashar', time: timings.Asr }, { id: 'maghrib', nama: 'Maghrib', time: timings.Maghrib }, { id: 'isya', nama: 'Isya', time: timings.Isha }
         ];
 
         sholatList.forEach(s => {
@@ -400,33 +268,19 @@ async function loadWaktuSholatDanCountdown() {
 
         function updateCountdown() {
             const now = new Date();
-            let activeSholat = null;
-            let nextSholat = null;
-            let targetDate = null;
-
-            sholatList.forEach(s => {
-                const p = document.getElementById(`pill-${s.id}`);
-                if (p) p.classList.remove('sholat-pill-active');
-            });
+            let activeSholat = null, nextSholat = null, targetDate = null;
+            sholatList.forEach(s => { const p = document.getElementById(`pill-${s.id}`); if (p) p.classList.remove('sholat-pill-active'); });
 
             for (let s of sholatList) {
                 const [jam, mnt] = s.time.split(':').map(Number);
-                const sDate = new Date();
-                sDate.setHours(jam, mnt, 0, 0);
-
-                const diffMs = now - sDate;
-                const diffMnit = diffMs / (1000 * 60);
-
-                if (diffMnit >= 0 && diffMnit <= 10) {
-                    activeSholat = s;
-                    break;
-                }
+                const sDate = new Date(); sDate.setHours(jam, mnt, 0, 0);
+                const diffMnit = (now - sDate) / 60000;
+                if (diffMnit >= 0 && diffMnit <= 10) { activeSholat = s; break; }
             }
 
             if (activeSholat) {
                 const activePill = document.getElementById(`pill-${activeSholat.id}`);
                 if (activePill) activePill.classList.add('sholat-pill-active');
-
                 elLabel.innerHTML = `<span style="color:var(--neon-green);">Sedang Memasuki Waktu Sholat ${activeSholat.nama}</span>`;
                 elTimer.innerText = "00:00:00";
                 return;
@@ -434,48 +288,30 @@ async function loadWaktuSholatDanCountdown() {
 
             for (let s of sholatList) {
                 const [jam, mnt] = s.time.split(':').map(Number);
-                const sDate = new Date();
-                sDate.setHours(jam, mnt, 0, 0);
-
-                if (sDate > now) {
-                    nextSholat = s;
-                    targetDate = sDate;
-                    break;
-                }
+                const sDate = new Date(); sDate.setHours(jam, mnt, 0, 0);
+                if (sDate > now) { nextSholat = s; targetDate = sDate; break; }
             }
 
             if (!nextSholat) {
                 nextSholat = sholatList[0];
-                const [jam, mnt] = nextSholat.time.split(':').map(Number);
-                targetDate = new Date();
-                targetDate.setDate(targetDate.getDate() + 1);
-                targetDate.setHours(jam, mnt, 0, 0);
+                targetDate = new Date(); targetDate.setDate(targetDate.getDate() + 1);
+                targetDate.setHours(...nextSholat.time.split(':').map(Number), 0, 0);
             }
 
             const activePill = document.getElementById(`pill-${nextSholat.id}`);
             if (activePill) activePill.classList.add('sholat-pill-active');
 
-            const diffMs = targetDate - now;
-            const diffSecTotal = Math.floor(diffMs / 1000);
-            const hours = String(Math.floor(diffSecTotal / 3600)).padStart(2, '0');
-            const minutes = String(Math.floor((diffSecTotal % 3600) / 60)).padStart(2, '0');
-            const seconds = String(diffSecTotal % 60).padStart(2, '0');
-
+            const diffSecTotal = Math.floor((targetDate - now) / 1000);
             elLabel.innerText = `Menuju Waktu ${nextSholat.nama}`;
-            elTimer.innerText = `${hours}:${minutes}:${seconds}`;
+            elTimer.innerText = `${String(Math.floor(diffSecTotal / 3600)).padStart(2, '0')}:${String(Math.floor((diffSecTotal % 3600) / 60)).padStart(2, '0')}:${String(diffSecTotal % 60).padStart(2, '0')}`;
         }
-
         updateCountdown();
         sholatIntervalTimer = setInterval(updateCountdown, 1000);
-
     } catch (e) {
-        console.error("Gagal inisialisasi sholat:", e);
-        elLabel.innerText = "Jadwal Sholat Offline";
-        elTimer.innerText = "--:--:--";
+        elLabel.innerText = "Jadwal Sholat Offline"; elTimer.innerText = "--:--:--";
     }
 }
 
-// ================= 5. GRAFIK KELANCARAN MEMBACA =================
 async function loadGrafikMembacaQuran() {
     const canvas = document.getElementById('chart-quran-dashboard');
     const msgKosong = document.getElementById('chart-quran-kosong');
@@ -483,7 +319,6 @@ async function loadGrafikMembacaQuran() {
 
     try {
         await loadChartJSLib();
-
         const [resKelas, resAnggota, resBaca] = await Promise.all([
             supabase.from('kelas').select('id, nama_kelas, tingkat').eq('status_kelas', true).order('tingkat').order('nama_kelas'),
             supabase.from('anggota_kelas').select('id_kelas, id_siswa'),
@@ -491,100 +326,38 @@ async function loadGrafikMembacaQuran() {
         ]);
 
         const listKelasAktif = resKelas.data || [];
-        const listAnggota = resAnggota.data || [];
-        const dataBaca = resBaca.data || [];
-
         if (listKelasAktif.length === 0) {
-            canvas.style.display = 'none';
-            if (msgKosong) msgKosong.style.display = 'block';
-            return;
+            canvas.style.display = 'none'; if (msgKosong) msgKosong.style.display = 'block'; return;
         }
 
-        const labelsKelas = [];
-        const persenBelum = [];
-        const persenTerbata = [];
-        const persenCepat = [];
-        const persenLancarMahir = [];
-
-        const countBelumArr = [];
-        const countTerbataArr = [];
-        const countCepatArr = [];
-        const countLancarMahirArr = [];
+        const labelsKelas = [], persenBelum = [], persenTerbata = [], persenCepat = [], persenLancarMahir = [];
+        const countBelumArr = [], countTerbataArr = [], countCepatArr = [], countLancarMahirArr = [];
 
         listKelasAktif.forEach(kls => {
-            const anggotaKls = listAnggota.filter(a => a.id_kelas === kls.id);
+            const anggotaKls = (resAnggota.data || []).filter(a => a.id_kelas === kls.id);
             const totalSiswa = anggotaKls.length;
-
             if (totalSiswa > 0) {
                 labelsKelas.push(kls.nama_kelas);
-
-                let countBelum = 0;
-                let countTerbata = 0;
-                let countCepat = 0;
-                let countLancarMahir = 0;
-
+                let cBelum = 0, cTerbata = 0, cCepat = 0, cLancar = 0;
                 anggotaKls.forEach(agt => {
-                    const rowBaca = dataBaca.find(b => b.id_kelas === kls.id && b.id_siswa === agt.id_siswa);
-                    const val = rowBaca && rowBaca.kelancaran_membaca ? rowBaca.kelancaran_membaca.trim() : '';
-
-                    if (!val) {
-                        countBelum++;
-                    } else if (
-                        val === 'Tidak bisa baca' || 
-                        val === 'Terbata-bata ada salah' || 
-                        val === 'Terbata-bata bacaan benar' ||
-                        val === 'Terbata-bata'
-                    ) {
-                        countTerbata++;
-                    } else if (
-                        val === 'Cepat namun banyak salah' || 
-                        val === 'cepat namun banyak salah' || 
-                        val === 'Cepat dengan sedikit salah' ||
-                        val === 'cepat dengan sedikit salah'
-                    ) {
-                        countCepat++;
-                    } else if (
-                        val === 'Lancar' || 
-                        val === 'lancar' || 
-                        val === 'Mahir tanpa kesalahan'
-                    ) {
-                        countLancarMahir++;
-                    } else {
-                        countBelum++;
-                    }
+                    const rowBaca = (resBaca.data || []).find(b => b.id_kelas === kls.id && b.id_siswa === agt.id_siswa);
+                    const val = rowBaca?.kelancaran_membaca?.trim() || '';
+                    if (!val) cBelum++;
+                    else if (val.includes('Tidak bisa') || val.includes('Terbata-bata')) cTerbata++;
+                    else if (val.includes('Cepat') || val.includes('cepat')) cCepat++;
+                    else if (val.includes('Lancar') || val.includes('lancar') || val.includes('Mahir')) cLancar++;
+                    else cBelum++;
                 });
-
-                persenBelum.push(Math.round((countBelum / totalSiswa) * 100));
-                persenTerbata.push(Math.round((countTerbata / totalSiswa) * 100));
-                persenCepat.push(Math.round((countCepat / totalSiswa) * 100));
-                persenLancarMahir.push(Math.round((countLancarMahir / totalSiswa) * 100));
-
-                countBelumArr.push(countBelum);
-                countTerbataArr.push(countTerbata);
-                countCepatArr.push(countCepat);
-                countLancarMahirArr.push(countLancarMahir);
+                persenBelum.push(Math.round((cBelum / totalSiswa) * 100)); persenTerbata.push(Math.round((cTerbata / totalSiswa) * 100));
+                persenCepat.push(Math.round((cCepat / totalSiswa) * 100)); persenLancarMahir.push(Math.round((cLancar / totalSiswa) * 100));
+                countBelumArr.push(cBelum); countTerbataArr.push(cTerbata); countCepatArr.push(cCepat); countLancarMahirArr.push(cLancar);
             }
         });
 
-        if (labelsKelas.length === 0) {
-            canvas.style.display = 'none';
-            if (msgKosong) msgKosong.style.display = 'block';
-            return;
-        }
+        canvas.style.display = 'block'; if (msgKosong) msgKosong.style.display = 'none';
+        if (chartQuranInstance) chartQuranInstance.destroy();
 
-        canvas.style.display = 'block';
-        if (msgKosong) msgKosong.style.display = 'none';
-
-        if (chartQuranInstance) {
-            chartQuranInstance.destroy();
-        }
-
-        // Baca warna teks dan border secara dinamis sesuai tema aktif
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        const textColor = isLight ? '#0f172a' : '#ffffff';
-        const subTextColor = isLight ? '#64748b' : '#8494a8';
-        const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.05)';
-
         const ctx = canvas.getContext('2d');
         chartQuranInstance = new window.Chart(ctx, {
             type: 'bar',
@@ -598,175 +371,63 @@ async function loadGrafikMembacaQuran() {
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: subTextColor, boxWidth: 12, font: { size: 10, family: 'Poppins' } }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) { 
-                                const dataset = context.dataset;
-                                const index = context.dataIndex;
-                                const totalSiswa = dataset.counts ? dataset.counts[index] : 0;
-                                return ` ${dataset.label}: ${totalSiswa} Siswa (${context.raw}%)`; 
-                            }
-                        }
-                    }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: isLight ? '#64748b' : '#8494a8', font: { size: 10, family: 'Poppins' } } },
+                           tooltip: { callbacks: { label: function(c) { return ` ${c.dataset.label}: ${c.dataset.counts[c.dataIndex]} Siswa (${c.raw}%)`; } } } },
                 scales: {
-                    x: {
-                        grid: { color: gridColor },
-                        ticks: { color: textColor, font: { family: 'Poppins', size: 11 } }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: gridColor },
-                        ticks: {
-                            color: subTextColor,
-                            stepSize: 20,
-                            callback: function(value) { return value + '%'; },
-                            font: { family: 'Poppins', size: 10 }
-                        }
-                    }
+                    x: { grid: { color: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)' }, ticks: { color: isLight ? '#0f172a' : '#ffffff', font: { family: 'Poppins', size: 11 } } },
+                    y: { beginAtZero: true, max: 100, grid: { color: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)' }, ticks: { color: isLight ? '#64748b' : '#8494a8', stepSize: 20, callback: function(v) { return v + '%'; }, font: { family: 'Poppins', size: 10 } } }
                 }
             }
         });
-
-    } catch (e) {
-        console.error("Gagal merender grafik Quran:", e);
-    }
+    } catch (e) { console.error("Gagal merender grafik Quran:", e); }
 }
 
-// ================= 6. ANALITIK KEHADIRAN =================
 async function loadAnalitikKehadiranPerKelas() {
     const container = document.getElementById('dash-list-analitik-kehadiran');
     if (!container) return;
-
     try {
-        const { data, error } = await supabase
-            .from('view_analitik_kehadiran')
-            .select('*');
-
+        const { data, error } = await supabase.from('view_analitik_kehadiran').select('*');
         if (error) throw error;
-
-        const listKelas = data || [];
-
-        if (listKelas.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>';
-            return;
-        }
+        if (!data || data.length === 0) { container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>'; return; }
 
         let html = '';
-        listKelas.forEach(kls => {
-            const jmlHadir = parseInt(kls.total_hadir) || 0;
-            const jmlValid = parseInt(kls.total_valid) || 0;
-
-            let persen = 0;
-            if (jmlValid > 0) {
-                persen = Math.round((jmlHadir / jmlValid) * 100);
-            }
-
-            let clr = 'var(--neon-green)';
-            if (persen < 75) clr = 'var(--neon-red)';
-            else if (persen < 85) clr = 'var(--neon-yellow)';
-
-            html += `
-                <div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
-                        <span style="color:var(--text-putih);">${kls.nama_kelas}</span>
-                        <span style="color:${clr}; font-weight:700;">${persen}% Hadir (${jmlValid} data)</span>
-                    </div>
-                    <div class="progress-bar-wrap">
-                        <div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div>
-                    </div>
-                </div>
-            `;
+        data.forEach(kls => {
+            const jmlHadir = parseInt(kls.total_hadir) || 0, jmlValid = parseInt(kls.total_valid) || 0;
+            const persen = jmlValid > 0 ? Math.round((jmlHadir / jmlValid) * 100) : 0;
+            const clr = persen < 75 ? 'var(--neon-red)' : (persen < 85 ? 'var(--neon-yellow)' : 'var(--neon-green)');
+            html += `<div><div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;"><span style="color:var(--text-putih);">${kls.nama_kelas}</span><span style="color:${clr}; font-weight:700;">${persen}% Hadir (${jmlValid} data)</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div></div></div>`;
         });
         container.innerHTML = html;
-
-    } catch (e) {
-        console.error("Gagal memuat view kehadiran:", e);
-        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat data kehadiran: ${e.message}</div>`;
-    }
+    } catch (e) { container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat data kehadiran: ${e.message}</div>`; }
 }
 
-// ================= 7. ANALITIK KETUNTASAN TUGAS =================
 async function loadAnalitikKetuntasanTugas() {
     const container = document.getElementById('dash-list-analitik-tugas');
     if (!container) return;
-
     try {
-        const { data, error } = await supabase
-            .from('view_analitik_tugas')
-            .select('*');
-
+        const { data, error } = await supabase.from('view_analitik_tugas').select('*');
         if (error) throw error;
-
-        const listKelas = data || [];
-
-        if (listKelas.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>';
-            return;
-        }
+        if (!data || data.length === 0) { container.innerHTML = '<div style="color:var(--text-abu); font-size:12px; text-align:center;">Belum ada kelas aktif.</div>'; return; }
 
         let html = '';
-        listKelas.forEach(kls => {
-            const totalSlot = parseInt(kls.total_slot) || 0;
-            const totalTuntas = parseInt(kls.total_tuntas) || 0;
-            const totalTugas = parseInt(kls.total_tugas) || 0;
-
-            let persen = 0;
-            if (totalSlot > 0) {
-                persen = Math.round((totalTuntas / totalSlot) * 100);
-            }
-
-            let clr = 'var(--neon-purple)';
-            if (persen < 70) clr = 'var(--neon-red)';
-            else if (persen < 85) clr = 'var(--neon-yellow)';
-            else if (persen === 100) clr = 'var(--neon-green)';
-
-            html += `
-                <div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
-                        <span style="color:var(--text-putih);">${kls.nama_kelas} (${totalTugas} Tugas)</span>
-                        <span style="color:${clr}; font-weight:700;">${persen}% Tuntas (${totalTuntas}/${totalSlot} data)</span>
-                    </div>
-                    <div class="progress-bar-wrap">
-                        <div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div>
-                    </div>
-                </div>
-            `;
+        data.forEach(kls => {
+            const totalSlot = parseInt(kls.total_slot) || 0, totalTuntas = parseInt(kls.total_tuntas) || 0, totalTugas = parseInt(kls.total_tugas) || 0;
+            const persen = totalSlot > 0 ? Math.round((totalTuntas / totalSlot) * 100) : 0;
+            const clr = persen < 70 ? 'var(--neon-red)' : (persen < 85 ? 'var(--neon-yellow)' : (persen === 100 ? 'var(--neon-green)' : 'var(--neon-purple)'));
+            html += `<div><div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;"><span style="color:var(--text-putih);">${kls.nama_kelas} (${totalTugas} Tugas)</span><span style="color:${clr}; font-weight:700;">${persen}% Tuntas (${totalTuntas}/${totalSlot} data)</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${persen}%; background:${clr};"></div></div></div>`;
         });
         container.innerHTML = html;
-
-    } catch (e) {
-        console.error("Gagal memuat view tugas:", e);
-        container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat ketuntasan tugas: ${e.message}</div>`;
-    }
+    } catch (e) { container.innerHTML = `<div style="color:var(--neon-red); font-size:11px;">Gagal memuat ketuntasan tugas: ${e.message}</div>`; }
 }
 
-// ================= 8. INFORMASI SISTEM =================
 async function loadInfoSistem() {
     const el = document.getElementById('dash-info-sistem');
     if (!el) return;
-
     try {
         const { data, error } = await supabase.from('profilaplikasi').select('*').limit(1).maybeSingle();
         if (error) throw error;
-
         const p = data || {};
-        el.innerHTML = `
-            <b>Sekolah:</b> ${p.nama_sekolah || '-'}<br>
-            <b>Guru Pengampu:</b> ${p.nama_guru || '-'}<br>
-            <b>NIP:</b> ${p.nip_guru || '-'}<br>
-            <b>Tahun Ajaran / Semester:</b> ${p.tahun_ajaran_aktif || '-'} (${p.semester_aktif || '-'})<br>
-            <b>Status Database:</b> <span style="color:var(--neon-green); font-weight:700;"><i class="fa-solid fa-circle-dot"></i> Terhubung ke Supabase</span>
-        `;
-    } catch (e) {
-        el.innerHTML = 'Gagal memuat identitas sistem.';
-    }
+        el.innerHTML = `<b>Sekolah:</b> ${p.nama_sekolah || '-'}<br><b>Guru Pengampu:</b> ${p.nama_guru || '-'}<br><b>NIP:</b> ${p.nip_guru || '-'}<br><b>Tahun Ajaran / Semester:</b> ${p.tahun_ajaran_aktif || '-'} (${p.semester_aktif || '-'})<br><b>Status Database:</b> <span style="color:var(--neon-green); font-weight:700;"><i class="fa-solid fa-circle-dot"></i> Terhubung</span>`;
+    } catch (e) { el.innerHTML = 'Gagal memuat identitas sistem.'; }
 }

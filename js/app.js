@@ -6,18 +6,26 @@ let currentProfileId = null;
 // ================= FITUR APP BADGE (NOTIFIKASI IKON APLIKASI) =================
 window.updateAppBadge = function(count) {
     const num = parseInt(count) || 0;
-    if ('setAppBadge' in navigator) {
-        if (num > 0) {
-            navigator.setAppBadge(num).catch(err => console.log('Gagal pasang badge:', err));
-        } else {
-            navigator.clearAppBadge().catch(err => console.log('Gagal hapus badge:', err));
+    try {
+        if ('setAppBadge' in navigator) {
+            if (num > 0) {
+                navigator.setAppBadge(num).catch(e => console.warn('Badge tidak didukung'));
+            } else {
+                navigator.clearAppBadge().catch(e => console.warn('Badge tidak didukung'));
+            }
         }
+    } catch (e) {
+        console.warn('API Badge Error:', e);
     }
 };
 
 window.clearAppBadge = function() {
-    if ('clearAppBadge' in navigator) {
-        navigator.clearAppBadge().catch(err => console.log('Gagal hapus badge:', err));
+    try {
+        if ('clearAppBadge' in navigator) {
+            navigator.clearAppBadge().catch(e => console.warn('Badge tidak didukung'));
+        }
+    } catch (e) {
+        console.warn('API Badge Error:', e);
     }
 };
 
@@ -33,46 +41,67 @@ window.loadPage = function(pageName, pageTitle) {
 
     fetch(`pages/${pageName}.html`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Halaman belum dibuat');
-            }
+            if (!response.ok) throw new Error('Halaman belum dibuat');
             return response.text();
         })
         .then(html => {
             document.getElementById('main-content').innerHTML = html;
 
             setTimeout(() => {
-                if (pageName === 'master' && typeof window.loadDataKelas === 'function') {
-                    window.loadDataKelas();
-                }
+                if (pageName === 'master' && typeof window.loadDataKelas === 'function') window.loadDataKelas();
                 if (pageName === 'presensi' && typeof window.loadKelasUntukPresensi === 'function') {
                     window.loadKelasUntukPresensi();
                     const tglInput = document.getElementById('input-tgl-absen-kelas');
                     if (tglInput) tglInput.valueAsDate = new Date();
                 }
-                if (pageName === 'penilaian' && typeof window.loadKelasUntukPenilaian === 'function') {
-                    window.loadKelasUntukPenilaian();
-                }
-                if (pageName === 'jurnal' && typeof window.initJurnal === 'function') {
-                    window.initJurnal();
-                }
-                if (pageName === 'paiapps' && typeof window.initPaiApps === 'function') {
-                    window.initPaiApps();
-                }
+                if (pageName === 'penilaian' && typeof window.loadKelasUntukPenilaian === 'function') window.loadKelasUntukPenilaian();
+                if (pageName === 'jurnal' && typeof window.initJurnal === 'function') window.initJurnal();
+                if (pageName === 'paiapps' && typeof window.initPaiApps === 'function') window.initPaiApps();
             }, 50);
         })
         .catch(error => {
-            document.getElementById('main-content').innerHTML = `
-                <div style="text-align:center; padding: 50px 20px; background: var(--bg-card); border-radius: 12px; border: 1px dashed var(--neon-red);">
-                    <i class="fa-solid fa-person-digging" style="font-size: 50px; color: var(--neon-red); margin-bottom:15px;"></i>
-                    <h3 style="color:var(--text-putih); font-size: 16px; font-weight: 600;">Modul ${pageTitle} Belum Tersedia</h3>
-                    <p style="color:var(--text-abu); font-size: 12px; margin-top: 5px;">Kita belum membuat file <b>${pageName}.html</b>.</p>
-                </div>
-            `;
+            document.getElementById('main-content').innerHTML = `<p style="color:var(--neon-red); text-align:center;">Gagal memuat modul: ${error.message}</p>`;
         });
 };
 
-// ================= FITUR KOMPRESI GAMBAR (CANVAS API) =================
+// ================= LOGIKA SUB-TAB PAI-APPS (PENTING AGAR TIDAK STUCK MEMUAT) =================
+window.initPaiApps = function() {
+    if (typeof window.bukaSubTabPaiApps === 'function') {
+        window.bukaSubTabPaiApps('dashboard');
+    }
+};
+
+window.bukaSubTabPaiApps = function(subPage) {
+    const btns = document.querySelectorAll('.subtab-btn');
+    btns.forEach(btn => btn.classList.remove('active'));
+    
+    const activeBtn = document.getElementById('btn-subtab-' + subPage);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    const contentArea = document.getElementById('paiapps-sub-content');
+    if (!contentArea) return;
+
+    contentArea.innerHTML = '<div style="text-align:center; padding: 40px 10px; color: var(--neon-green);"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i><p style="font-size: 12px; margin-top: 10px; color: var(--text-abu);">Memuat antarmuka...</p></div>';
+
+    fetch(`pages/paiapps-${subPage}.html`)
+        .then(res => {
+            if (!res.ok) throw new Error('Sub-halaman tidak ditemukan');
+            return res.text();
+        })
+        .then(html => {
+            contentArea.innerHTML = html;
+            setTimeout(() => {
+                if (subPage === 'dashboard' && typeof window.loadDashboardPaiApps === 'function') {
+                    window.loadDashboardPaiApps();
+                }
+            }, 50);
+        })
+        .catch(err => {
+            contentArea.innerHTML = `<div style="color:var(--neon-red); text-align:center; padding:20px;">Gagal memuat: ${err.message}</div>`;
+        });
+};
+
+// ================= FITUR KOMPRESI GAMBAR =================
 async function compressImage(file, maxWidth = 300) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -93,95 +122,59 @@ async function compressImage(file, maxWidth = 300) {
     });
 }
 
-// ================= FETCH DATA PROFIL & UPDATE HEADER/SIDEBAR =================
+// ================= FETCH DATA PROFIL & UPDATE HEADER =================
 window.fetchProfile = async function() {
     try {
         const { data, error } = await supabase.from('profilaplikasi').select('*').limit(1).maybeSingle();
+        if (error) throw error;
+
         const profBtn = document.getElementById('profile-btn');     
         const subtitle = document.getElementById('header-subtitle'); 
         const sidebarBrand = document.getElementById('sidebar-brand'); 
 
-        if (error) throw error;
-
         if (data) {
             currentProfileId = data.id;
-            
-            // 1. UBAH LOGO HEADER (Mobile) dengan object-position: top
-            if (data.foto_profil) {
-                if(profBtn) profBtn.innerHTML = `<img src="${data.foto_profil}" style="width:100%; height:100%; object-fit:cover; object-position:top; border-radius:50%;">`;
-            } else {
-                if(profBtn) profBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size:18px;"></i>';
-            }
+            if (profBtn && data.foto_profil) profBtn.innerHTML = `<img src="${data.foto_profil}" style="width:100%; height:100%; object-fit:cover; object-position:top; border-radius:50%;">`;
+            else if (profBtn) profBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size:18px;"></i>';
 
-            // 2. UBAH PROFIL SIDEBAR (Desktop)
             if (sidebarBrand) {
                 const namaGuru = data.nama_guru || 'Nama Guru PAI';
                 const namaSekolah = data.nama_sekolah || 'Nama Sekolah';
-                let sidebarHTML = '';
-                
-                if (data.foto_profil) {
-                    sidebarHTML += `<img src="${data.foto_profil}" alt="Foto Profil">`;
-                } else {
-                    sidebarHTML += `<div class="default-icon"><i class="fa-solid fa-user" style="font-size:30px; color:var(--neon-green);"></i></div>`;
-                }
-                
-                sidebarHTML += `<h3>${namaGuru}</h3><p>${namaSekolah}</p>`;
-                sidebarBrand.innerHTML = sidebarHTML;
+                let sidebarHTML = data.foto_profil ? `<img src="${data.foto_profil}" alt="Foto Profil">` : `<div class="default-icon"><i class="fa-solid fa-user" style="font-size:30px; color:var(--neon-green);"></i></div>`;
+                sidebarBrand.innerHTML = sidebarHTML + `<h3>${namaGuru}</h3><p>${namaSekolah}</p>`;
             }
 
-            // 3. UBAH SUBTITLE TAHUN AJARAN
-            if (subtitle) {
-                const ta = data.tahun_ajaran_aktif || '-';
-                const sm = data.semester_aktif || '-';
-                subtitle.innerText = `TA ${ta} - Semester ${sm}`;
-            }
+            if (subtitle) subtitle.innerText = `TA ${data.tahun_ajaran_aktif || '-'} - Semester ${data.semester_aktif || '-'}`;
 
-            // 4. ISI DATA KE FORM MODAL
             if(document.getElementById('prof-nama-guru')) document.getElementById('prof-nama-guru').value = data.nama_guru || '';
             if(document.getElementById('prof-nip')) document.getElementById('prof-nip').value = data.nip_guru || '';
             if(document.getElementById('prof-email')) document.getElementById('prof-email').value = data.email_guru || '';
             if(document.getElementById('prof-wa')) document.getElementById('prof-wa').value = data.whatsapp_guru || '';
-            if(document.getElementById('prof-sekolah')) document.getElementById('prof-sekolah').value = data.nama_sekolah || '';
+            if(document.getElementById('prof-sekolah')) document.getElementById('prof-sekolah').value = data.nama_sekolah || 'SMPN 8 Balikpapan';
             if(document.getElementById('prof-npsn')) document.getElementById('prof-npsn').value = data.npsn_sekolah || '';
             if(document.getElementById('prof-ta')) document.getElementById('prof-ta').value = data.tahun_ajaran_aktif || '';
             if(document.getElementById('prof-semester')) document.getElementById('prof-semester').value = data.semester_aktif || 'Ganjil';
             if(document.getElementById('prof-alamat')) document.getElementById('prof-alamat').value = data.alamat_sekolah || '';
             if(document.getElementById('current-foto-url')) document.getElementById('current-foto-url').value = data.foto_profil || '';
-
-        } else {
-            if (profBtn) profBtn.innerHTML = '<i class="fa-solid fa-user" style="font-size:18px;"></i>';
-            if (subtitle) subtitle.innerText = `Profil belum diatur`;
-            if (sidebarBrand) {
-                sidebarBrand.innerHTML = `
-                    <div class="default-icon"><i class="fa-solid fa-user" style="font-size:30px; color:var(--neon-green);"></i></div>
-                    <h3>Guru Agama Islam</h3><p>Sistem Administrasi</p>
-                `;
-            }
         }
     } catch (e) {
-        console.log("Sistem memuat default. Profil belum terisi penuh atau terjadi kesalahan:", e.message);
+        console.log("Profil default:", e.message);
     }
 };
 
-// ================= LOGIKA KLIK 7x (BUKA MODAL PENGATURAN PROFIL) =================
 let clickCount = 0;
 let clickTimeout = null;
-
 window.handleProfileClick = function() {
     clickCount++;
     if (clickTimeout) clearTimeout(clickTimeout);
-    
     if (clickCount >= 7) {
         document.getElementById('modal-profil').style.display = 'flex';
         clickCount = 0; 
     } else {
-        clickTimeout = setTimeout(() => { 
-            clickCount = 0; 
-        }, 500);
+        clickTimeout = setTimeout(() => { clickCount = 0; }, 500);
     }
 };
 
-// ================= SIMPAN PROFIL & UPLOAD FOTO =================
 window.simpanProfil = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-simpan-profil');
@@ -195,18 +188,11 @@ window.simpanProfil = async function(e) {
 
         if (fileInput && fileInput.files.length > 0) {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengompres Foto...';
-            const file = fileInput.files[0];
-            const compressedBlob = await compressImage(file, 300); 
-            
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
-            const fileExt = 'jpg'; 
-            const fileName = `profil_${Date.now()}.${fileExt}`;
-            
+            const compressedBlob = await compressImage(fileInput.files[0], 300); 
+            const fileName = `profil_${Date.now()}.jpg`;
             const { error: uploadError } = await supabase.storage.from('foto-siswa').upload(fileName, compressedBlob, { contentType: 'image/jpeg' });
             if (uploadError) throw uploadError;
-
-            const { data: publicUrlData } = supabase.storage.from('foto-siswa').getPublicUrl(fileName);
-            fotoUrl = publicUrlData.publicUrl;
+            fotoUrl = supabase.storage.from('foto-siswa').getPublicUrl(fileName).data.publicUrl;
         }
 
         const payload = {
@@ -222,8 +208,6 @@ window.simpanProfil = async function(e) {
             foto_profil: fotoUrl || null
         };
 
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan Database...';
-
         if (currentProfileId) {
             const { error } = await supabase.from('profilaplikasi').update(payload).eq('id', currentProfileId);
             if (error) throw error;
@@ -233,13 +217,10 @@ window.simpanProfil = async function(e) {
             if(data && data.length > 0) currentProfileId = data[0].id;
         }
 
-        alert("Profil berhasil diperbarui!");
+        alert("Profil diperbarui!");
         document.getElementById('modal-profil').style.display = 'none';
-        
         if(document.getElementById('prof-foto')) document.getElementById('prof-foto').value = ''; 
-        
         fetchProfile(); 
-
     } catch (error) {
         alert("Gagal menyimpan profil: " + error.message);
     } finally {
@@ -248,13 +229,7 @@ window.simpanProfil = async function(e) {
     }
 };
 
-// ================= INIT PADA SAAT WEBSITE DIMUAT =================
 document.addEventListener('DOMContentLoaded', () => {
     loadPage('paiapps', 'PAI-APPS');
     fetchProfile(); 
 });
-```[cite: 17]
-
----
-
-Setelah file `js/app.js` disimpan[cite: 17], silakan konfirmasi untuk melanjutkan ke **Langkah 2: Memperbarui `js/modules/paiapps-dashboard.js`** agar angka pengingat aktif dikirimkan ke lencana ikon[cite: 18].

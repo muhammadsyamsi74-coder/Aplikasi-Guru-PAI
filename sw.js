@@ -9,18 +9,22 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
     if (!event.data) return;
 
-    if (event.data.action === 'set-badge') {
-        const count = parseInt(event.data.count) || 0;
-        if ('setAppBadge' in self.navigator) {
-            if (count > 0) {
-                self.navigator.setAppBadge(count).catch(err => console.log('SW set badge error:', err));
-            } else {
-                self.navigator.clearAppBadge().catch(err => console.log('SW clear badge error:', err));
+    try {
+        if (event.data.action === 'set-badge') {
+            const count = parseInt(event.data.count) || 0;
+            if ('setAppBadge' in self.navigator) {
+                if (count > 0) {
+                    self.navigator.setAppBadge(count).catch(err => console.log('SW set badge warn:', err));
+                } else {
+                    self.navigator.clearAppBadge().catch(err => console.log('SW clear badge warn:', err));
+                }
+            }
+        } else if (event.data.action === 'clear-badge') {
+            if ('clearAppBadge' in self.navigator) {
+                self.navigator.clearAppBadge().catch(err => console.log('SW clear badge warn:', err));
             }
         }
-    } else if (event.data.action === 'clear-badge') {
-        if ('clearAppBadge' in self.navigator) {
-            self.navigator.clearAppBadge().catch(err => console.log('SW clear badge error:', err));
-        }
+    } catch (error) {
+        console.warn('Lencana latar belakang gagal:', error);
     }
 });
