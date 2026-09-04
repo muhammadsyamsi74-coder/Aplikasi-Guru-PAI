@@ -3,6 +3,24 @@ import supabase from './supabase.js';
 
 let currentProfileId = null;
 
+// ================= FITUR APP BADGE (NOTIFIKASI IKON APLIKASI) =================
+window.updateAppBadge = function(count) {
+    const num = parseInt(count) || 0;
+    if ('setAppBadge' in navigator) {
+        if (num > 0) {
+            navigator.setAppBadge(num).catch(err => console.log('Gagal pasang badge:', err));
+        } else {
+            navigator.clearAppBadge().catch(err => console.log('Gagal hapus badge:', err));
+        }
+    }
+};
+
+window.clearAppBadge = function() {
+    if ('clearAppBadge' in navigator) {
+        navigator.clearAppBadge().catch(err => console.log('Gagal hapus badge:', err));
+    }
+};
+
 // ================= LOGIKA NAVIGASI HALAMAN =================
 window.loadPage = function(pageName, pageTitle) {
     document.getElementById('page-title').innerText = pageTitle;
@@ -232,7 +250,11 @@ window.simpanProfil = async function(e) {
 
 // ================= INIT PADA SAAT WEBSITE DIMUAT =================
 document.addEventListener('DOMContentLoaded', () => {
-    // Memuat modul PAI-APPS (Dashboard) secara default saat aplikasi dibuka
     loadPage('paiapps', 'PAI-APPS');
     fetchProfile(); 
 });
+```[cite: 17]
+
+---
+
+Setelah file `js/app.js` disimpan[cite: 17], silakan konfirmasi untuk melanjutkan ke **Langkah 2: Memperbarui `js/modules/paiapps-dashboard.js`** agar angka pengingat aktif dikirimkan ke lencana ikon[cite: 18].
