@@ -458,14 +458,9 @@
         applyTheme(savedTheme);
     </script>
 
-    <script type="module" src="js/supabase.js"></script>
-    <script type="module" src="js/modules/master.js"></script>
-    <script type="module" src="js/modules/presensi.js"></script>
-    <script type="module" src="js/modules/penilaian.js"></script>
-    <script type="module" src="js/modules/jurnal.js"></script>
-    <script type="module" src="js/modules/paiapps-dashboard.js"></script>
-    <script type="module" src="js/modules/paiapps-tools.js"></script>
-    <script type="module" src="js/app.js"></script>
+
+<!-- GANTI HANYA DENGAN SATU BARIS INI: -->
+<script type="module" src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW fail', err));
