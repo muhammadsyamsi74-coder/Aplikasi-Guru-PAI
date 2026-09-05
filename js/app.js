@@ -193,15 +193,26 @@ window.fetchProfile = async function() {
     }
 };
 
-let clickCount = 0; 
+let clickCount = 0;
 let clickTimeout = null;
-window.handleProfileClick = function() {
+window.handleProfileClick = function(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('profile-menu');
+    const modal = document.getElementById('modal-profil');
+
+    // Jika menu profil tersedia, gunakan menu baru.
+    if (menu) {
+        const open = menu.classList.toggle('show');
+        menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+        return;
+    }
+
+    // Fallback kompatibilitas apabila menu belum ada.
     clickCount++;
     if (clickTimeout) clearTimeout(clickTimeout);
     if (clickCount >= 7 || !currentProfileId) {
-        const modal = document.getElementById('modal-profil');
         if (modal) modal.style.display = 'flex';
-        clickCount = 0; 
+        clickCount = 0;
     } else {
         clickTimeout = setTimeout(() => { clickCount = 0; }, 500);
     }
@@ -262,23 +273,211 @@ window.simpanProfil = async function(e) {
     }
 };
 
-// ================= INISIALISASI APLIKASI LANGSUNG (TANPA LOGIN) =================
-document.addEventListener('DOMContentLoaded', () => {
-    // Tampilkan elemen navigasi dan header
-    const bottomNav = document.querySelector('.bottom-nav');
-    const appHeader = document.querySelector('.app-header');
-    if (bottomNav) bottomNav.style.display = 'flex';
-    if (appHeader) appHeader.style.display = 'flex';
+// ================= AUTENTIKASI + INISIALISASI APLIKASI =================
+let appInitialized = false;
+let authBusy = false;
 
-    // Izin notifikasi PWA
+function getEl(id) {
+    return document.getElementById(id);
+}
+
+function setLoginMessage(message = '', isError = true) {
+    const box = getEl('login-message');
+    if (!box) return;
+    box.textContent = message;
+    box.classList.toggle('show', !!message);
+    box.classList.toggle('error', !!isError);
+    box.classList.toggle('success', !!message && !isError);
+}
+
+function setLoginLoading(loading) {
+    const btn = getEl('login-submit-btn');
+    if (!btn) return;
+    btn.disabled = loading;
+    btn.innerHTML = loading
+        ? '<i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i> Memproses...'
+        : '<i class="fa-solid fa-right-to-bracket" style="margin-right:8px;"></i> Masuk ke Aplikasi';
+}
+
+function showLoginScreen(message = '') {
+    const login = getEl('login-screen');
+    const header = document.querySelector('.app-header');
+    const main = getEl('main-content');
+    const nav = document.querySelector('.bottom-nav');
+    const menu = getEl('profile-menu');
+    const modal = getEl('modal-profil');
+
+    if (login) login.style.display = 'flex';
+    if (header) header.style.display = 'none';
+    if (main) main.style.display = 'none';
+    if (nav) nav.style.display = 'none';
+    if (menu) {
+        menu.classList.remove('show');
+        menu.setAttribute('aria-hidden', 'true');
+    }
+    if (modal) modal.style.display = 'none';
+    if (message) setLoginMessage(message, true);
+}
+
+function hideLoginScreen() {
+    const login = getEl('login-screen');
+    const header = document.querySelector('.app-header');
+    const main = getEl('main-content');
+    const nav = document.querySelector('.bottom-nav');
+
+    if (login) login.style.display = 'none';
+    if (header) header.style.display = 'flex';
+    if (main) main.style.display = '';
+    if (nav) nav.style.display = 'flex';
+}
+
+window.toggleLoginPassword = function() {
+    const input = getEl('login-password');
+    const button = getEl('login-password-toggle');
+    if (!input || !button) return;
+    const icon = button.querySelector('i');
+    const visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    button.setAttribute('aria-label', visible ? 'Tampilkan password' : 'Sembunyikan password');
+    button.title = visible ? 'Tampilkan password' : 'Sembunyikan password';
+    if (icon) icon.className = visible ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+};
+
+window.openProfileSettings = function(event) {
+    if (event) event.stopPropagation();
+    const menu = getEl('profile-menu');
+    const modal = getEl('modal-profil');
+    if (menu) {
+        menu.classList.remove('show');
+        menu.setAttribute('aria-hidden', 'true');
+    }
+    if (modal) modal.style.display = 'flex';
+};
+
+window.toggleProfileMenu = function(event) {
+    if (event) event.stopPropagation();
+    const menu = getEl('profile-menu');
+    if (!menu) return;
+    const open = menu.classList.toggle('show');
+    menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+};
+
+window.logout = async function(event) {
+    if (event) event.stopPropagation();
+    if (authBusy) return;
+    if (!window.confirm('Apakah Anda yakin ingin logout dari aplikasi?')) return;
+
+    authBusy = true;
     try {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().catch(() => {});
-        }
-    } catch (err) {}
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+    } catch (error) {
+        console.error('Logout gagal:', error);
+        alert('Logout gagal: ' + (error.message || 'Terjadi kesalahan.'));
+    } finally {
+        authBusy = false;
+    }
+};
 
-    // Jalankan modul aplikasi
-    window.checkGlobalBadge();
-    window.loadPage('paiapps', 'PAI-APPS');
-    window.fetchProfile();
+async function initializeAuthenticatedApp() {
+    if (appInitialized) return;
+
+    try {
+        // Modul aplikasi sudah di-import seperti versi asli sehingga perilaku
+        // aplikasi lama tetap dipertahankan dan risiko race import berkurang.
+        appInitialized = true;
+        hideLoginScreen();
+
+        try {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(() => {});
+            }
+        } catch (err) {}
+
+        window.checkGlobalBadge();
+        window.loadPage('paiapps', 'PAI-APPS');
+        window.fetchProfile();
+    } catch (error) {
+        appInitialized = false;
+        console.error('Gagal memuat aplikasi:', error);
+        showLoginScreen('Aplikasi gagal dimuat. Silakan refresh halaman.');
+    }
+}
+
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+    if (authBusy) return;
+
+    const email = (getEl('login-email')?.value || '').trim();
+    const password = getEl('login-password')?.value || '';
+    if (!email || !password) {
+        setLoginMessage('Email dan password wajib diisi.', true);
+        return;
+    }
+
+    authBusy = true;
+    setLoginMessage('');
+    setLoginLoading(true);
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        if (!data?.session) throw new Error('Session login tidak berhasil dibuat.');
+
+        // Jangan menunggu event SIGNED_IN. Kita sudah memiliki session valid.
+        // Ini mencegah race condition yang membuat login screen muncul kembali.
+        await initializeAuthenticatedApp();
+    } catch (error) {
+        console.error('Login gagal:', error);
+        setLoginMessage(error.message || 'Email atau password salah.', true);
+    } finally {
+        authBusy = false;
+        setLoginLoading(false);
+    }
+}
+
+function handleAuthStateChange(event) {
+    if (event === 'SIGNED_OUT') {
+        appInitialized = false;
+        currentProfileId = null;
+        showLoginScreen();
+        setLoginMessage('Anda telah logout dari aplikasi.', false);
+    }
+    // SIGNED_IN, INITIAL_SESSION, dan TOKEN_REFRESHED sengaja tidak
+    // menginisialisasi ulang aplikasi. Session sudah diverifikasi oleh
+    // bootstrap di bawah dan login handler.
+}
+
+document.addEventListener('click', (event) => {
+    const menu = getEl('profile-menu');
+    if (!menu || !menu.classList.contains('show')) return;
+    const profileBtn = getEl('profile-btn');
+    const sidebarBrand = getEl('sidebar-brand');
+    if (menu.contains(event.target) || profileBtn?.contains(event.target) || sidebarBrand?.contains(event.target)) return;
+    menu.classList.remove('show');
+    menu.setAttribute('aria-hidden', 'true');
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    showLoginScreen();
+
+    const loginForm = getEl('login-form');
+    if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
+
+    try {
+        supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+        // Satu sumber kebenaran untuk menentukan apakah aplikasi boleh dibuka.
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        if (data?.session) {
+            await initializeAuthenticatedApp();
+        } else {
+            showLoginScreen();
+        }
+    } catch (error) {
+        console.error('Inisialisasi autentikasi gagal:', error);
+        showLoginScreen('Tidak dapat memeriksa session. Silakan coba lagi.');
+    }
 });

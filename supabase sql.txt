@@ -1,0 +1,321 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.profilaplikasi (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  nama_guru text NOT NULL,
+  nip_guru text,
+  email_guru text,
+  whatsapp_guru text,
+  foto_profil text,
+  nama_sekolah text NOT NULL DEFAULT 'SMPN 8 Balikpapan'::text,
+  npsn_sekolah text,
+  logo_sekolah text,
+  alamat_sekolah text,
+  tahun_ajaran_aktif text DEFAULT '2025/2026'::text,
+  semester_aktif text DEFAULT 'Ganjil'::text CHECK (semester_aktif = ANY (ARRAY['Ganjil'::text, 'Genap'::text])),
+  CONSTRAINT profilaplikasi_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.kelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  tingkat text NOT NULL CHECK (tingkat = ANY (ARRAY['7'::text, '8'::text, '9'::text])),
+  nama_kelas text NOT NULL,
+  tahun_ajaran text NOT NULL,
+  status_kelas boolean,
+  link_wa_group text,
+  id_ketua uuid,
+  id_sekretaris uuid,
+  id_bendahara uuid,
+  nama_walikelas text,
+  wa_walikelass text,
+  CONSTRAINT kelas_pkey PRIMARY KEY (id),
+  CONSTRAINT kelas_id_ketua_fkey FOREIGN KEY (id_ketua) REFERENCES public.siswa(id),
+  CONSTRAINT kelas_id_sekretaris_fkey FOREIGN KEY (id_sekretaris) REFERENCES public.siswa(id),
+  CONSTRAINT kelas_id_bendahara_fkey FOREIGN KEY (id_bendahara) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.siswa (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  nisn_siswa text,
+  kode_siswa text,
+  nama_siswa text,
+  jenis_kelamin text CHECK (jenis_kelamin = ANY (ARRAY['L'::text, 'P'::text])),
+  tempat_lahir text,
+  tanggal_lahir date,
+  alamat_tinggal text,
+  whatsapp_siswa text,
+  email_siswa text,
+  whatsapp_orangtua text,
+  instagram_siswa text,
+  foto_siswa text,
+  nomor_wa text,
+  CONSTRAINT siswa_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.anggota_kelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  nomor_absen integer,
+  jabatan_kelas text DEFAULT 'Anggota'::text,
+  CONSTRAINT anggota_kelas_pkey PRIMARY KEY (id),
+  CONSTRAINT anggota_kelas_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT anggota_kelas_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.namatugas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  nama_tugas text NOT NULL,
+  kategori_tugas text DEFAULT 'Formatif'::text,
+  deskripsi text,
+  tanggal_diberikan date NOT NULL DEFAULT CURRENT_DATE,
+  deadline date,
+  CONSTRAINT namatugas_pkey PRIMARY KEY (id),
+  CONSTRAINT namatugas_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id)
+);
+CREATE TABLE public.penilaiantugas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_tugas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  nilai_tugas numeric NOT NULL CHECK (nilai_tugas >= 0::numeric AND nilai_tugas <= 100::numeric),
+  refleksi text,
+  ketuntasan text,
+  CONSTRAINT penilaiantugas_pkey PRIMARY KEY (id),
+  CONSTRAINT penilaian_id_tugas_fkey FOREIGN KEY (id_tugas) REFERENCES public.namatugas(id),
+  CONSTRAINT penilaian_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.absenkelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  tanggal date NOT NULL DEFAULT CURRENT_DATE,
+  pertemuan_ke integer,
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  kehadiran text NOT NULL CHECK (kehadiran = ANY (ARRAY['Hadir'::text, 'Sakit'::text, 'Izin'::text, 'Alpa'::text, 'Dispensasi'::text])),
+  bawa_quran boolean DEFAULT true,
+  keterangan_kehadiran text,
+  id_jurnal uuid,
+  CONSTRAINT absenkelas_pkey PRIMARY KEY (id),
+  CONSTRAINT absenkelas_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT absenkelas_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id),
+  CONSTRAINT absenkelas_id_jurnal_fkey FOREIGN KEY (id_jurnal) REFERENCES public.jurnalmengajar(id)
+);
+CREATE TABLE public.absensholat (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone DEFAULT now(),
+  tanggal date DEFAULT CURRENT_DATE,
+  id_kelas uuid,
+  id_siswa uuid,
+  nama_sholat text CHECK (nama_sholat = ANY (ARRAY['Subuh'::text, 'Dzuhur'::text, 'Ashar'::text, 'Maghrib'::text, 'Isya'::text, 'Dhuha'::text, 'Sunnah'::text, 'Jumat'::text])),
+  kehadiran text,
+  CONSTRAINT absensholat_pkey PRIMARY KEY (id),
+  CONSTRAINT absensholat_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT absensholat_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.jurnalmengajar (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  tanggal date NOT NULL DEFAULT CURRENT_DATE,
+  id_kelas uuid NOT NULL,
+  pertemuan_ke integer,
+  jam_ke text,
+  judul_materi text NOT NULL,
+  deskripsi_materi text,
+  refleksi text,
+  CONSTRAINT jurnalmengajar_pkey PRIMARY KEY (id),
+  CONSTRAINT jurnalmengajar_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id)
+);
+CREATE TABLE public.jurnalsikap (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  tanggal date NOT NULL DEFAULT CURRENT_DATE,
+  id_kelas uuid,
+  id_siswa uuid,
+  jenis_sikap text NOT NULL CHECK (jenis_sikap = ANY (ARRAY['Positif'::text, 'Negatif'::text])),
+  kategori_sikap text,
+  deskripsi_sikap text NOT NULL,
+  refleksi_sikap text,
+  CONSTRAINT jurnalsikap_pkey PRIMARY KEY (id),
+  CONSTRAINT jurnalsikap_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT jurnalsikap_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.jurnalwali (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  tanggal date NOT NULL DEFAULT CURRENT_DATE,
+  id_siswa uuid NOT NULL,
+  deskripsi_pembinaan text NOT NULL,
+  tindak_lanjut text,
+  refleksi text,
+  CONSTRAINT jurnalwali_pkey PRIMARY KEY (id),
+  CONSTRAINT jurnalwali_id_siswa_fkey1 FOREIGN KEY (id_siswa) REFERENCES public.siswaguruwali(id)
+);
+CREATE TABLE public.penilaianmenulis (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  ketepatan_huruf text,
+  kerapian text,
+  nilai_menulis bigint,
+  keterangan text,
+  CONSTRAINT penilaianmenulis_pkey PRIMARY KEY (id),
+  CONSTRAINT penilaianmenulis_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT penilaianmenulis_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.penilaianhafalansholat (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  iftitah text,
+  rukuk text,
+  itidal text,
+  sujud text,
+  duduk text,
+  tahyat_awal text,
+  tahyat_akhir text,
+  alfatihah text,
+  CONSTRAINT penilaianhafalansholat_pkey PRIMARY KEY (id),
+  CONSTRAINT penilaianhafalansholat_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT penilaianhafalansholat_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.hafalansurah (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  annas text,
+  alfalaq text,
+  alikhlas text,
+  allahab text,
+  annasr text,
+  alkafirun text,
+  alkautsar text,
+  almaun text,
+  quraisy text,
+  alfil text,
+  alhumazah text,
+  alasr text,
+  attakatsur text,
+  alqoriah text,
+  aladiyat text,
+  CONSTRAINT hafalansurah_pkey PRIMARY KEY (id),
+  CONSTRAINT hafalansurah_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT hafalansurah_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.penilaianmembaca (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid NOT NULL,
+  id_siswa uuid NOT NULL,
+  kelancaran_membaca text,
+  tajwid_bacaan text,
+  makraj_huruf text,
+  nada_suara text,
+  nilai bigint,
+  keterangan text,
+  CONSTRAINT penilaianmembaca_pkey PRIMARY KEY (id),
+  CONSTRAINT penilaianmembaca_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT penilaianmembaca_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id)
+);
+CREATE TABLE public.siswaguruwali (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  nama_siswa text,
+  jenis_kelamin text,
+  tempat_lahir text,
+  tanggal_lahir text,
+  nisn_siswa text,
+  no_wasiswa text,
+  alat_tinggal text,
+  no_waorangtua text,
+  instagram text,
+  email text,
+  foto_profil text,
+  kelas_saatini text,
+  CONSTRAINT siswaguruwali_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.jadwalmengajar (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  id_kelas uuid DEFAULT gen_random_uuid(),
+  jam_ke text,
+  waktu time without time zone,
+  hari text,
+  keterangan text,
+  jumlah_jp integer DEFAULT 1,
+  jam_mulai time without time zone,
+  jam_selesai time without time zone,
+  CONSTRAINT jadwalmengajar_pkey PRIMARY KEY (id),
+  CONSTRAINT jadwalmengajar_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id)
+);
+CREATE TABLE public.materiajar (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  jenis_materi text NOT NULL,
+  judul_materi text NOT NULL,
+  deskripsi_singkat text,
+  tahun_ajaran text NOT NULL,
+  semester text NOT NULL,
+  is_pinned boolean DEFAULT false,
+  pin_order integer DEFAULT 0,
+  link_materi text NOT NULL,
+  CONSTRAINT materiajar_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.perangkatajar (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  jenis_perangkat text NOT NULL,
+  deskripsi_perangkat text,
+  tahun_ajaran text NOT NULL,
+  semester text NOT NULL,
+  is_pinned boolean DEFAULT false,
+  pin_order integer DEFAULT 0,
+  link_perangkat text NOT NULL,
+  CONSTRAINT perangkatajar_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.pengingat_kegiatan (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  judul_pengingat text NOT NULL,
+  siklus character varying NOT NULL CHECK (siklus::text = ANY (ARRAY['1 Kali'::character varying, 'Mingguan'::character varying, 'Bulanan'::character varying, 'Tahunan'::character varying]::text[])),
+  tanggal_pelaksanaan date NOT NULL,
+  ingatkan_h_min integer DEFAULT 1,
+  status_selesai boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT pengingat_kegiatan_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.konsepceramah (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone DEFAULT now(),
+  judul_konsep text NOT NULL,
+  link_materi text NOT NULL,
+  is_pinned boolean DEFAULT false,
+  CONSTRAINT konsepceramah_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.quran_lengkap (
+  id integer NOT NULL DEFAULT nextval('quran_lengkap_id_seq'::regclass),
+  surah_no integer NOT NULL,
+  nama_surah character varying NOT NULL,
+  ayat_no integer NOT NULL,
+  teks_arab text NOT NULL,
+  terjemahan_id text NOT NULL,
+  search_vector tsvector DEFAULT to_tsvector('indonesian'::regconfig, ((COALESCE(terjemahan_id, ''::text) || ' '::text) || (COALESCE(nama_surah, ''::character varying))::text)),
+  CONSTRAINT quran_lengkap_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.bank_hadis (
+  id integer NOT NULL DEFAULT nextval('bank_hadis_id_seq'::regclass),
+  kitab character varying NOT NULL,
+  nomor_hadis integer,
+  bab character varying,
+  teks_arab text NOT NULL,
+  terjemahan_id text NOT NULL,
+  derajat_hadis character varying DEFAULT 'Shahih'::character varying,
+  search_vector tsvector DEFAULT to_tsvector('indonesian'::regconfig, ((((COALESCE(terjemahan_id, ''::text) || ' '::text) || (COALESCE(bab, ''::character varying))::text) || ' '::text) || (COALESCE(kitab, ''::character varying))::text)),
+  CONSTRAINT bank_hadis_pkey PRIMARY KEY (id)
+);

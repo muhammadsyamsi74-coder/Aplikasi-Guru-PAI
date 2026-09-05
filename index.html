@@ -166,6 +166,60 @@
         }
         .header-profile:active { transform: scale(0.9); }
 
+        /* MENU PROFIL / LOGOUT */
+        .profile-menu {
+            position: fixed;
+            top: 76px;
+            right: 18px;
+            z-index: 5000;
+            width: 190px;
+            padding: 7px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0,0,0,.25);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            display: none;
+            animation: fadeIn .18s ease-out;
+        }
+        .profile-menu.show {
+            display: block;
+            animation: fadeIn .18s ease-out;
+        }
+        .profile-menu button {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: var(--text-putih);
+            padding: 11px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+        .profile-menu button:hover { background: var(--bg-card-hover); }
+        .profile-menu button i { width: 18px; text-align: center; color: var(--neon-cyan); }
+        .profile-menu .logout-btn i,
+        .profile-menu .logout-btn { color: var(--neon-red); }
+        .profile-menu-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 5px 4px;
+        }
+        @media (min-width: 768px) {
+            .profile-menu {
+                top: 105px;
+                left: 22px;
+                right: auto;
+            }
+        }
+
         /* WADAH KONTEN UTAMA */
         #main-content { 
             padding: 20px 15px; 
@@ -325,9 +379,431 @@
                 text-shadow: 0 0 10px rgba(56, 189, 248, 0.6); 
             }
         }
+
+        /* ================= LOGIN SCREEN ================= */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-y: auto;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(59,130,246,.16), transparent 28%),
+                radial-gradient(circle at 85% 80%, rgba(168,85,247,.14), transparent 30%),
+                var(--bg-main);
+        }
+
+        .login-background {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .login-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: .38;
+        }
+
+        .login-orb.one {
+            width: 230px;
+            height: 230px;
+            top: -90px;
+            left: -70px;
+            background: rgba(59,130,246,.20);
+        }
+
+        .login-orb.two {
+            width: 280px;
+            height: 280px;
+            right: -110px;
+            bottom: -120px;
+            background: rgba(5,213,138,.16);
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .login-card {
+            position: relative;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 26px;
+            padding: 32px 28px 26px;
+            box-shadow:
+                0 24px 70px rgba(0,0,0,.32),
+                0 0 0 1px rgba(255,255,255,.02) inset;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            animation: loginCardIn .5s ease-out;
+        }
+
+        @keyframes loginCardIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .login-logo {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 16px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                0 12px 30px rgba(0,0,0,.18),
+                0 0 28px rgba(56,189,248,.14);
+        }
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
+        }
+
+        .login-brand h2 {
+            margin: 0;
+            color: var(--text-putih);
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: .2px;
+        }
+
+        .login-brand p {
+            margin: 6px 0 0;
+            color: var(--text-abu);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .login-form-group {
+            margin-bottom: 16px;
+        }
+
+        .login-form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--text-abu);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .login-input-wrap {
+            position: relative;
+        }
+
+        .login-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-abu);
+            font-size: 14px;
+            pointer-events: none;
+            transition: color .2s ease;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 44px 0 42px;
+            border: 1px solid var(--border-color);
+            border-radius: 13px;
+            outline: none;
+            background: var(--bg-main);
+            color: var(--text-putih);
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            transition: .2s ease;
+        }
+
+        .login-input::placeholder {
+            color: var(--text-abu);
+            opacity: .72;
+        }
+
+        .login-input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 3px rgba(56,189,248,.12);
+        }
+
+        .login-input-wrap:focus-within .login-input-icon {
+            color: var(--neon-cyan);
+        }
+
+        .login-password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 32px;
+            height: 32px;
+            transform: translateY(-50%);
+            border: 0;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--text-abu);
+            cursor: pointer;
+        }
+
+        .login-password-toggle:hover {
+            background: var(--bg-card);
+            color: var(--text-putih);
+        }
+
+        .login-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 2px 0 20px;
+        }
+
+        .login-remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-abu);
+            font-size: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .login-remember input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--neon-blue);
+            cursor: pointer;
+        }
+
+        .login-help {
+            color: var(--neon-cyan);
+            font-size: 10px;
+            text-decoration: none;
+        }
+
+        .login-help:hover {
+            text-decoration: underline;
+        }
+
+        .login-submit {
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 13px;
+            padding: 12px 16px;
+            color: #fff;
+            background: var(--gradient-blue);
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(37,99,235,.18);
+            transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+        }
+
+        .login-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(37,99,235,.24);
+        }
+
+        .login-submit:active {
+            transform: scale(.98);
+        }
+
+        .login-submit:disabled {
+            opacity: .72;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-message {
+            display: none;
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 11px;
+            font-size: 10px;
+            line-height: 1.5;
+            border: 1px solid var(--border-red-subtle);
+            color: var(--neon-red);
+            background: rgba(239,68,68,.08);
+        }
+
+        .login-message.show {
+            display: block;
+        }
+
+        .login-footer {
+            margin-top: 22px;
+            text-align: center;
+            color: var(--text-abu);
+            font-size: 9px;
+            line-height: 1.6;
+        }
+
+        .login-footer strong {
+            color: var(--text-putih);
+            font-weight: 700;
+        }
+
+        .login-theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 5;
+        }
+
+        @media (max-width: 480px) {
+            #login-screen {
+                padding: 16px;
+            }
+
+            .login-card {
+                padding: 28px 20px 22px;
+                border-radius: 22px;
+            }
+
+            .login-logo {
+                width: 78px;
+                height: 78px;
+                border-radius: 20px;
+            }
+
+            .login-brand h2 {
+                font-size: 20px;
+            }
+
+            .login-brand p {
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <section id="login-screen" aria-label="Halaman Login">
+        <div class="login-background" aria-hidden="true">
+            <div class="login-orb one"></div>
+            <div class="login-orb two"></div>
+        </div>
+
+        <div class="login-container">
+            <button
+                type="button"
+                class="btn-theme-toggle login-theme-toggle"
+                id="login-theme-toggle-btn"
+                onclick="toggleTheme()"
+                title="Ubah Tema"
+                aria-label="Ubah Tema"
+            >
+                <i class="fa-solid fa-sun" id="login-icon-toggle-theme"></i>
+            </button>
+
+            <div class="login-card">
+                <div class="login-brand">
+                    <div class="login-logo">
+                        <img src="assets/logo_aplikasi.png" alt="Logo PAI-Apps"
+                             onerror="this.style.display='none';">
+                    </div>
+                    <h2>PAI-Apps</h2>
+                    <p>Sistem Administrasi Guru PAI</p>
+                </div>
+
+                <form id="login-form" autocomplete="on">
+                    <div class="login-form-group">
+                        <label for="login-email">EMAIL</label>
+                        <div class="login-input-wrap">
+                            <i class="fa-solid fa-envelope login-input-icon"></i>
+                            <input
+                                type="email"
+                                id="login-email"
+                                class="login-input"
+                                name="email"
+                                placeholder="Masukkan email Anda"
+                                autocomplete="username"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="login-form-group">
+                        <label for="login-password">PASSWORD</label>
+                        <div class="login-input-wrap">
+                            <i class="fa-solid fa-lock login-input-icon"></i>
+                            <input
+                                type="password"
+                                id="login-password"
+                                class="login-input"
+                                name="password"
+                                placeholder="Masukkan password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                id="login-password-toggle"
+                                class="login-password-toggle"
+                                onclick="toggleLoginPassword()"
+                                aria-label="Tampilkan password"
+                                title="Tampilkan password"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="login-options">
+                        <label class="login-remember">
+                            <input type="checkbox" id="login-remember" checked>
+                            <span>Ingat perangkat ini</span>
+                        </label>
+                        <a href="#" class="login-help" id="login-help-link"
+                           onclick="event.preventDefault(); return false;">
+                            Lupa password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="login-submit" id="login-submit-btn">
+                        <i class="fa-solid fa-right-to-bracket" style="margin-right:8px;"></i>
+                        Masuk ke Aplikasi
+                    </button>
+
+                    <div id="login-message" class="login-message" role="alert"></div>
+                </form>
+
+                <div class="login-footer">
+                    <strong>Administrasi Guru PAI</strong><br>
+                    Akses aplikasi hanya untuk pengguna yang telah terdaftar.
+                </div>
+            </div>
+        </div>
+    </section>
+
 
     <header class="app-header">
         <div class="header-info">
@@ -342,11 +818,27 @@
             </button>
             
             <!-- Pemicu Modal Mobile: Klik di profil -->
-            <div class="header-profile" id="profile-btn" onclick="handleProfileClick()">
+            <div class="header-profile" id="profile-btn" onclick="toggleProfileMenu(event)">
                 <i class="fa-solid fa-user"></i>
             </div>
         </div>
     </header>
+
+    <!-- MENU PROFIL: PENGATURAN + LOGOUT -->
+    <div id="profile-menu" class="profile-menu" role="menu" aria-hidden="true">
+        <div style="padding:7px 10px 8px; font-size:10px; font-weight:700; color:var(--text-abu);">
+            AKUN
+        </div>
+        <button type="button" onclick="openProfileSettings(event)">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>Pengaturan Profil</span>
+        </button>
+        <div class="profile-menu-divider"></div>
+        <button type="button" class="logout-btn" onclick="logout(event)">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+        </button>
+    </div>
 
     <main id="main-content">
         <div style="text-align:center; padding: 50px 20px;">
@@ -406,7 +898,7 @@
 
     <nav class="bottom-nav">
         <!-- Pemicu Modal Desktop: Klik di area profil sidebar -->
-        <div class="sidebar-brand" id="sidebar-brand" onclick="handleProfileClick()">
+        <div class="sidebar-brand" id="sidebar-brand" onclick="toggleProfileMenu(event)">
             <div class="default-icon"><i class="fa-solid fa-user" style="font-size:28px; color:var(--neon-cyan);"></i></div>
             <h3>Memuat Profil...</h3>
             <p>Sistem Administrasi</p>
@@ -445,6 +937,12 @@
                 icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
                 icon.style.color = theme === 'dark' ? 'var(--neon-yellow)' : 'var(--neon-purple)';
             }
+
+            const loginIcon = document.getElementById('login-icon-toggle-theme');
+            if (loginIcon) {
+                loginIcon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                loginIcon.style.color = theme === 'dark' ? 'var(--neon-yellow)' : 'var(--neon-purple)';
+            }
         }
 
         window.toggleTheme = function() {
@@ -456,6 +954,28 @@
         // Inisialisasi tema instan saat halaman dibuka
         const savedTheme = localStorage.getItem('app-theme') || 'dark';
         applyTheme(savedTheme);
+        window.toggleLoginPassword = function() {
+            const input = document.getElementById('login-password');
+            const button = document.getElementById('login-password-toggle');
+            if (!input || !button) return;
+
+            const icon = button.querySelector('i');
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            if (icon) icon.className = visible ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+            button.setAttribute('aria-label', visible ? 'Tampilkan password' : 'Sembunyikan password');
+            button.setAttribute('title', visible ? 'Tampilkan password' : 'Sembunyikan password');
+        };
+
+        // Tutup menu profil saat area di luar menu diklik.
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profile-menu');
+            if (!menu || !menu.classList.contains('show')) return;
+            if (menu.contains(event.target)) return;
+            if (event.target.closest && event.target.closest('#profile-btn, #sidebar-brand')) return;
+            menu.classList.remove('show');
+            menu.setAttribute('aria-hidden', 'true');
+        });
     </script>
 
 
