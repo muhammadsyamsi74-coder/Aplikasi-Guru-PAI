@@ -408,8 +408,6 @@ window.loadRiwayatMengajar = async function() {
     
     const elFilt = document.getElementById('filter-riwayat-mengajar');
     const idKelasFilt = elFilt ? elFilt.value : '';
-    
-    container.innerHTML = '<li><i class="fa-solid fa-spinner fa-spin"></i> Memuat riwayat...</li>';
 
     try {
         let query = supabase.from('jurnalmengajar').select('*, kelas(nama_kelas)').order('tanggal', {ascending: false});
